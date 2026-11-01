@@ -3160,5 +3160,6 @@
   "Sharpening is off in the Performance preset": "A nitidez fica desativada na predefinição Desempenho",
   "{width} × {height} px · MSAA {samples}×": "{width} × {height} px · MSAA {samples}×",
   "{width} × {height} px · FXAA": "{width} × {height} px · FXAA",
-  "{width} × {height} px": "{width} × {height} px"
+  "{width} × {height} px": "{width} × {height} px",
+  "Severity": "Gravidade"
 }

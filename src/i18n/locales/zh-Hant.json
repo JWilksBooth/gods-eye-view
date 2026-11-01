@@ -3016,5 +3016,6 @@
   "Sharpening is off in the Performance preset": "「效能」預設下銳化已關閉",
   "{width} × {height} px · MSAA {samples}×": "{width} × {height} 像素 · MSAA {samples}×",
   "{width} × {height} px · FXAA": "{width} × {height} 像素 · FXAA",
-  "{width} × {height} px": "{width} × {height} 像素"
+  "{width} × {height} px": "{width} × {height} 像素",
+  "Severity": "嚴重程度"
 }

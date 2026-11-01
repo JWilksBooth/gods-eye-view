@@ -10,6 +10,8 @@ import { createAircraftEventAdapter } from '../../layers/events/adapters/aircraf
 import { createVesselsEventAdapter } from '../../layers/events/adapters/vessels.js';
 import { createIncidentsEventAdapter } from '../../layers/events/adapters/incidents.js';
 import { buildIncidentCard } from '../../layers/incidents/index.js';
+import { createAlertsEventAdapter } from '../../layers/events/adapters/alerts.js';
+import { buildAlertCard, severityLabel } from '../../layers/alerts/index.js';
 import { createEventFeedDrawer } from '../../ui/eventFeedDrawer.js';
 import { pickViewTarget } from '../../ui/cameraOrientationControls.js';
 import * as picking from '../../data/pickRegistry.js';
@@ -35,7 +37,7 @@ export function readCameraCenter(viewer) {
  * @param {object} options
  * @param {object} options.surface Application surface services.
  * @param {object} options.layers `{ cctv, firms, earthquakes, flights, military,
- *   vessels, incidents }`; each is optional and adds its adapter when present.
+ *   vessels, incidents, alerts }`; each is optional and adds its adapter when present.
  * @param {object} [options.cctvSource] The CCTV source, for snapshot URLs.
  * @param {object} [options.feed] A feed drawer, when the host supplies one.
  */
@@ -106,6 +108,15 @@ export function createApplicationEvents({
         openExternal,
       }),
     );
+  if (layers.alerts)
+    add(
+      createAlertsEventAdapter({
+        layer: layers.alerts,
+        describe: describeAlert,
+        severityLabel,
+        openExternal,
+      }),
+    );
   const destroy = layer.destroy;
   layer.destroy = (viewer) => {
     for (const remove of unregister.splice(0)) remove();
@@ -129,4 +140,10 @@ export function describeIncident(row, nowMs = Date.now()) {
 /** Agency pages open in a new tab, as the incident card itself does. */
 function openExternal(url) {
   globalThis.window?.open?.(url, '_blank', 'noopener,noreferrer');
+}
+
+/** The alerts card's lines; no source line, the drawer has its own button. */
+export function describeAlert(alert, nowMs = Date.now()) {
+  const card = buildAlertCard(alert, nowMs, { accent: null, link: null });
+  return [card.title, ...card.details];
 }

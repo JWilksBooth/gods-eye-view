@@ -3232,5 +3232,6 @@
   "Sharpening is off in the Performance preset": "Повышение резкости отключено в предустановке «Производительность»",
   "{width} × {height} px · MSAA {samples}×": "{width} × {height} пикс. · MSAA {samples}×",
   "{width} × {height} px · FXAA": "{width} × {height} пикс. · FXAA",
-  "{width} × {height} px": "{width} × {height} пикс."
+  "{width} × {height} px": "{width} × {height} пикс.",
+  "Severity": "Серьёзность"
 }

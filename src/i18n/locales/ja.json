@@ -3016,5 +3016,6 @@
   "Sharpening is off in the Performance preset": "パフォーマンスのプリセットではシャープ化はオフです",
   "{width} × {height} px · MSAA {samples}×": "{width} × {height} px · MSAA {samples}×",
   "{width} × {height} px · FXAA": "{width} × {height} px · FXAA",
-  "{width} × {height} px": "{width} × {height} px"
+  "{width} × {height} px": "{width} × {height} px",
+  "Severity": "深刻度"
 }

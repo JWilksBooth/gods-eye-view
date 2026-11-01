@@ -210,40 +210,11 @@ export function _resetEventAdaptersForTest() {
 /* ------------------------------------------------------------------ */
 /* Built-in adapters live in ./adapters/<layer>.js and are registered  */
 /* by src/app/layers/events.js from the catalog's layer instances:     */
-/* cctv, fires, earthquakes, aircraft (flights and military), vessels  */
-/* and incidents (LIVE OPS regions, src/layers/incidents; the drawer   */
-/* detail reuses buildIncidentCard through a `describe` callback).     */
-/*                                                                     */
-/* The stub below is for a layer built alongside this framework. It is */
-/* a complete registration; move it to ./adapters/alerts.js and add it */
-/* to the application wiring once the layer exposes what it names.     */
+/* cctv, fires, earthquakes, aircraft (flights and military), vessels, */
+/* incidents (LIVE OPS regions, src/layers/incidents) and alerts       */
+/* (src/layers/alerts). The last two reuse their layer's card for the  */
+/* drawer detail through a `describe` callback the wiring supplies, so */
+/* the adapters themselves import neither Cesium nor the catalogs.     */
+/* A new layer follows the same shape: a pure adapter module here, the */
+/* layer instance and any card builder wired in src/app/layers/events. */
 /* ------------------------------------------------------------------ */
-
-// Alerts (warnings and watches): one icon at each alert's centroid. The
-// adapter needs, from the alerts layer: a synchronous `getAlerts()` returning
-// the rows it currently draws, each with a stable `id`, a centroid `lat`/`lon`
-// (an alert is an area; the icon marks its centre), a one-line `headline`,
-// the `event` name for the hover description, the `sender` (the issuing
-// office, shown as the source), `sentMs` (freshness) and an `urgency` rank
-// so a capped cohort keeps the most urgent warnings. The feed can be a
-// `detail` with the alert's description and instruction lines plus
-// `nearestCameras: true`, and an action that focuses the alert's polygon on
-// the alerts layer. With `layerId: 'alerts'` the adapter is read only while
-// that layer is on, and the manager's `data-updated` for it refreshes the
-// icons, so no `subscribe` is needed.
-// registerEventAdapter({
-//   id: 'alerts',
-//   kind: 'alert',
-//   layerId: 'alerts',
-//   getEvents: ({ limit }) =>
-//     alertsLayer.getAlerts().slice(0, limit).map((alert) => ({
-//       id: alert.id,
-//       lat: alert.lat,
-//       lon: alert.lon,
-//       title: alert.headline,
-//       description: alert.event,
-//       source: alert.sender,
-//       time: alert.sentMs,
-//       priority: alert.urgency,
-//     })),
-// });

@@ -9,15 +9,17 @@ Layers panel (Events group); the grid view is Display → GRID or the `G` key.
 
 - `src/layers/events/adapters.js`: the adapter registry. A layer joins the
   event map with `registerEventAdapter({ id, kind, layerId, getEvents,
-feed? })`; the interface, every field and the remaining `alerts` stub (with
-  what its adapter needs from that layer) are documented in the file.
+feed? })`; the interface and every field are documented in the file.
 - `src/layers/events/adapters/{cctv,fires,earthquakes,aircraft,vessels,
 incidents}.js`: the built-in adapters, registered by `src/app/layers/
 events.js` from the catalog's own layer instances. An adapter is read only
   while its layer is on, so the event map shows what the operator has turned
   on. The incidents adapter lists LIVE OPS incidents newest first and reuses
   the incident card (`buildIncidentCard`) for the drawer detail, with an "Open
-  at source" action for the agency page.
+  at source" action for the agency page. The alerts adapter does the same over
+  the alerts layer (`getAlerts()`, `buildAlertCard`): worst severity first and
+  newest within a band, the hover line is the headline with agency and
+  severity, and a shapeless bulletin sits at its LIVE OPS region centre.
 - `src/layers/events/model.js`: pick ids (`event:<adapter>:<id>`), record
   normalization, priority-then-distance ranking, freshness, cluster summaries
   and nearest-camera lookups.
@@ -111,8 +113,6 @@ turns the view off again. Screenshots land in `docs/media/event-map/`:
   `src/keySetupCore.mjs` and `.env.example`, `find_live_streams` tool,
   `DATA_SOURCES.md`, `src/data/dataCredits.js`, `docs/TOOLS.md`, and a
   `streams` adapter registered like the built-in ones.
-- Alerts (built in parallel): the `alerts` layer and its adapter from the
-  stub in `src/layers/events/adapters.js`.
 - At merge, reconcile the three branches' layer-state tokens and the pinned
   counts in `src/data/layerState.test.mjs` and
   `src/data/layerStateTokenLedger.test.mjs`, the voice tool-schema pins in

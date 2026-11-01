@@ -112,6 +112,7 @@ export function createApplicationCatalog({
       source: sources.earthquakes,
     });
     const incidents = createApplicationIncidents({ source: sources.incidents });
+    const alerts = createApplicationAlerts({ source: sources.alerts });
     const cctv = createApplicationCctv({ surface, source: sources.cctv });
     const firms = createApplicationFirms({
       surface,
@@ -141,7 +142,7 @@ export function createApplicationCatalog({
           source: sources['fire-perimeters'],
         }),
         incidents,
-        createApplicationAlerts({ source: sources.alerts }),
+        alerts,
         createApplicationGnssIntegrity({
           source: sources['gnss-integrity'],
           windowMs: sources['gnss-integrity'].windowMs,
@@ -201,6 +202,7 @@ export function createApplicationCatalog({
             military,
             vessels,
             incidents,
+            alerts,
           },
           cctvSource: sources.cctv,
         }),
