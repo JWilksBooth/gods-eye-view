@@ -771,12 +771,28 @@ async function runScene(page, scene) {
     return sampleScene(page, 'layers');
   }
   if (scene === 'cockpit') {
-    await setAllLayers(page, ['flights', 'ais-live-vessels', 'cctv']);
+    // Cockpit entry is gated on Contacts context with Flights AND Military on
+    // (src/contextModePolicy.js), the same route scripts/qa-cockpit-utility.mjs
+    // takes: track a flight, select the Contacts mode, then enter.
+    await setAllLayers(page, [
+      'flights',
+      'military',
+      'ais-live-vessels',
+      'cctv',
+    ]);
     await page.evaluate((camera) => window.__perfPark(camera), CAMERA);
     await waitForCounts(page, ['flights'], 1, 90_000);
     const entered = await page.evaluate(async () => {
       const gev = window.__godsEyeView;
       const flights = gev.dataManager.layers.get('flights')?.module;
+      try {
+        await Promise.race([
+          gev.styleManager._contextControls?._selectContextMode?.('flights'),
+          new Promise((r) => setTimeout(r, 30_000)),
+        ]);
+      } catch (error) {
+        console.warn('Contacts mode failed', error?.message);
+      }
       const candidates = flights?.getAllPositions?.(500) || [];
       const airborne =
         candidates.find((c) => Number(c.altitudeM) > 1500) || candidates[0];
