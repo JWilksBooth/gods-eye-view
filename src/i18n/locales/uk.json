@@ -3130,5 +3130,41 @@
   "Rendering performance preset": "Передустановка продуктивності рендерингу",
   "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Повна роздільна здатність, згладжування 4×, 60 к/с і повна щільність підписів",
   "Full resolution with 2× anti-aliasing at 60 fps — the default": "Повна роздільна здатність зі згладжуванням 2× при 60 к/с — типово",
-  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Роздільна здатність 3/4, без мультисемплінгу, 30 к/с, рідкі підписи та повільніше оновлення шарів"
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Роздільна здатність 3/4, без мультисемплінгу, 30 к/с, рідкі підписи та повільніше оновлення шарів",
+  "US EPA air-quality readings in the Alerts layer; unhealthy readings become air alerts": "Дані про якість повітря від EPA США в шарі «Сповіщення»; шкідливі значення стають сповіщеннями про повітря",
+  "Bay Area and Sonoma County transit service alerts in the Alerts layer": "Сповіщення громадського транспорту Bay Area і Sonoma County в шарі «Сповіщення»",
+  "LA Metro and RTC Southern Nevada service alerts in the Alerts layer": "Сповіщення LA Metro і RTC Southern Nevada в шарі «Сповіщення»",
+  "Issued {when}": "Видано {when}",
+  "Starts {when}": "Почнеться {when}",
+  "Until {time}": "До {time}",
+  "Placed at the county centre; the feed gave no shape": "Розміщено в центрі округу: у стрічці немає контуру",
+  "Feed copy may be stale": "Копія стрічки може бути застарілою",
+  "{count} more bulletins": {
+    "one": "ще {count} повідомлення",
+    "few": "ще {count} повідомлення",
+    "many": "ще {count} повідомлень",
+    "other": "ще {count} повідомлення"
+  },
+  "{region} · {count} bulletins": {
+    "one": "{region} · {count} повідомлення",
+    "few": "{region} · {count} повідомлення",
+    "many": "{region} · {count} повідомлень",
+    "other": "{region} · {count} повідомлення"
+  },
+  "Alerts source unavailable": "Джерело сповіщень недоступне",
+  "key required": "потрібен ключ",
+  "Colour shows severity. Bulletins without a map shape gather at each region's centre.": "Колір показує серйозність. Повідомлення без контуру на мапі збираються в центрі свого регіону.",
+  "{live} of {total} feeds live": "Працює стрічок: {live} з {total}",
+  "Extreme": "Надзвичайний",
+  "Severe": "Серйозний",
+  "Minor": "Незначний",
+  "Unknown severity": "Серйозність невідома",
+  "Roads": "Дороги",
+  "Airports": "Аеропорти",
+  "Emergency": "Екстрені",
+  "Advisory": "Інформація",
+  "Alerts feed rate limited (HTTP 429)": "Стрічку сповіщень обмежено за частотою (HTTP 429)",
+  "Malformed alerts snapshot": "Пошкоджений знімок сповіщень",
+  "Malformed airport status": "Пошкоджені дані про стан аеропортів",
+  "Alerts": "Сповіщення"
 }
