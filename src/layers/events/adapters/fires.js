@@ -30,7 +30,11 @@ export function createFiresEventAdapter({ layer, layerId = 'local-firms' }) {
         source: 'NASA FIRMS',
         time: fire.acqTime,
         priority: Number.isFinite(fire.frp) ? fire.frp : 0,
-        data: { frp: fire.frp, confidence: fire.confidence, sensor: fire.sensor },
+        data: {
+          frp: fire.frp,
+          confidence: fire.confidence,
+          sensor: fire.sensor,
+        },
       }));
     },
     feed(event) {
@@ -39,10 +43,15 @@ export function createFiresEventAdapter({ layer, layerId = 'local-firms' }) {
         type: 'detail',
         nearestCameras: true,
         lines: [
-          { label: msg('Radiative power'), value: Number.isFinite(frp) ? `${Math.round(frp)} MW` : '--' },
+          {
+            label: msg('Radiative power'),
+            value: Number.isFinite(frp) ? `${Math.round(frp)} MW` : '--',
+          },
           {
             label: msg('Confidence'),
-            value: Number.isFinite(confidence) ? `${Math.round(confidence * 100)}%` : '--',
+            value: Number.isFinite(confidence)
+              ? `${Math.round(confidence * 100)}%`
+              : '--',
           },
           { label: msg('Sensor'), value: sensor || '--' },
         ],

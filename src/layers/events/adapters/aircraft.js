@@ -50,7 +50,9 @@ export function createAircraftEventAdapter({
           description: [
             altitudeFt !== null ? `${altitudeFt} ft` : null,
             knots !== null ? `${knots} kt` : null,
-            Number.isFinite(aircraft.heading) ? `${Math.round(aircraft.heading)}°` : null,
+            Number.isFinite(aircraft.heading)
+              ? `${Math.round(aircraft.heading)}°`
+              : null,
             aircraft.routeOrigin && aircraft.routeDestination
               ? `${aircraft.routeOrigin}→${aircraft.routeDestination}`
               : null,
@@ -84,22 +86,40 @@ export function createAircraftEventAdapter({
           { label: msg('ICAO'), value: data.icao24 || '--' },
           { label: msg('Operator'), value: data.operator || '--' },
           { label: msg('Class'), value: data.aircraftClass || '--' },
-          { label: msg('Altitude'), value: data.altitudeFt !== null && data.altitudeFt !== undefined ? `${data.altitudeFt} ft` : '--' },
-          { label: msg('Speed'), value: data.knots !== null && data.knots !== undefined ? `${data.knots} kt` : '--' },
-          { label: msg('Heading'), value: Number.isFinite(data.heading) ? `${Math.round(data.heading)}°` : '--' },
+          {
+            label: msg('Altitude'),
+            value:
+              data.altitudeFt !== null && data.altitudeFt !== undefined
+                ? `${data.altitudeFt} ft`
+                : '--',
+          },
+          {
+            label: msg('Speed'),
+            value:
+              data.knots !== null && data.knots !== undefined
+                ? `${data.knots} kt`
+                : '--',
+          },
+          {
+            label: msg('Heading'),
+            value: Number.isFinite(data.heading)
+              ? `${Math.round(data.heading)}°`
+              : '--',
+          },
           { label: msg('Squawk'), value: data.squawk || '--' },
           ...(data.emergencyBroadcast
             ? [{ label: msg('Emergency'), value: data.emergencyBroadcast }]
             : []),
         ],
-        actions: data.icao24 && typeof layer?.trackById === 'function'
-          ? [
-              {
-                label: msg('Follow'),
-                run: () => layer.trackById(data.icao24, { origin: 'user' }),
-              },
-            ]
-          : [],
+        actions:
+          data.icao24 && typeof layer?.trackById === 'function'
+            ? [
+                {
+                  label: msg('Follow'),
+                  run: () => layer.trackById(data.icao24, { origin: 'user' }),
+                },
+              ]
+            : [],
       };
     },
   };

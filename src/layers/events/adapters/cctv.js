@@ -27,7 +27,10 @@ export function createCctvEventAdapter({ layer, layerId = 'cctv' }) {
         lat: camera.lat,
         lon: camera.lon,
         title: camera.name || camera.id,
-        description: [camera.city, FEED_LABELS[camera.isVideo ? 'video' : 'image']]
+        description: [
+          camera.city,
+          FEED_LABELS[camera.isVideo ? 'video' : 'image'],
+        ]
           .filter(Boolean)
           .join(' · '),
         source: camera.credit || camera.provider || null,

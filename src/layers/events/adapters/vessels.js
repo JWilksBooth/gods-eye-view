@@ -5,7 +5,10 @@ import { msg } from '../../../i18n/marker.js';
  * Ships from the live AIS layer, nearest the camera's ground point first.
  * @param {{layer: object, layerId?: string}} options
  */
-export function createVesselsEventAdapter({ layer, layerId = 'ais-live-vessels' }) {
+export function createVesselsEventAdapter({
+  layer,
+  layerId = 'ais-live-vessels',
+}) {
   return {
     id: 'vessels',
     kind: 'vessel',
@@ -13,7 +16,9 @@ export function createVesselsEventAdapter({ layer, layerId = 'ais-live-vessels' 
     getEvents({ limit, center }) {
       const records = (layer?.getAnalystRecords?.(4000) || []).filter(
         (record) =>
-          Number.isFinite(record.lat) && Number.isFinite(record.lon) && record.mmsi,
+          Number.isFinite(record.lat) &&
+          Number.isFinite(record.lon) &&
+          record.mmsi,
       );
       const ranked = center
         ? records
@@ -32,8 +37,12 @@ export function createVesselsEventAdapter({ layer, layerId = 'ais-live-vessels' 
         title: vessel.name || vessel.mmsi,
         description: [
           vessel.shipType,
-          Number.isFinite(vessel.speedKts) ? `${Math.round(vessel.speedKts)} kt` : null,
-          Number.isFinite(vessel.courseDeg) ? `${Math.round(vessel.courseDeg)}°` : null,
+          Number.isFinite(vessel.speedKts)
+            ? `${Math.round(vessel.speedKts)} kt`
+            : null,
+          Number.isFinite(vessel.courseDeg)
+            ? `${Math.round(vessel.courseDeg)}°`
+            : null,
           vessel.destination ? `→ ${vessel.destination}` : null,
         ]
           .filter(Boolean)
@@ -55,13 +64,29 @@ export function createVesselsEventAdapter({ layer, layerId = 'ais-live-vessels' 
         lines: [
           { label: msg('MMSI'), value: data.mmsi || '--' },
           { label: msg('Type'), value: data.shipType || '--' },
-          { label: msg('Speed'), value: Number.isFinite(data.speedKts) ? `${Math.round(data.speedKts)} kt` : '--' },
-          { label: msg('Course'), value: Number.isFinite(data.courseDeg) ? `${Math.round(data.courseDeg)}°` : '--' },
+          {
+            label: msg('Speed'),
+            value: Number.isFinite(data.speedKts)
+              ? `${Math.round(data.speedKts)} kt`
+              : '--',
+          },
+          {
+            label: msg('Course'),
+            value: Number.isFinite(data.courseDeg)
+              ? `${Math.round(data.courseDeg)}°`
+              : '--',
+          },
           { label: msg('Destination'), value: data.destination || '--' },
         ],
-        actions: data.mmsi && typeof layer?.selectById === 'function'
-          ? [{ label: msg('Select on map'), run: () => layer.selectById(data.mmsi) }]
-          : [],
+        actions:
+          data.mmsi && typeof layer?.selectById === 'function'
+            ? [
+                {
+                  label: msg('Select on map'),
+                  run: () => layer.selectById(data.mmsi),
+                },
+              ]
+            : [],
       };
     },
   };

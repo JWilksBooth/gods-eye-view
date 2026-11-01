@@ -87,7 +87,10 @@ export function readEventTheme({ documentRef = globalThis.document } = {}) {
   }
   return {
     kinds,
-    glyph: cssVar(style, '--event-icon-glyph') || cssVar(style, '--bg-dark') || fallback.glyph,
+    glyph:
+      cssVar(style, '--event-icon-glyph') ||
+      cssVar(style, '--bg-dark') ||
+      fallback.glyph,
     ring:
       cssVar(style, '--event-icon-ring') ||
       cssVar(style, '--text-primary') ||
@@ -96,7 +99,10 @@ export function readEventTheme({ documentRef = globalThis.document } = {}) {
       cssVar(style, '--event-icon-outline') ||
       cssVar(style, '--bg-dark') ||
       fallback.outline,
-    text: cssVar(style, '--event-icon-text') || cssVar(style, '--bg-dark') || fallback.text,
+    text:
+      cssVar(style, '--event-icon-text') ||
+      cssVar(style, '--bg-dark') ||
+      fallback.text,
   };
 }
 

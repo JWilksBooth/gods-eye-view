@@ -17,9 +17,13 @@ import { createLifecycle } from './lifecycle.js';
  *   The feed drawer; without one, clicks only announce `gev:event-selected`.
  * @param {Document} [options.documentRef]
  */
-export function createEventsLayer({ services, documentRef = globalThis.document }) {
+export function createEventsLayer({
+  services,
+  documentRef = globalThis.document,
+}) {
   for (const key of ['picking', 'ground', 'render', 'camera']) {
-    if (!services?.[key]) throw new TypeError(`Event layer needs services.${key}`);
+    if (!services?.[key])
+      throw new TypeError(`Event layer needs services.${key}`);
   }
   const state = createState();
   const parts = {};

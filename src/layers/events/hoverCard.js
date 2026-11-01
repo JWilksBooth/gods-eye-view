@@ -60,8 +60,10 @@ export function createEventHoverCard({
     const rect = { w: root.offsetWidth || 240, h: root.offsetHeight || 80 };
     let x = position.x + OFFSET_PX;
     let y = position.y + OFFSET_PX;
-    if (width && x + rect.w + EDGE_PX > width) x = position.x - rect.w - OFFSET_PX;
-    if (height && y + rect.h + EDGE_PX > height) y = position.y - rect.h - OFFSET_PX;
+    if (width && x + rect.w + EDGE_PX > width)
+      x = position.x - rect.w - OFFSET_PX;
+    if (height && y + rect.h + EDGE_PX > height)
+      y = position.y - rect.h - OFFSET_PX;
     x = Math.max(EDGE_PX, x);
     y = Math.max(EDGE_PX, y);
     root.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
@@ -160,10 +162,13 @@ export function createEventHoverCard({
   /** Hide after a short linger so gaps between icons do not flicker. */
   function scheduleHide(delayMs) {
     if (!root || root.hidden || hideTimer) return;
-    hideTimer = setTimeout(() => {
-      hideTimer = 0;
-      hide();
-    }, Math.max(0, delayMs));
+    hideTimer = setTimeout(
+      () => {
+        hideTimer = 0;
+        hide();
+      },
+      Math.max(0, delayMs),
+    );
   }
 
   function destroy() {

@@ -5,7 +5,10 @@ import { msg } from '../../../i18n/marker.js';
  * capped cohort keeps the strongest shocks.
  * @param {{layer: object, layerId?: string}} options
  */
-export function createEarthquakesEventAdapter({ layer, layerId = 'earthquakes' }) {
+export function createEarthquakesEventAdapter({
+  layer,
+  layerId = 'earthquakes',
+}) {
   return {
     id: 'earthquakes',
     kind: 'quake',
@@ -22,7 +25,11 @@ export function createEarthquakesEventAdapter({ layer, layerId = 'earthquakes' }
         source: 'USGS',
         time: quake.timeMs,
         priority: Number.isFinite(quake.magnitude) ? quake.magnitude : 0,
-        data: { magnitude: quake.magnitude, depthKm: quake.depthKm, place: quake.place },
+        data: {
+          magnitude: quake.magnitude,
+          depthKm: quake.depthKm,
+          place: quake.place,
+        },
       }));
     },
     feed(event) {
@@ -31,8 +38,16 @@ export function createEarthquakesEventAdapter({ layer, layerId = 'earthquakes' }
         type: 'detail',
         nearestCameras: true,
         lines: [
-          { label: msg('Magnitude'), value: Number.isFinite(magnitude) ? magnitude.toFixed(1) : '--' },
-          { label: msg('Depth'), value: Number.isFinite(depthKm) ? `${Math.round(depthKm)} km` : '--' },
+          {
+            label: msg('Magnitude'),
+            value: Number.isFinite(magnitude) ? magnitude.toFixed(1) : '--',
+          },
+          {
+            label: msg('Depth'),
+            value: Number.isFinite(depthKm)
+              ? `${Math.round(depthKm)} km`
+              : '--',
+          },
           { label: msg('Place'), value: place || '--' },
         ],
       };
