@@ -890,6 +890,12 @@
       "src/layers/incidents/source.js",
       "src/sources/httpBody.js",
       "src/performancePreset.js",
+      "src/app/layers/alerts.js",
+      "src/layers/alerts/index.js",
+      "src/layers/alerts/model.js",
+      "src/layers/alerts/regions.js",
+      "src/layers/alerts/cards.js",
+      "src/layers/alerts/source.js",
       "src/app/layers/streams.js",
       "src/layers/streams/index.js",
       "src/layers/streams/model.js",
@@ -931,7 +937,8 @@
       "src/ui/styles/provider-settings.css",
       "src/ui/styles/weather.css",
       "src/ui/styles/recent-imagery.css",
-      "src/ui/styles/live-ops.css"
+      "src/ui/styles/live-ops.css",
+      "src/ui/styles/alerts.css"
     ],
     "external": []
   },
@@ -2852,6 +2859,12 @@
       "src/sources/liveOpsHeadlines.js",
       "src/services/surfaceHeight.js",
       "src/performancePreset.js",
+      "src/app/layers/alerts.js",
+      "src/layers/alerts/index.js",
+      "src/layers/alerts/model.js",
+      "src/layers/alerts/regions.js",
+      "src/layers/alerts/cards.js",
+      "src/layers/alerts/source.js",
       "src/app/layers/streams.js",
       "src/layers/streams/index.js",
       "src/layers/streams/model.js",
@@ -3453,6 +3466,13 @@
       "src/layers/incidents/source.js",
       "src/services/surfaceHeight.js",
       "src/performancePreset.js",
+      "src/app/layers/alerts.js",
+      "src/layers/alerts/index.js",
+      "src/layers/alerts/model.js",
+      "src/layers/alerts/regions.js",
+      "src/layers/alerts/cards.js",
+      "src/layers/alerts/source.js",
+      "src/data/liveOpsRegions.js",
       "src/app/layers/streams.js",
       "src/layers/streams/index.js",
       "src/layers/streams/model.js",
@@ -3462,8 +3482,7 @@
       "src/layers/streams/eventAdapter.js",
       "src/layers/events/adapters.js",
       "src/layers/events/model.js",
-      "src/layers/events/policy.js",
-      "src/data/liveOpsRegions.js"
+      "src/layers/events/policy.js"
     ],
     "external": [
       "hls.js",
@@ -3952,6 +3971,7 @@
       "src/layers/airQuality/source.js",
       "src/layers/incidents/source.js",
       "src/layers/incidents/records.js",
+      "src/layers/alerts/source.js",
       "src/layers/streams/source.js",
       "src/layers/streams/records.js",
       "src/layers/streams/embed.js"
@@ -4097,6 +4117,75 @@
   "live-ops-regions": {
     "exports": ["./sources/live-ops"],
     "modules": ["src/data/liveOpsRegions.js"],
+    "external": []
+  },
+  "alerts-provider": {
+    "runtime": "node",
+    "exports": ["./server/providers/alerts"],
+    "modules": [
+      "server/providers/alerts.js",
+      "server/providers/alerts/index.js",
+      "server/providers/alerts/agencies.js",
+      "server/providers/alerts/airnow.js",
+      "server/providers/alerts/calfire.js",
+      "server/providers/alerts/caltrans.js",
+      "server/providers/alerts/csv.js",
+      "server/providers/alerts/faa.js",
+      "server/providers/alerts/feeds.js",
+      "server/providers/alerts/geometry.js",
+      "server/providers/alerts/governor.js",
+      "server/providers/alerts/gtfsrt.js",
+      "server/providers/alerts/http.js",
+      "server/providers/alerts/nws.js",
+      "server/providers/alerts/rss.js",
+      "server/providers/alerts/time.js",
+      "server/providers/alerts/transit.js",
+      "server/providers/common/http.js",
+      "server/providers/common/rate-limit.js",
+      "server/providers/common/same-site.js",
+      "src/localRequestGate.mjs",
+      "src/sources/httpBody.js",
+      "src/sources/rateLimit.js",
+      "src/i18n/marker.js",
+      "src/layers/alerts/model.js",
+      "src/layers/alerts/regions.js",
+      "src/data/liveOpsRegions.js"
+    ],
+    "external": ["pbf"]
+  },
+  "alerts-layer": {
+    "exports": ["./layers/alerts"],
+    "modules": [
+      "src/layers/alerts/index.js",
+      "src/layers/alerts/model.js",
+      "src/layers/alerts/regions.js",
+      "src/layers/alerts/cards.js",
+      "src/layers/alerts/source.js",
+      "src/data/liveOpsRegions.js",
+      "src/sources/httpBody.js",
+      "src/i18n/marker.js",
+      "src/i18n/index.js",
+      "src/i18n/locale.js",
+      "src/i18n/locales/de.json",
+      "src/i18n/locales/es.json",
+      "src/i18n/locales/fr.json",
+      "src/i18n/locales/it.json",
+      "src/i18n/locales/ja.json",
+      "src/i18n/locales/pt.json",
+      "src/i18n/locales/ru.json",
+      "src/i18n/locales/uk.json",
+      "src/i18n/locales/zh-CN.json",
+      "src/i18n/locales/zh-Hant.json"
+    ],
+    "external": ["cesium"]
+  },
+  "alerts-source": {
+    "exports": ["./layers/alerts/source"],
+    "modules": [
+      "src/layers/alerts/source.js",
+      "src/sources/httpBody.js",
+      "src/i18n/marker.js"
+    ],
     "external": []
   },
   "nominatim-provider": {
@@ -4525,6 +4614,9 @@
       "src/tools/queries/liveOps.js",
       "src/data/liveOpsRegions.js",
       "src/layers/incidents/records.js",
+      "src/tools/queries/alerts.js",
+      "src/layers/alerts/model.js",
+      "src/layers/alerts/regions.js",
       "src/tools/queries/streams.js",
       "src/layers/streams/records.js",
       "src/layers/streams/embed.js"
@@ -4624,6 +4716,7 @@
       "src/sources/liveOpsHeadlines.js",
       "src/data/regionalModel.js",
       "src/geoDistance.js",
+      "src/layers/alerts/source.js",
       "src/layers/streams/source.js",
       "src/layers/streams/records.js",
       "src/layers/streams/embed.js"

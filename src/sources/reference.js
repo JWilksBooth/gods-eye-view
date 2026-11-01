@@ -4,6 +4,7 @@ import { createWfigsPerimeterSource } from '../layers/perimeters/source.js';
 import { createBundledCableSource } from '../layers/submarineCables/bundledSource.js';
 import { createAdsbGnssSource } from '../layers/gnss/source.js';
 import { createIncidentSource } from '../layers/incidents/source.js';
+import { createAlertsSource } from '../layers/alerts/source.js';
 import { createStreamSource } from '../layers/streams/source.js';
 
 /** Construct the existing reference feeds independently of application setup. */
@@ -15,6 +16,7 @@ export function createReferenceSources() {
     cables: createBundledCableSource(),
     'gnss-integrity': createAdsbGnssSource(),
     incidents: createIncidentSource(),
+    alerts: createAlertsSource(),
     streams: createStreamSource(),
   };
 }

@@ -168,6 +168,38 @@ export const KEY_SETUP_KEYS = Object.freeze([
     hidden: true,
   }),
   Object.freeze({
+    id: 'airnow',
+    title: 'AIRNOW', // i18n-ignore: provider product name
+    unlocks: msg(
+      'US EPA air-quality readings in the Alerts layer; unhealthy readings become air alerts',
+    ),
+    getUrl: 'https://docs.airnowapi.org/account/request/',
+    envVars: Object.freeze(['AIRNOW_API_KEY']),
+    tier: 'free',
+  }),
+  Object.freeze({
+    id: 'bay-area-511',
+    title: '511 SF BAY', // i18n-ignore: provider product name; row is hidden
+    unlocks: msg(
+      'Bay Area and Sonoma County transit service alerts in the Alerts layer',
+    ),
+    getUrl: 'https://511.org/open-data/token',
+    envVars: Object.freeze(['BAY_AREA_511_API_KEY']),
+    tier: 'free',
+    hidden: true,
+  }),
+  Object.freeze({
+    id: 'swiftly',
+    title: 'SWIFTLY', // i18n-ignore: provider product name; row is hidden
+    unlocks: msg(
+      'LA Metro and RTC Southern Nevada service alerts in the Alerts layer',
+    ),
+    getUrl: 'https://goswift.ly/realtime-api-key',
+    envVars: Object.freeze(['SWIFTLY_API_KEY']),
+    tier: 'free',
+    hidden: true,
+  }),
+  Object.freeze({
     id: 'launch-library',
     title: 'LAUNCH LIBRARY', // i18n-ignore: provider product name
     unlocks: msg(

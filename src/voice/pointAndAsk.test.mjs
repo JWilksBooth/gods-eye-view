@@ -350,7 +350,9 @@ test('deixis prompt lint: one short rule, and every sentinel it names exists in 
   // Incidents (LIVE OPS) added one generated layer enum value, its alias and
   // field hints (52,084), so the ceiling moved to 52,200.
   const size = instructions.length + JSON.stringify(GEV_REALTIME_TOOLS).length;
-  assert.ok(size <= 52200, `prompt size ${size}`);
+  // Live Streams adds one layer enum value, its aliases and field hints
+  // (52,299), so the ceiling moved to 52,400.
+  assert.ok(size <= 52400, `prompt size ${size}`);
 });
 
 

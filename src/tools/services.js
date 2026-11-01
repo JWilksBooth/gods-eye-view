@@ -16,6 +16,7 @@ import { createCycloneSource } from '../layers/cyclones/source.js';
 import { createUsgsEarthquakeSource } from '../layers/earthquakes/source.js';
 import { createFirmsSource } from '../layers/firms/source.js';
 import { createIncidentSource } from '../layers/incidents/source.js';
+import { createAlertsSource } from '../layers/alerts/source.js';
 import { createStreamSource } from '../layers/streams/source.js';
 import { createInstallationSource } from '../layers/installations/source.js';
 import { createLaunchSource } from '../layers/launches/source.js';
@@ -88,6 +89,7 @@ export function createToolServices({ fetchImpl, appUrl, panelKey }) {
     incidents: createIncidentSource({ fetchImpl }),
     streams: createStreamSource({ fetchImpl }),
     liveOps: createLiveOpsHeadlineSource({ fetchImpl }),
+    alerts: createAlertsSource({ fetchImpl }),
     installations: createInstallationSource({
       fetchImpl,
       tileFetchImpl: fetchImpl,

@@ -243,6 +243,21 @@ const layers = [
     },
   },
   {
+    id: 'alerts',
+    aliases: ['alerts', 'official alerts', 'warnings', 'advisories'],
+    context: false,
+    query: {
+      fields: {
+        kind: ['t'],
+        severity: ['t'],
+        agency: ['t'],
+        headline: ['t'],
+        issuedMs: ['ms'],
+      },
+      timeField: 'issuedMs',
+    },
+  },
+  {
     id: 'streams',
     aliases: ['streams', 'live streams', 'stream cams', 'live video feeds'],
     context: false,

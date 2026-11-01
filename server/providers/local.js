@@ -31,6 +31,7 @@ import { ghostMapsProxy } from './ghostMaps.js';
 import { cycloneProxy } from './cyclones.js';
 import { windProxy } from './wind.js';
 import { incidentsProxy } from './incidents.js';
+import { alertsProxy } from './alerts.js';
 import { streamsProxy } from './streams.js';
 
 /**
@@ -71,6 +72,7 @@ function localProviderPlugins({ realtime, gemini } = {}) {
     gnssIntegrityProxy(),
     ghostMapsProxy(),
     incidentsProxy(),
+    alertsProxy(),
     streamsProxy(),
     keySetupEndpoint(),
   ];

@@ -30,6 +30,7 @@ import { getActiveFires, getEarthquakes } from './queries/hazards.js';
 import { getRecentImagery } from './queries/imagery.js';
 import { findInfrastructure } from './queries/infrastructure.js';
 import { getIncidents, liveOpsRegionTool } from './queries/liveOps.js';
+import { getAirportStatus, getAlerts } from './queries/alerts.js';
 import { findLiveStreams } from './queries/streams.js';
 import {
   findVessel,
@@ -120,6 +121,8 @@ export const coreTools = Object.freeze([
   getFirePerimeters,
   getIncidents,
   liveOpsRegionTool,
+  getAlerts,
+  getAirportStatus,
   findLiveStreams,
   getTerrainHeight,
   findMilitaryInstallations,

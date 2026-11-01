@@ -19,6 +19,7 @@ test('reference factories retain compatibility without starting acquisition or s
     'cables',
     'gnss-integrity',
     'incidents',
+    'alerts',
     'streams',
   ]);
   assert.notEqual(first.earthquakes, second.earthquakes);
@@ -27,6 +28,7 @@ test('reference factories retain compatibility without starting acquisition or s
   assert.notEqual(first.cables, second.cables);
   assert.notEqual(first['gnss-integrity'], second['gnss-integrity']);
   assert.notEqual(first.incidents, second.incidents);
+  assert.notEqual(first.alerts, second.alerts);
   assert.notEqual(first.streams, second.streams);
   assert.equal(typeof first.earthquakes.getSnapshot, 'function');
   assert.equal(typeof first['air-quality'].getSnapshot, 'function');
@@ -34,6 +36,7 @@ test('reference factories retain compatibility without starting acquisition or s
   assert.equal(typeof first.cables.fetch, 'function');
   assert.equal(typeof first['gnss-integrity'].getSnapshot, 'function');
   assert.equal(typeof first.incidents.getSnapshot, 'function');
+  assert.equal(typeof first.alerts.getSnapshot, 'function');
   assert.equal(typeof first.streams.getSnapshot, 'function');
   assert.equal(requests, 0);
 });
