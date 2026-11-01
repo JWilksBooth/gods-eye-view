@@ -27,6 +27,7 @@ import { createApplicationEarthquakes } from './layers/earthquakes.js';
 import { createApplicationAirQuality } from './layers/airQuality.js';
 import { createApplicationFirePerimeters } from './layers/perimeters.js';
 import { createApplicationIncidents } from './layers/incidents.js';
+import { createApplicationEvents } from './layers/events.js';
 import { createApplicationGnssIntegrity } from './layers/gnss.js';
 import { createApplicationGhostMaps } from './layers/ghostMaps.js';
 import { createApplicationCables } from './layers/submarineCables.js';
@@ -106,6 +107,19 @@ export function createApplicationCatalog({
     const satellites = createApplicationSatellites({
       source: sources.satellites,
     });
+    const earthquakes = createApplicationEarthquakes({
+      source: sources.earthquakes,
+    });
+    const incidents = createApplicationIncidents({ source: sources.incidents });
+    const cctv = createApplicationCctv({ surface, source: sources.cctv });
+    const firms = createApplicationFirms({
+      surface,
+      id: 'local-firms',
+      name: 'FIRMS Active Fires',
+      icon: '▲',
+      source: 'NASA FIRMS · LIVE',
+      feed: sources.firms,
+    });
     const catalog = createLayerCatalog(
       [
         createBhoteKoshiEventLayer(),
@@ -120,12 +134,12 @@ export function createApplicationCatalog({
           displayParams: () => flights.getParams(),
           ...(resolveAsset ? { resolveAsset } : {}),
         }),
-        createApplicationEarthquakes({ source: sources.earthquakes }),
+        earthquakes,
         createApplicationAirQuality({ source: sources['air-quality'] }),
         createApplicationFirePerimeters({
           source: sources['fire-perimeters'],
         }),
-        createApplicationIncidents({ source: sources.incidents }),
+        incidents,
         createApplicationGnssIntegrity({
           source: sources['gnss-integrity'],
           windowMs: sources['gnss-integrity'].windowMs,
@@ -140,7 +154,7 @@ export function createApplicationCatalog({
         satellites,
         createApplicationLaunches({ source: sources.launches, satellites }),
         createApplicationTraffic({ source: sources.traffic, surface }),
-        createApplicationCctv({ surface, source: sources.cctv }),
+        cctv,
         createApplicationRadio({ surface, source: sources.radio }),
         createApplicationTransit({ surface, source: sources.transit }),
         createApplicationBikeshare({ source: sources.bikeshare }),
@@ -173,13 +187,20 @@ export function createApplicationCatalog({
         createCyclonesLayer({ feed: sources.cyclones }),
         ...createInfrastructureLayers(localGeoJsonServices),
         createApplicationCables({ source: sources.cables }),
-        createApplicationFirms({
+        firms,
+        // Last: the event map reads the layers above through their adapters.
+        createApplicationEvents({
           surface,
-          id: 'local-firms',
-          name: 'FIRMS Active Fires',
-          icon: '▲',
-          source: 'NASA FIRMS · LIVE',
-          feed: sources.firms,
+          layers: {
+            cctv,
+            firms,
+            earthquakes,
+            flights,
+            military,
+            vessels,
+            incidents,
+          },
+          cctvSource: sources.cctv,
         }),
       ],
       metadata,

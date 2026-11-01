@@ -243,6 +243,13 @@ const layers = [
     },
   },
   {
+    id: 'events',
+    aliases: ['event map', 'event icons', 'live events', 'events'],
+    context: false,
+    noQuery:
+      'icons for other layers; query incidents, earthquakes, fires, flights or vessels',
+  },
+  {
     id: 'weather-cyclones',
     aliases: ['cyclones', 'hurricanes', 'typhoons', 'tropical storms'],
     context: false,

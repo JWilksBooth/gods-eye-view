@@ -1067,10 +1067,11 @@ test('the voice TOOL SCHEMA matches the pinned contract — the mission mapping 
   // preserves the mission mapping and globe-rotation arguments.
   // S2 GhostMaps extends the generated layer enums; both feature contracts remain.
   // Live Incidents (LIVE OPS) extends the generated layer enums the same way.
-  assert.equal(block.length, 31324, 'serialized tool schema length drifted');
+  // The Event Map layer (toggle only) extends them the same way.
+  assert.equal(block.length, 31371, 'serialized tool schema length drifted');
   assert.equal(
     crypto.createHash('sha256').update(block).digest('hex'),
-    '8b34a8d2511bac1f057b7a19a0c6563f5fc24b9acde3c7ade9548c1ae4b0107f',
+    'a64d6cbd9329d49c1e10ee7e231423012f398c216ffe2b23c0ad93435fdc3494',
     'the first-run missions must ride EXISTING tools: no schema edit, no cache bust',
   );
   const instructions = fs.readFileSync(

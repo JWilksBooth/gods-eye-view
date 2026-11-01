@@ -119,6 +119,7 @@ export const WORLD_OVERLAY_OCCLUDER_SELECTORS = Object.freeze([
   '#space-mission-panel-host',
   '#military-awareness-panel',
   '#bhote-koshi-event-panel',
+  '#event-feed-drawer',
   // Cockpit: solid backdrop-filled windows only (both bounded to
   // `min(340px, 28vw)` wide and `min(42vh, 410px)` tall, both `hidden` until
   // toggled). Every other cockpit selector was removed — see the block comment.

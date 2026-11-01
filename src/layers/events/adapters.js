@@ -118,7 +118,10 @@ export const EVENT_ADAPTER_KINDS = Object.freeze([...KINDS]);
 export function assertEventAdapter(adapter) {
   if (!adapter || typeof adapter !== 'object')
     throw new TypeError('An event adapter must be an object');
-  if (typeof adapter.id !== 'string' || !/^[a-z0-9][a-z0-9-]{0,39}$/.test(adapter.id))
+  if (
+    typeof adapter.id !== 'string' ||
+    !/^[a-z0-9][a-z0-9-]{0,39}$/.test(adapter.id)
+  )
     throw new TypeError('An event adapter needs a short lowercase id');
   if (!KINDS.has(adapter.kind))
     throw new TypeError(
@@ -130,7 +133,10 @@ export function assertEventAdapter(adapter) {
     throw new TypeError(`Event adapter ${adapter.id} layerId must be a string`);
   if (adapter.feed !== undefined && typeof adapter.feed !== 'function')
     throw new TypeError(`Event adapter ${adapter.id} feed must be a function`);
-  if (adapter.subscribe !== undefined && typeof adapter.subscribe !== 'function')
+  if (
+    adapter.subscribe !== undefined &&
+    typeof adapter.subscribe !== 'function'
+  )
     throw new TypeError(
       `Event adapter ${adapter.id} subscribe must be a function`,
     );
@@ -202,37 +208,29 @@ export function _resetEventAdaptersForTest() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Stubs for layers built alongside this framework. Each is a complete */
-/* registration; uncomment it in the layer's application wiring once   */
-/* the layer exposes the accessor it names.                            */
+/* Built-in adapters live in ./adapters/<layer>.js and are registered  */
+/* by src/app/layers/events.js from the catalog's layer instances:     */
+/* cctv, fires, earthquakes, aircraft (flights and military), vessels  */
+/* and incidents (LIVE OPS regions, src/layers/incidents; the drawer   */
+/* detail reuses buildIncidentCard through a `describe` callback).     */
+/*                                                                     */
+/* The stub below is for a layer built alongside this framework. It is */
+/* a complete registration; move it to ./adapters/alerts.js and add it */
+/* to the application wiring once the layer exposes what it names.     */
 /* ------------------------------------------------------------------ */
 
-// Incidents (LIVE OPS regions): one icon per open incident.
-// import { registerEventAdapter } from '../events/adapters.js';
-// registerEventAdapter({
-//   id: 'incidents',
-//   kind: 'incident',
-//   layerId: 'incidents',
-//   getEvents: ({ limit }) =>
-//     incidentsLayer.getIncidents().slice(0, limit).map((incident) => ({
-//       id: incident.id,
-//       lat: incident.lat,
-//       lon: incident.lon,
-//       title: incident.title,
-//       description: incident.summary,
-//       source: incident.agency,
-//       time: incident.updatedAtMs,
-//       priority: incident.severity,
-//       data: { incidentId: incident.id },
-//     })),
-//   feed: (event) => ({
-//     type: 'detail',
-//     nearestCameras: true,
-//     lines: incidentsLayer.describe(event.data.incidentId),
-//   }),
-// });
-
-// Alerts (warnings and watches): one icon at each alert's centroid.
+// Alerts (warnings and watches): one icon at each alert's centroid. The
+// adapter needs, from the alerts layer: a synchronous `getAlerts()` returning
+// the rows it currently draws, each with a stable `id`, a centroid `lat`/`lon`
+// (an alert is an area; the icon marks its centre), a one-line `headline`,
+// the `event` name for the hover description, the `sender` (the issuing
+// office, shown as the source), `sentMs` (freshness) and an `urgency` rank
+// so a capped cohort keeps the most urgent warnings. The feed can be a
+// `detail` with the alert's description and instruction lines plus
+// `nearestCameras: true`, and an action that focuses the alert's polygon on
+// the alerts layer. With `layerId: 'alerts'` the adapter is read only while
+// that layer is on, and the manager's `data-updated` for it refreshes the
+// icons, so no `subscribe` is needed.
 // registerEventAdapter({
 //   id: 'alerts',
 //   kind: 'alert',
