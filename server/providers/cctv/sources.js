@@ -276,6 +276,37 @@ export async function loadAustinSourcesFromOpenData() {
  *
  * @returns {Promise<Array<object>>} Normalized camera source objects.
  */
+/**
+ * Accept a Caltrans live-stream URL only on Caltrans' own media host, over
+ * HTTPS, as a bare `/D<district>/<camera>.stream/playlist.m3u8` path: no
+ * credentials, no query, nothing that could redirect the HLS proxy elsewhere.
+ *
+ * @param {unknown} value `imageData.streamingVideoURL` from the district JSON.
+ * @returns {string|null} The normalized playlist URL, or null when absent/unsafe.
+ */
+export function caltransStreamUrl(value) {
+  const raw = String(value ?? '').trim();
+  if (!raw) return null;
+  let url;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+  if (
+    url.protocol !== 'https:' ||
+    url.host !== 'wzmedia.dot.ca.gov' ||
+    url.username ||
+    url.password ||
+    url.search ||
+    url.hash ||
+    !/^/Dd{1,2}/[A-Za-z0-9_.-]+.stream/playlist.m3u8$/.test(url.pathname)
+  ) {
+    return null;
+  }
+  return url.href;
+}
+
 export async function loadCaltransSourcesFromOpenData() {
   const districtsRaw =
     process.env.CCTV_CALTRANS_DISTRICTS ?? DEFAULT_CALTRANS_DISTRICTS;
@@ -323,6 +354,13 @@ export async function loadCaltransSourcesFromOpenData() {
       );
       if (!imageUrl) continue;
 
+      // Live video when Caltrans publishes an HLS stream on its own media host;
+      // the still stays the snapshot fallback. CCTV_CALTRANS_VIDEO=0 keeps stills only.
+      const streamUrl =
+        String(process.env.CCTV_CALTRANS_VIDEO || '1').trim() !== '0'
+          ? caltransStreamUrl(cctv.imageData?.streamingVideoURL)
+          : null;
+
       const locationName = String(loc.locationName || '').trim();
       // Leading token of locationName is the stable camera code ("TV102 -- I-580 : …").
       const codeMatch = /^([A-Za-z0-9_-]+)\s*--/.exec(locationName);
@@ -367,8 +405,8 @@ export async function loadCaltransSourcesFromOpenData() {
             ? Math.max(-100, Math.min(4000, ft * 0.3048))
             : 150;
         })(),
-        feedType: 'image',
-        url: imageUrl,
+        feedType: streamUrl ? 'hls' : 'image',
+        url: streamUrl || imageUrl,
         snapshotUrl: imageUrl,
         sourceKind: 'caltrans-open-data',
         license: 'Public Caltrans highway camera frame',
