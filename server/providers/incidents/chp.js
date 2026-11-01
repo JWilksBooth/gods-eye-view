@@ -89,11 +89,11 @@ export function parseChpIncidents(xml, { onlyRegions = true } = {}) {
   const rows = [];
   const text = String(xml || '');
   for (const dispatch of text.matchAll(
-    /<Dispatch\s+ID="([^"]*)"[^>]*>([\s\S]*?)<\/Dispatch>/gi,
+    /<Dispatch\s+ID\s*=\s*"([^"]*)"[^>]*>([\s\S]*?)<\/Dispatch>/gi,
   )) {
     const dispatchId = unquote(dispatch[1]).toUpperCase();
     for (const log of dispatch[2].matchAll(
-      /<Log\s+ID="([^"]*)"[^>]*>([\s\S]*?)<\/Log>/gi,
+      /<Log\s+ID\s*=\s*"([^"]*)"[^>]*>([\s\S]*?)<\/Log>/gi,
     )) {
       const logId = unquote(log[1]);
       const body = log[2];

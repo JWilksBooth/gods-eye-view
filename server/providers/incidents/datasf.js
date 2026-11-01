@@ -16,8 +16,7 @@ import {
   pacificToUtcMs,
 } from './common.js';
 
-export const DATASF_CALLS_URL =
-  'https://data.sfgov.org/resource/gnap-fj3t.json';
+export const DATASF_CALLS_URL = 'https://data.sf.gov/resource/gnap-fj3t.json';
 export const DATASF_SOURCE = Object.freeze({
   id: 'datasf-police',
   label: 'DataSF dispatched calls',
@@ -98,7 +97,7 @@ export function parseDataSfCalls(rows) {
       time: callTime(row),
       description: description || null,
       region: incidentRegionId(lat, lon),
-      url: 'https://data.sfgov.org/d/gnap-fj3t',
+      url: 'https://data.sf.gov/d/gnap-fj3t',
     });
     if (record) out.push(record);
   }
