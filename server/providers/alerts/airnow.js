@@ -10,7 +10,10 @@
  * "Unhealthy for Sensitive Groups" or worse also becomes an `air` alert.
  */
 import { createAlert } from '../../../src/layers/alerts/model.js';
-import { ALERT_REGIONS } from '../../../src/layers/alerts/regions.js';
+import {
+  ALERT_REGIONS,
+  bboxContains,
+} from '../../../src/layers/alerts/regions.js';
 import { ALERT_FEEDS } from './feeds.js';
 import { UpstreamError, fetchUpstreamText, parseJsonText } from './http.js';
 
@@ -85,7 +88,10 @@ export function normalizeAirNowRows(rows, regionId) {
     const lon = number(row.Longitude);
     const aqi = number(row.AQI);
     if (lat === null || lon === null || aqi === null || aqi < 0) continue;
-    const observedMs = Date.parse(`${String(row.UTC || '').trim()}:00Z`);
+    // `YYYY-MM-DDTHH:MM` in UTC; Date.parse alone accepts far looser text.
+    const hour = String(row.UTC || '').trim();
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(hour)) continue;
+    const observedMs = Date.parse(`${hour}:00Z`);
     if (!Number.isFinite(observedMs)) continue;
     const code =
       String(row.FullAQSCode || row.IntlAQSCode || '').trim() ||
@@ -182,7 +188,12 @@ export function createAirNowFeedSource({
           const rows = normalizeAirNowRows(parseJsonText(payload), region.id);
           if (!rows) throw new UpstreamError('invalid_payload');
           loaded += 1;
-          readings.push(...rows);
+          // The box query is exact; a site outside it is not this region's.
+          readings.push(
+            ...rows.filter((row) =>
+              bboxContains(region.bbox, row.lon, row.lat),
+            ),
+          );
         } catch (error) {
           lastError = error;
         }

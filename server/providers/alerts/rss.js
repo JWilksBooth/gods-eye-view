@@ -35,16 +35,23 @@ function decodeEntities(text) {
   });
 }
 
+/** An HTML tag once escaped markup is decoded; `a < b` is not one. */
+const DECODED_TAG = /<\/?[a-z][a-z0-9-]*(?:\s[^>]*)?\/?>/gi;
+
 /**
  * Decode text from an RSS/Atom element: CDATA, markup, entities and
- * whitespace. Markup that arrives escaped (`&lt;a …&gt;`) is stripped on a
- * second pass, so it never reaches a card as literal tags.
+ * whitespace. Markup that arrives escaped once or twice (`&lt;a …&gt;`,
+ * `&amp;lt;a …&amp;gt;`) is stripped as it is decoded, so it never reaches a
+ * card as literal tags, while a decoded `<` in prose stays.
  */
 export function decodeXmlText(value) {
-  let text = String(value || '').replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1');
+  let text = String(value || '')
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+    .replace(/<[^>]+>/g, ' ');
   for (let pass = 0; pass < 2; pass += 1) {
-    text = decodeEntities(text.replace(/<[^>]+>/g, ' '));
-    if (!/<[a-z/!][^>]*>|&(#x[0-9a-f]+|#\d+|[a-z]+);/i.test(text)) break;
+    const decoded = decodeEntities(text);
+    if (decoded === text) break;
+    text = decoded.replace(DECODED_TAG, ' ');
   }
   return text.replace(/\s+/g, ' ').trim();
 }
@@ -142,9 +149,10 @@ export function parseFeedItems(
   { limit = 60, baseUrl = undefined, timeZone = null } = {},
 ) {
   const text = String(xml || '');
-  const declaredBase = /<(?:rss|feed|channel)\b[^>]*\bxml:base\s*=\s*["']([^"']+)["']/i.exec(
-    text,
-  )?.[1];
+  const declaredBase =
+    /<(?:rss|feed|channel)\b[^>]*\bxml:base\s*=\s*["']([^"']+)["']/i.exec(
+      text,
+    )?.[1];
   const base = resolveHttpUrl(declaredBase, baseUrl) || baseUrl;
   const blocks = [
     ...text.matchAll(/<item(?:\s[^>]*)?>([\s\S]*?)<\/item\s*>/gi),

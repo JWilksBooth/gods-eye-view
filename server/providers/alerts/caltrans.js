@@ -58,7 +58,9 @@ const epochMs = (value) => {
 /** `Not Reported` and similar placeholders read as absent. */
 const reported = (value, max) => {
   const text = clampText(value, max);
-  return text && !/^(not reported|n\/a|none)$/i.test(text) ? text : null;
+  return text && !/^(not reported|n\/a|na|none|unknown)$/i.test(text)
+    ? text
+    : null;
 };
 
 /** Whether a closure record is in place now (10-97, not lifted or cancelled). */
@@ -106,10 +108,9 @@ export function normalizeCaltransClosure(
   const logNumber = clampText(record.logNumber, 20);
   const route = clampText(record.beginRoute, 40);
   const suffix = clampText(record.beginRouteSuffix, 8);
-  const direction = clampText(
-    record.travelFlowDirection || record.beginDirection,
-    40,
-  );
+  const direction =
+    reported(record.travelFlowDirection, 40) ||
+    reported(record.beginDirection, 40);
   const typeOfClosure = clampText(record.typeOfClosure, 40) || 'Lane';
   const lanesClosed = reported(record.lanesClosed, 40);
   const totalLanes = reported(record.totalExistingLanes, 10);

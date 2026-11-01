@@ -83,11 +83,15 @@ const iso = (ms) => (Number.isFinite(ms) ? new Date(ms).toISOString() : null);
 
 /** A failure code fit to publish: the short identifier form only. */
 const safeCode = (code) =>
-  /^[a-z][a-z0-9_]{0,40}$/.test(String(code ?? '')) ? String(code) : 'unavailable';
+  /^[a-z][a-z0-9_]{0,40}$/.test(String(code ?? ''))
+    ? String(code)
+    : 'unavailable';
 
 /** Whether a keyed source is waiting for its key. */
 export const sourceKeyMissing = (source) =>
-  typeof source?.keyMissing === 'function' ? source.keyMissing() === true : false;
+  typeof source?.keyMissing === 'function'
+    ? source.keyMissing() === true
+    : false;
 
 /** Ask one source through its governor; never throw. */
 export async function readSource(source) {
@@ -266,9 +270,7 @@ export function parseAlertsQuery(searchParams) {
   if (kinds.some((kind) => !ALERT_KIND_IDS.includes(kind)))
     return { error: 'unknown_kind', allowed: [...ALERT_KIND_IDS] };
   const severityParam = searchParams.get('severity');
-  const minSeverity = severityParam
-    ? severityParam.trim().toLowerCase()
-    : null;
+  const minSeverity = severityParam ? severityParam.trim().toLowerCase() : null;
   if (minSeverity && !ALERT_SEVERITY_IDS.includes(minSeverity))
     return { error: 'unknown_severity', allowed: [...ALERT_SEVERITY_IDS] };
   return { region: region?.id ?? null, kinds, minSeverity };
@@ -314,7 +316,11 @@ export function alertsProxy({
     const url = new URL(req.url || '/', 'http://localhost');
     const path = url.pathname.replace(/\/+$/, '') || '/';
     // AirNow spends the operator's key; the rest is keyless public data.
-    if (path === '/airnow' ? admitSameSite(req, res) : admitSameSiteKeyless(req, res))
+    if (
+      path === '/airnow'
+        ? admitSameSite(req, res)
+        : admitSameSiteKeyless(req, res)
+    )
       return undefined;
     if (!allow(clientKey(req)))
       return json(429, { error: 'rate_limited' }, { 'Retry-After': '30' });

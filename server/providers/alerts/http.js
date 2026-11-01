@@ -99,11 +99,7 @@ async function fetchUpstream(url, read, options = {}) {
         } catch {
           next = null;
         }
-        if (
-          !next ||
-          hop >= MAX_REDIRECTS ||
-          !hostAllowed(next, redirectHosts)
-        )
+        if (!next || hop >= MAX_REDIRECTS || !hostAllowed(next, redirectHosts))
           throw new UpstreamError('redirect_refused');
         target = next;
         continue;

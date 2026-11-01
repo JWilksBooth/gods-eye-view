@@ -16,7 +16,8 @@ export const ALERT_MAX_POLYGONS = 24;
 function perpendicularDistance(point, start, end) {
   const dx = end[0] - start[0];
   const dy = end[1] - start[1];
-  if (dx === 0 && dy === 0) return Math.hypot(point[0] - start[0], point[1] - start[1]);
+  if (dx === 0 && dy === 0)
+    return Math.hypot(point[0] - start[0], point[1] - start[1]);
   const t = Math.max(
     0,
     Math.min(
@@ -25,7 +26,10 @@ function perpendicularDistance(point, start, end) {
         (dx * dx + dy * dy),
     ),
   );
-  return Math.hypot(point[0] - (start[0] + t * dx), point[1] - (start[1] + t * dy));
+  return Math.hypot(
+    point[0] - (start[0] + t * dx),
+    point[1] - (start[1] + t * dy),
+  );
 }
 
 /** Douglas–Peucker over an open or closed ring; keeps the end points. */
@@ -100,7 +104,9 @@ export function simplifyAlertGeometry(
   const simplified = polygons
     .map((rings) =>
       rings
-        .map((ring) => capRing(simplifyRing(ring, tolerance), maxVertices).map(round))
+        .map((ring) =>
+          capRing(simplifyRing(ring, tolerance), maxVertices).map(round),
+        )
         .filter((ring) => ring.length >= 4),
     )
     .filter((rings) => rings.length > 0)

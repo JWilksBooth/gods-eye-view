@@ -43,7 +43,7 @@ const MAX_ZONES_PER_ALERT = 8;
 /** Zone shapes fetched at once. */
 const ZONE_CONCURRENCY = 4;
 /** SAME state FIPS codes of the states the regions lie in. */
-const STATE_BY_FIPS = Object.freeze({ '06': 'CA', '32': 'NV' });
+const STATE_BY_FIPS = Object.freeze({ '06': 'CA', 32: 'NV' });
 
 /** The kind of alert an NWS event name describes. */
 export function nwsAlertKind(event) {
@@ -290,9 +290,7 @@ export function createNwsFeedSource({
       for (const draft of drafts.values()) {
         let { area, areaSource } = draft.alert;
         if (!area && draft.zoneUrls.length) {
-          const merged = mergePolygons(
-            await zoneCache.resolve(draft.zoneUrls),
-          );
+          const merged = mergePolygons(await zoneCache.resolve(draft.zoneUrls));
           if (merged) {
             area = merged;
             areaSource = 'zones';

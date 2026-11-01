@@ -85,13 +85,16 @@ function readSelector(tag, out, pbf) {
 }
 function readAlert(tag, out, pbf) {
   if (tag === 1) out.active_period.push(pbf.readMessage(readTimeRange, {}));
-  else if (tag === 5) out.informed_entity.push(pbf.readMessage(readSelector, {}));
+  else if (tag === 5)
+    out.informed_entity.push(pbf.readMessage(readSelector, {}));
   else if (tag === 6) out.cause = GTFS_ALERT_CAUSES[pbf.readVarint()] || null;
   else if (tag === 7) out.effect = GTFS_ALERT_EFFECTS[pbf.readVarint()] || null;
   else if (tag === 8)
     out.url = pbf.readMessage(readTranslatedString, { translation: [] });
   else if (tag === 10)
-    out.header_text = pbf.readMessage(readTranslatedString, { translation: [] });
+    out.header_text = pbf.readMessage(readTranslatedString, {
+      translation: [],
+    });
   else if (tag === 11)
     out.description_text = pbf.readMessage(readTranslatedString, {
       translation: [],
@@ -138,7 +141,8 @@ export function decodeGtfsAlertFeed(bytes) {
 function pick(object, ...names) {
   if (!object || typeof object !== 'object') return undefined;
   for (const name of names) {
-    if (object[name] !== undefined && object[name] !== null) return object[name];
+    if (object[name] !== undefined && object[name] !== null)
+      return object[name];
   }
   return undefined;
 }
@@ -146,7 +150,13 @@ function pick(object, ...names) {
 /** The English (or first) text of a TranslatedString in any spelling. */
 export function translatedText(value) {
   if (typeof value === 'string') return value.trim();
-  const translations = pick(value, 'translation', 'translations', 'Translation', 'Translations');
+  const translations = pick(
+    value,
+    'translation',
+    'translations',
+    'Translation',
+    'Translations',
+  );
   if (!Array.isArray(translations)) return '';
   const english = translations.find((entry) =>
     /^en\b/i.test(String(pick(entry, 'language', 'Language') || '')),
@@ -215,9 +225,24 @@ export function normalizeGtfsAlertFeed(feed) {
       pick(alert, 'header_text', 'headerText', 'HeaderText'),
     ).slice(0, MAX_TEXT);
     if (!headline) continue;
-    const periods = pick(alert, 'active_period', 'activePeriod', 'ActivePeriods', 'ActivePeriod');
-    const informed = pick(alert, 'informed_entity', 'informedEntity', 'InformedEntities', 'InformedEntity');
-    const effect = enumName(pick(alert, 'effect', 'Effect'), GTFS_ALERT_EFFECTS);
+    const periods = pick(
+      alert,
+      'active_period',
+      'activePeriod',
+      'ActivePeriods',
+      'ActivePeriod',
+    );
+    const informed = pick(
+      alert,
+      'informed_entity',
+      'informedEntity',
+      'InformedEntities',
+      'InformedEntity',
+    );
+    const effect = enumName(
+      pick(alert, 'effect', 'Effect'),
+      GTFS_ALERT_EFFECTS,
+    );
     const level = enumName(
       pick(alert, 'severity_level', 'severityLevel', 'SeverityLevel'),
       GTFS_ALERT_SEVERITIES,
@@ -238,9 +263,17 @@ export function normalizeGtfsAlertFeed(feed) {
         end: toMs(pick(range, 'end', 'End')),
       })),
       informed: (Array.isArray(informed) ? informed : []).map((selector) => ({
-        agencyId: String(pick(selector, 'agency_id', 'agencyId', 'AgencyId') ?? '').trim() || null,
-        routeId: String(pick(selector, 'route_id', 'routeId', 'RouteId') ?? '').trim() || null,
-        stopId: String(pick(selector, 'stop_id', 'stopId', 'StopId') ?? '').trim() || null,
+        agencyId:
+          String(
+            pick(selector, 'agency_id', 'agencyId', 'AgencyId') ?? '',
+          ).trim() || null,
+        routeId:
+          String(
+            pick(selector, 'route_id', 'routeId', 'RouteId') ?? '',
+          ).trim() || null,
+        stopId:
+          String(pick(selector, 'stop_id', 'stopId', 'StopId') ?? '').trim() ||
+          null,
       })),
     });
   }
