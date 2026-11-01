@@ -138,7 +138,7 @@ test('reservation ledger is complete, pinned, and rejects duplicate or malformed
       'air-quality': '4',
       's2-ghostmaps': '5',
       incidents: '6',
-      events: '7',
+      events: '8',
     },
   );
   assert.throws(
@@ -164,9 +164,9 @@ test('reservation ledger is complete, pinned, and rejects duplicate or malformed
     /Duplicate layer-state token reservation/,
   );
   assert.equal(
-    parseLayerStateTokenReservations([...reservationRows, ['future', '8']])
+    parseLayerStateTokenReservations([...reservationRows, ['future', '7']])
       .future,
-    '8',
+    '7',
   );
   assert.throws(
     () =>
@@ -184,7 +184,7 @@ test('reservation ledger is complete, pinned, and rejects duplicate or malformed
 
 test('published retired digits and competing PRs advance the merge-time allocation', () => {
   withPublishedBase(
-    { rows: [...reservationRows, ['retired-layer', '8']] },
+    { rows: [...reservationRows, ['retired-layer', '7']] },
     (cwd) => {
       const published = readPublishedLayerStateReservations('HEAD', cwd);
       assert.equal(nextLayerStateToken(published), '9');
@@ -215,8 +215,8 @@ test('published retired digits and competing PRs advance the merge-time allocati
   );
 });
 
-test('PR B manually replaces provisional 8 with 9 after PR A publishes 7', () => {
-  withPublishedBase({ rows: [...reservationRows, ['pr-a', '8']] }, (cwd) => {
+test('PR B manually replaces provisional 7 with 9 after PR A publishes 7', () => {
+  withPublishedBase({ rows: [...reservationRows, ['pr-a', '7']] }, (cwd) => {
     mkdirSync(path.join(cwd, 'scripts'));
     const fixtureChecker = path.join(
       cwd,
@@ -237,8 +237,8 @@ test('PR B manually replaces provisional 8 with 9 after PR A publishes 7', () =>
 
     writeCodecFixture(
       cwd,
-      [...reservationRows, ['pr-b', '8']],
-      [{ id: 'pr-b', token: '8' }],
+      [...reservationRows, ['pr-b', '7']],
+      [{ id: 'pr-b', token: '7' }],
     );
     const beforeRebase = runCheck();
     assert.equal(beforeRebase.status, 1);
@@ -246,10 +246,10 @@ test('PR B manually replaces provisional 8 with 9 after PR A publishes 7', () =>
 
     writeCodecFixture(
       cwd,
-      [...reservationRows, ['pr-a', '8'], ['pr-b', '8']],
+      [...reservationRows, ['pr-a', '7'], ['pr-b', '7']],
       [
-        { id: 'pr-a', token: '8' },
-        { id: 'pr-b', token: '8' },
+        { id: 'pr-a', token: '7' },
+        { id: 'pr-b', token: '7' },
       ],
     );
     const staleRebase = runCheck();
@@ -258,8 +258,8 @@ test('PR B manually replaces provisional 8 with 9 after PR A publishes 7', () =>
 
     const published = readPublishedLayerStateReservations('HEAD', cwd);
     assert.equal(nextLayerStateToken(published), '9');
-    const validBaselineRows = [...reservationRows, ['pr-a', '8']];
-    writeCodecFixture(cwd, validBaselineRows, [{ id: 'pr-a', token: '8' }]);
+    const validBaselineRows = [...reservationRows, ['pr-a', '7']];
+    writeCodecFixture(cwd, validBaselineRows, [{ id: 'pr-a', token: '7' }]);
     const helper = spawnSync(
       process.execPath,
       [realpathSync(fixtureNext), 'pr-b'],
@@ -274,9 +274,9 @@ test('PR B manually replaces provisional 8 with 9 after PR A publishes 7', () =>
     );
     writeCodecFixture(
       cwd,
-      [...reservationRows, ['pr-a', '8'], ['pr-b', '9']],
+      [...reservationRows, ['pr-a', '7'], ['pr-b', '9']],
       [
-        { id: 'pr-a', token: '8' },
+        { id: 'pr-a', token: '7' },
         { id: 'pr-b', token: '9' },
       ],
     );
@@ -287,7 +287,7 @@ test('PR B manually replaces provisional 8 with 9 after PR A publishes 7', () =>
 });
 
 test('allocation batches cross the last digit and base-36 pair boundaries in order', () => {
-  const digitRows = [...'89'].map((digit) => [`retired-${digit}`, digit]);
+  const digitRows = [...'79'].map((digit) => [`retired-${digit}`, digit]);
   const allDigits = parseLayerStateTokenReservations([
     ...reservationRows,
     ...digitRows,
@@ -339,7 +339,7 @@ test('allocation batches cross the last digit and base-36 pair boundaries in ord
 test('an isolated valid two-character fixture round-trips an l field beyond the old 64-character cap', async () => {
   const cwd = mkdtempSync(path.join(tmpdir(), 'gev-layer-token-width-'));
   try {
-    const priorDigits = [...'89'].map((digit) => [
+    const priorDigits = [...'79'].map((digit) => [
       `qa-prior-digit-${digit}`,
       digit,
     ]);

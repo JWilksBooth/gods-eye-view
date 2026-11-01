@@ -41,7 +41,7 @@ update/destroy/getStats`, `attachDataManager`, `findByQuery`, `openEvent`,
 
 ### Registration
 
-`events` holds layer-state token `7` (`src/data/layerState.js`,
+`events` holds layer-state token `8` (`src/data/layerState.js`,
 `src/data/layerStateTokenReservations.json`); it is named in
 `src/ui/layerNames.js`, placed first in the Events group of
 `src/ui/layerPanel.js`, has pick kind `event` in `src/data/pickedContext.js`,
@@ -107,7 +107,7 @@ turns the view off again. Screenshots land in `docs/media/event-map/`:
 
 - Streams (built in parallel on the same base): `server/providers/streams/`
   (curated registry, YouTube discovery, Windy, scanners),
-  `src/layers/streams/{source,index}.js` with token `8`, keys in
+  `src/layers/streams/{source,index}.js` with token `9`, keys in
   `src/keySetupCore.mjs` and `.env.example`, `find_live_streams` tool,
   `DATA_SOURCES.md`, `src/data/dataCredits.js`, `docs/TOOLS.md`, and a
   `streams` adapter registered like the built-in ones.
