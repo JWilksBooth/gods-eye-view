@@ -3233,5 +3233,22 @@
   "{width} × {height} px · MSAA {samples}×": "{width} × {height} пікс. · MSAA {samples}×",
   "{width} × {height} px · FXAA": "{width} × {height} пікс. · FXAA",
   "{width} × {height} px": "{width} × {height} пікс.",
-  "Severity": "Серйозність"
+  "Severity": "Серйозність",
+  "Live Streams": "Прямі трансляції",
+  "YouTube live": "YouTube наживо",
+  "Live video (HLS)": "Живе відео (HLS)",
+  "Motion JPEG": "Motion JPEG",
+  "Link out": "Зовнішнє посилання",
+  "Position is approximate": "Положення приблизне",
+  "Placed at the region centre": "Розміщено в центрі регіону",
+  "Published by {owner}": "Опубліковано: {owner}",
+  "Checked on {date}": "Перевірено {date}",
+  "Click card to open the stream": "Натисніть на картку, щоб відкрити трансляцію",
+  "Open {title}": "Відкрити {title}",
+  "Live stream source unavailable": "Джерело прямих трансляцій недоступне",
+  "Colour shows how a stream plays. Nothing loads until you open one.": "Колір показує, як відтворюється трансляція. Нічого не завантажується, доки ви її не відкриєте.",
+  "Live stream feed rate limited (HTTP 429)": "Стрічка прямих трансляцій обмежена за частотою (HTTP 429)",
+  "Malformed live stream snapshot": "Пошкоджений знімок прямих трансляцій",
+  "Discovers geotagged YouTube live streams for the Live Streams layer; keyless, the layer shows its curated cameras": "Знаходить геоприв’язані прямі трансляції YouTube для шару «Прямі трансляції»; без ключа шар показує відібрані камери",
+  "Adds Windy.com webcams to the Live Streams layer, credited \"Webcams provided by windy.com\"": "Додає вебкамери Windy.com до шару «Прямі трансляції» із зазначенням «Webcams provided by windy.com»"
 }

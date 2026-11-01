@@ -351,7 +351,9 @@ test('deixis prompt lint: one short rule, and every sentinel it names exists in 
   // field hints (52,084), so the ceiling moved to 52,200. Alerts and the Event
   // Map (toggle only) added two more enum values (52,231), so it is 52,300.
   const size = instructions.length + JSON.stringify(GEV_REALTIME_TOOLS).length;
-  assert.ok(size <= 52300, `prompt size ${size}`);
+  // Live Streams adds one layer enum value, its aliases and field hints
+  // (52,341), so the ceiling moved to 52,400.
+  assert.ok(size <= 52400, `prompt size ${size}`);
 });
 
 

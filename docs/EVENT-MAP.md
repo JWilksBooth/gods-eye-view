@@ -39,7 +39,7 @@ update/destroy/getStats`, `attachDataManager`, `findByQuery`, `openEvent`,
   are created on open and destroyed on close).
 - `src/layers/streams/{embed,playback}.js`: pure embed descriptors (YouTube
   privacy-enhanced iframe, HLS, MJPEG, link-out) and bounded hls.js playback.
-  The `streams` layer that feeds them is built separately (see Remaining).
+  The `streams` layer that feeds them is described under **Streams** below.
 
 ### Registration
 
@@ -107,17 +107,48 @@ turns the view off again. Screenshots land in `docs/media/event-map/`:
 
 ## Remaining
 
-- Streams (built in parallel on the same base): `server/providers/streams/`
-  (curated registry, YouTube discovery, Windy, scanners),
-  `src/layers/streams/{source,index}.js` with token `9`, keys in
-  `src/keySetupCore.mjs` and `.env.example`, `find_live_streams` tool,
-  `DATA_SOURCES.md`, `src/data/dataCredits.js`, `docs/TOOLS.md`, and a
-  `streams` adapter registered like the built-in ones.
+- Streams: done on `wip/streams` (see **Streams** below).
 - At merge, reconcile the three branches' layer-state tokens and the pinned
   counts in `src/data/layerState.test.mjs` and
   `src/data/layerStateTokenLedger.test.mjs`, the voice tool-schema pins in
   `src/firstRunExperience.test.mjs` and `src/voice/actionSchemas.test.mjs`,
   and the catalog counts in `src/app/constructCatalog.test.mjs`.
+
+## Streams
+
+The `streams` layer (`src/layers/streams/`, token `9`, enabled-only, Cameras
+group) and the `/api/streams` provider (`server/providers/streams.js`) put
+geotagged live streams on the map for the four LIVE OPS regions. Everything
+that crosses the wire is metadata (`src/layers/streams/records.js`: where, who,
+and how it plays); the source never requests media and never creates a player.
+A player exists only inside the feed drawer, created when an icon is clicked
+and destroyed when the drawer closes.
+
+- **Sources** (`server/providers/streams/`): the curated registry (one JSON
+  file per region under `registry/`; every YouTube entry answered oEmbed, so it
+  is public and embeddable, and every Caltrans HLS playlist answered `#EXTM3U`
+  on its `verified_at`), YouTube Data API discovery behind `YOUTUBE_API_KEY`
+  (hourly per region, a daily budget below the 100-call `search.list` bucket,
+  cached result served when spent, disk copy pruned after 30 days, discovered
+  streams placed at the region centre and saying so), Windy webcams behind
+  `WINDY_WEBCAMS_API_KEY` (hourly per region, preview URLs served only within
+  nine minutes of their fetch, rows link to Windy's player, credited "Webcams
+  provided by windy.com") and Broadcastify scanner directories as link-outs.
+  Keyless, the layer serves the registry and the link-outs.
+- **Registry counts on 2026-10-31**: Los Angeles 16, San Francisco Bay Area
+  15, Las Vegas 8, Sonoma County 8 (2 civic YouTube cameras plus 6 Caltrans
+  District 4 HLS feeds; the county has few public YouTube cameras), plus one
+  or more scanner link-outs per region.
+- **Layer**: points coloured by kind (`--event-stream` for anything that plays
+  in place, `--text-dim` for link-outs), ambient labels, a card on click that
+  opens the stream through the event map's drawer when the Event Map layer is
+  on and on the provider's page otherwise. While the Event Map layer is on, its
+  icons carry the streams and the layer's own points hide, so nothing is drawn
+  twice. `src/app/layers/streams.js` registers the adapter
+  (`src/layers/streams/eventAdapter.js`, kind `stream`, `layerId: 'streams'`)
+  whose `feed()` is `{ type: 'stream', stream, owner, terms }`.
+- **Tool**: `find_live_streams` (region, area, kind, source, limit) on MCP and
+  voice; `docs/TOOLS.md`.
 
 ## Provider terms (researched 2026-11-01)
 

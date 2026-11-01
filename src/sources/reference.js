@@ -5,6 +5,7 @@ import { createBundledCableSource } from '../layers/submarineCables/bundledSourc
 import { createAdsbGnssSource } from '../layers/gnss/source.js';
 import { createIncidentSource } from '../layers/incidents/source.js';
 import { createAlertsSource } from '../layers/alerts/source.js';
+import { createStreamSource } from '../layers/streams/source.js';
 
 /** Construct the existing reference feeds independently of application setup. */
 export function createReferenceSources() {
@@ -16,5 +17,6 @@ export function createReferenceSources() {
     'gnss-integrity': createAdsbGnssSource(),
     incidents: createIncidentSource(),
     alerts: createAlertsSource(),
+    streams: createStreamSource(),
   };
 }

@@ -29,6 +29,7 @@ import { createApplicationFirePerimeters } from './layers/perimeters.js';
 import { createApplicationIncidents } from './layers/incidents.js';
 import { createApplicationAlerts } from './layers/alerts.js';
 import { createApplicationEvents } from './layers/events.js';
+import { createApplicationStreams } from './layers/streams.js';
 import { createApplicationGnssIntegrity } from './layers/gnss.js';
 import { createApplicationGhostMaps } from './layers/ghostMaps.js';
 import { createApplicationCables } from './layers/submarineCables.js';
@@ -143,6 +144,7 @@ export function createApplicationCatalog({
         }),
         incidents,
         alerts,
+        createApplicationStreams({ source: sources.streams }),
         createApplicationGnssIntegrity({
           source: sources['gnss-integrity'],
           windowMs: sources['gnss-integrity'].windowMs,

@@ -3161,5 +3161,22 @@
   "{width} × {height} px · MSAA {samples}×": "{width} × {height} px · MSAA {samples}×",
   "{width} × {height} px · FXAA": "{width} × {height} px · FXAA",
   "{width} × {height} px": "{width} × {height} px",
-  "Severity": "Gravedad"
+  "Severity": "Gravedad",
+  "Live Streams": "Transmisiones en vivo",
+  "YouTube live": "YouTube en vivo",
+  "Live video (HLS)": "Vídeo en vivo (HLS)",
+  "Motion JPEG": "Motion JPEG",
+  "Link out": "Enlace externo",
+  "Position is approximate": "La posición es aproximada",
+  "Placed at the region centre": "Situado en el centro de la región",
+  "Published by {owner}": "Publicado por {owner}",
+  "Checked on {date}": "Comprobado el {date}",
+  "Click card to open the stream": "Haz clic en la tarjeta para abrir la transmisión",
+  "Open {title}": "Abrir {title}",
+  "Live stream source unavailable": "Fuente de transmisiones en vivo no disponible",
+  "Colour shows how a stream plays. Nothing loads until you open one.": "El color indica cómo se reproduce una transmisión. No se carga nada hasta que abres una.",
+  "Live stream feed rate limited (HTTP 429)": "Fuente de transmisiones en vivo limitada (HTTP 429)",
+  "Malformed live stream snapshot": "Instantánea de transmisiones en vivo mal formada",
+  "Discovers geotagged YouTube live streams for the Live Streams layer; keyless, the layer shows its curated cameras": "Descubre transmisiones en vivo de YouTube geolocalizadas para la capa Transmisiones en vivo; sin clave, la capa muestra sus cámaras seleccionadas",
+  "Adds Windy.com webcams to the Live Streams layer, credited \"Webcams provided by windy.com\"": "Añade webcams de Windy.com a la capa Transmisiones en vivo, con el crédito \"Webcams provided by windy.com\""
 }

@@ -898,7 +898,17 @@
       "src/layers/alerts/model.js",
       "src/layers/alerts/regions.js",
       "src/layers/alerts/cards.js",
-      "src/layers/alerts/source.js"
+      "src/layers/alerts/source.js",
+      "src/app/layers/streams.js",
+      "src/layers/streams/index.js",
+      "src/layers/streams/model.js",
+      "src/layers/streams/records.js",
+      "src/layers/streams/source.js",
+      "src/layers/streams/embed.js",
+      "src/layers/streams/eventAdapter.js",
+      "src/layers/events/adapters.js",
+      "src/layers/events/model.js",
+      "src/layers/events/policy.js"
     ],
     "external": ["cesium", "mgrs"]
   },
@@ -2881,7 +2891,17 @@
       "src/layers/alerts/model.js",
       "src/layers/alerts/regions.js",
       "src/layers/alerts/cards.js",
-      "src/layers/alerts/source.js"
+      "src/layers/alerts/source.js",
+      "src/app/layers/streams.js",
+      "src/layers/streams/index.js",
+      "src/layers/streams/model.js",
+      "src/layers/streams/records.js",
+      "src/layers/streams/source.js",
+      "src/layers/streams/embed.js",
+      "src/layers/streams/eventAdapter.js",
+      "src/layers/events/adapters.js",
+      "src/layers/events/model.js",
+      "src/layers/events/policy.js"
     ],
     "external": [
       "hls.js",
@@ -3502,7 +3522,17 @@
       "src/layers/alerts/regions.js",
       "src/layers/alerts/cards.js",
       "src/layers/alerts/source.js",
-      "src/data/liveOpsRegions.js"
+      "src/data/liveOpsRegions.js",
+      "src/app/layers/streams.js",
+      "src/layers/streams/index.js",
+      "src/layers/streams/model.js",
+      "src/layers/streams/records.js",
+      "src/layers/streams/source.js",
+      "src/layers/streams/embed.js",
+      "src/layers/streams/eventAdapter.js",
+      "src/layers/events/adapters.js",
+      "src/layers/events/model.js",
+      "src/layers/events/policy.js"
     ],
     "external": [
       "hls.js",
@@ -3996,7 +4026,10 @@
       "src/layers/airQuality/source.js",
       "src/layers/incidents/source.js",
       "src/layers/incidents/records.js",
-      "src/layers/alerts/source.js"
+      "src/layers/alerts/source.js",
+      "src/layers/streams/source.js",
+      "src/layers/streams/records.js",
+      "src/layers/streams/embed.js"
     ],
     "external": []
   },
@@ -4069,6 +4102,68 @@
     "modules": [
       "src/layers/incidents/source.js",
       "src/layers/incidents/records.js",
+      "src/sources/httpBody.js",
+      "src/i18n/marker.js"
+    ],
+    "external": []
+  },
+  "streams-provider": {
+    "runtime": "node",
+    "exports": ["./server/providers/streams"],
+    "modules": [
+      "server/providers/streams.js",
+      "server/providers/streams/common.js",
+      "server/providers/streams/registry.js",
+      "server/providers/streams/scanners.js",
+      "server/providers/streams/youtube.js",
+      "server/providers/streams/windy.js",
+      "server/providers/common/http.js",
+      "server/providers/common/rate-limit.js",
+      "server/providers/common/same-site.js",
+      "server/providers/common/source-root.js",
+      "src/localRequestGate.mjs",
+      "src/data/liveOpsRegions.js",
+      "src/layers/streams/records.js",
+      "src/layers/streams/embed.js",
+      "src/geoDistance.js",
+      "src/sources/httpBody.js",
+      "src/sources/rateLimit.js",
+      "src/i18n/marker.js"
+    ],
+    "external": []
+  },
+  "streams-layer": {
+    "exports": ["./layers/streams"],
+    "modules": [
+      "src/layers/streams/index.js",
+      "src/layers/streams/model.js",
+      "src/layers/streams/records.js",
+      "src/layers/streams/source.js",
+      "src/layers/streams/embed.js",
+      "src/data/liveOpsRegions.js",
+      "src/sources/httpBody.js",
+      "src/i18n/marker.js",
+      "src/i18n/index.js",
+      "src/i18n/locale.js",
+      "src/i18n/locales/de.json",
+      "src/i18n/locales/es.json",
+      "src/i18n/locales/fr.json",
+      "src/i18n/locales/it.json",
+      "src/i18n/locales/ja.json",
+      "src/i18n/locales/pt.json",
+      "src/i18n/locales/ru.json",
+      "src/i18n/locales/uk.json",
+      "src/i18n/locales/zh-CN.json",
+      "src/i18n/locales/zh-Hant.json"
+    ],
+    "external": ["cesium"]
+  },
+  "streams-source": {
+    "exports": ["./layers/streams/source"],
+    "modules": [
+      "src/layers/streams/source.js",
+      "src/layers/streams/records.js",
+      "src/layers/streams/embed.js",
       "src/sources/httpBody.js",
       "src/i18n/marker.js"
     ],
@@ -4576,7 +4671,10 @@
       "src/layers/incidents/records.js",
       "src/tools/queries/alerts.js",
       "src/layers/alerts/model.js",
-      "src/layers/alerts/regions.js"
+      "src/layers/alerts/regions.js",
+      "src/tools/queries/streams.js",
+      "src/layers/streams/records.js",
+      "src/layers/streams/embed.js"
     ],
     "external": ["satellite.js"]
   },
@@ -4673,7 +4771,10 @@
       "src/sources/liveOpsHeadlines.js",
       "src/data/regionalModel.js",
       "src/geoDistance.js",
-      "src/layers/alerts/source.js"
+      "src/layers/alerts/source.js",
+      "src/layers/streams/source.js",
+      "src/layers/streams/records.js",
+      "src/layers/streams/embed.js"
     ],
     "external": ["@mapbox/vector-tile", "pbf"]
   },

@@ -3233,5 +3233,22 @@
   "{width} × {height} px · MSAA {samples}×": "{width} × {height} пикс. · MSAA {samples}×",
   "{width} × {height} px · FXAA": "{width} × {height} пикс. · FXAA",
   "{width} × {height} px": "{width} × {height} пикс.",
-  "Severity": "Серьёзность"
+  "Severity": "Серьёзность",
+  "Live Streams": "Прямые трансляции",
+  "YouTube live": "YouTube в прямом эфире",
+  "Live video (HLS)": "Живое видео (HLS)",
+  "Motion JPEG": "Motion JPEG",
+  "Link out": "Внешняя ссылка",
+  "Position is approximate": "Положение приблизительное",
+  "Placed at the region centre": "Размещено в центре региона",
+  "Published by {owner}": "Опубликовано: {owner}",
+  "Checked on {date}": "Проверено {date}",
+  "Click card to open the stream": "Нажмите на карточку, чтобы открыть трансляцию",
+  "Open {title}": "Открыть {title}",
+  "Live stream source unavailable": "Источник прямых трансляций недоступен",
+  "Colour shows how a stream plays. Nothing loads until you open one.": "Цвет показывает, как воспроизводится трансляция. Ничего не загружается, пока вы её не откроете.",
+  "Live stream feed rate limited (HTTP 429)": "Лента прямых трансляций ограничена по частоте (HTTP 429)",
+  "Malformed live stream snapshot": "Повреждённый снимок прямых трансляций",
+  "Discovers geotagged YouTube live streams for the Live Streams layer; keyless, the layer shows its curated cameras": "Находит геопривязанные прямые трансляции YouTube для слоя «Прямые трансляции»; без ключа слой показывает отобранные камеры",
+  "Adds Windy.com webcams to the Live Streams layer, credited \"Webcams provided by windy.com\"": "Добавляет веб-камеры Windy.com в слой «Прямые трансляции» с указанием «Webcams provided by windy.com»"
 }

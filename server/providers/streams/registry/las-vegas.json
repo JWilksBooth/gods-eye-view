@@ -1,0 +1,110 @@
+{
+  "region": "las-vegas",
+  "notes": "Public 24/7 YouTube live cameras around the Strip, Fremont Street and the airport. Every entry answered the YouTube oEmbed endpoint (public and embeddable) on verified_at; a position marked approximate is the view's vantage, not a surveyed camera position.",
+  "entries": [
+    {
+      "id": "lv-bellagio-conservatory",
+      "title": "Bellagio Conservatory & Botanical Gardens",
+      "lat": 36.1129,
+      "lon": -115.1765,
+      "kind": "youtube",
+      "videoId": "KJuGU7v5oYw",
+      "owner": "EarthCam",
+      "terms": "Public YouTube live stream embedded with the standard player; EarthCam's terms apply",
+      "placement": "exact",
+      "verified_at": "2026-10-31",
+      "tags": ["strip"]
+    },
+    {
+      "id": "lv-strip-realtime",
+      "title": "Las Vegas Strip, real-time view",
+      "lat": 36.1147,
+      "lon": -115.1728,
+      "kind": "youtube",
+      "videoId": "n37j-Zl1Lc4",
+      "owner": "LV Strip Cam (YouTube channel)",
+      "terms": "Public YouTube live stream embedded with the standard player; the channel's terms apply",
+      "placement": "approximate",
+      "verified_at": "2026-10-31",
+      "tags": ["strip"]
+    },
+    {
+      "id": "lv-fremont-street-walkthru",
+      "title": "Fremont Street Experience, 24/7 cam",
+      "lat": 36.17,
+      "lon": -115.144,
+      "kind": "youtube",
+      "videoId": "ZBVbqtk05d4",
+      "owner": "Justin Clouse (YouTube channel)",
+      "terms": "Public YouTube live stream embedded with the standard player; the channel's terms apply",
+      "placement": "approximate",
+      "verified_at": "2026-10-31",
+      "tags": ["downtown", "fremont-street"]
+    },
+    {
+      "id": "lv-fremont-street-camera-2",
+      "title": "Fremont Street, camera 2",
+      "lat": 36.1703,
+      "lon": -115.142,
+      "kind": "youtube",
+      "videoId": "uaIhqF1hz0I",
+      "owner": "Justin Clouse (YouTube channel)",
+      "terms": "Public YouTube live stream embedded with the standard player; the channel's terms apply",
+      "placement": "approximate",
+      "verified_at": "2026-10-31",
+      "tags": ["downtown", "fremont-street"]
+    },
+    {
+      "id": "lv-fremont-street-music",
+      "title": "Fremont Street, music stage cam",
+      "lat": 36.1698,
+      "lon": -115.1455,
+      "kind": "youtube",
+      "videoId": "ZvYvZLfPatQ",
+      "owner": "Justin Clouse (YouTube channel)",
+      "terms": "Public YouTube live stream embedded with the standard player; the channel's terms apply",
+      "placement": "approximate",
+      "verified_at": "2026-10-31",
+      "tags": ["downtown", "fremont-street"]
+    },
+    {
+      "id": "lv-city-hall-roof",
+      "title": "Las Vegas City Hall roof cam",
+      "lat": 36.1676,
+      "lon": -115.1485,
+      "kind": "youtube",
+      "videoId": "T9me0N2i2M4",
+      "owner": "City of Las Vegas TV",
+      "terms": "Public YouTube live stream from the City of Las Vegas, embedded with the standard player",
+      "placement": "exact",
+      "verified_at": "2026-10-31",
+      "tags": ["downtown"]
+    },
+    {
+      "id": "lv-las-airport-flightradar24",
+      "title": "LAS airport, runways 26R and 26L",
+      "lat": 36.084,
+      "lon": -115.1537,
+      "kind": "youtube",
+      "videoId": "V7_orOtu-oo",
+      "owner": "Flightradar24",
+      "terms": "Public YouTube live stream embedded with the standard player; Flightradar24's terms apply",
+      "placement": "approximate",
+      "verified_at": "2026-10-31",
+      "tags": ["airport"]
+    },
+    {
+      "id": "lv-las-airport-strip-view",
+      "title": "LAS airport, departures, arrivals and the Strip",
+      "lat": 36.08,
+      "lon": -115.14,
+      "kind": "youtube",
+      "videoId": "iIUCaiiMmNs",
+      "owner": "LAS Vegas Airport LIVE (YouTube channel)",
+      "terms": "Public YouTube live stream embedded with the standard player; the channel's terms apply",
+      "placement": "approximate",
+      "verified_at": "2026-10-31",
+      "tags": ["airport", "strip"]
+    }
+  ]
+}

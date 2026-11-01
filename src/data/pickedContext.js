@@ -28,6 +28,7 @@ const KIND_BY_LAYER = Object.freeze({
   'local-firms': 'fire',
   events: 'event',
   alerts: 'alert',
+  streams: 'stream',
 });
 
 const IGNORED_OWNERS = new Set(['trails']);

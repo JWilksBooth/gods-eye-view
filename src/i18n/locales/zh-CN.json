@@ -3017,5 +3017,22 @@
   "{width} × {height} px · MSAA {samples}×": "{width} × {height} 像素 · MSAA {samples}×",
   "{width} × {height} px · FXAA": "{width} × {height} 像素 · FXAA",
   "{width} × {height} px": "{width} × {height} 像素",
-  "Severity": "严重程度"
+  "Severity": "严重程度",
+  "Live Streams": "直播流",
+  "YouTube live": "YouTube 直播",
+  "Live video (HLS)": "实时视频 (HLS)",
+  "Motion JPEG": "Motion JPEG",
+  "Link out": "外部链接",
+  "Position is approximate": "位置为近似值",
+  "Placed at the region centre": "放置在区域中心",
+  "Published by {owner}": "发布者：{owner}",
+  "Checked on {date}": "检查日期：{date}",
+  "Click card to open the stream": "点击卡片打开直播",
+  "Open {title}": "打开 {title}",
+  "Live stream source unavailable": "直播流来源不可用",
+  "Colour shows how a stream plays. Nothing loads until you open one.": "颜色表示直播的播放方式。在打开之前不会加载任何内容。",
+  "Live stream feed rate limited (HTTP 429)": "直播流数据源已限速 (HTTP 429)",
+  "Malformed live stream snapshot": "直播流快照格式错误",
+  "Discovers geotagged YouTube live streams for the Live Streams layer; keyless, the layer shows its curated cameras": "为直播流图层发现带地理标记的 YouTube 直播；无密钥时，图层显示精选摄像头",
+  "Adds Windy.com webcams to the Live Streams layer, credited \"Webcams provided by windy.com\"": "将 Windy.com 网络摄像头添加到直播流图层，并注明 \"Webcams provided by windy.com\""
 }

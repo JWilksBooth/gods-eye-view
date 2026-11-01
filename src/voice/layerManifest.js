@@ -264,6 +264,21 @@ const layers = [
     },
   },
   {
+    id: 'streams',
+    aliases: ['streams', 'live streams', 'stream cams', 'live video feeds'],
+    context: false,
+    query: {
+      fields: {
+        title: ['t'],
+        kind: ['t'],
+        source: ['t'],
+        owner: ['t'],
+        region: ['t'],
+        placement: ['t'],
+      },
+    },
+  },
+  {
     id: 'weather-cyclones',
     aliases: ['cyclones', 'hurricanes', 'typhoons', 'tropical storms'],
     context: false,

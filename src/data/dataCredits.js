@@ -308,6 +308,13 @@ export const DATA_CREDITS = [
       '<a href="https://511.org/open-data" target="_blank" rel="noopener">511 SF Bay</a>; ' +
       '<a href="https://www.goswift.ly/" target="_blank" rel="noopener">Swiftly</a> (LA Metro, RTC Southern Nevada); ' +
       'Cal OES, County of Sonoma and LAFD bulletins (courtesy)',
+    key: 'live-streams',
+    html:
+      'Live streams: public YouTube live cameras embedded with the standard ' +
+      '<a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener">YouTube</a> player, each credited to its channel; ' +
+      'live stream discovery through the YouTube Data API; traffic video: Caltrans District 4 (courtesy); ' +
+      'Webcams provided by <a href="https://www.windy.com/webcams" target="_blank" rel="noopener">windy.com</a>; ' +
+      'scanner directories: <a href="https://www.broadcastify.com/" target="_blank" rel="noopener">Broadcastify</a> (link only)',
   },
   {
     key: 'catalonia-cctv',

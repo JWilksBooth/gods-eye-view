@@ -49,7 +49,8 @@ test('the complete Realtime tool payload pins the manifest-generated layer relea
     // The Operator HUD layout leaves set_hud's layout enum.
     // Live Incidents (LIVE OPS) extends the generated layer enums.
     // Alerts and the Event Map layer (toggle only) extend them the same way.
-    '9e139b095732fe2d246d6106048982d2852ef28800582c7df65d08e33d0fbed6',
+    // Live Streams extends the generated layer enums.
+    '30547292f6737739d1a69bf0dd9b9c1ee8e54eb2cc57858fb6ca455d8ef35c1a',
   );
 });
 

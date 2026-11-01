@@ -3161,5 +3161,22 @@
   "{width} × {height} px · MSAA {samples}×": "{width} × {height} px · MSAA {samples}×",
   "{width} × {height} px · FXAA": "{width} × {height} px · FXAA",
   "{width} × {height} px": "{width} × {height} px",
-  "Severity": "Gravité"
+  "Severity": "Gravité",
+  "Live Streams": "Flux en direct",
+  "YouTube live": "YouTube en direct",
+  "Live video (HLS)": "Vidéo en direct (HLS)",
+  "Motion JPEG": "Motion JPEG",
+  "Link out": "Lien externe",
+  "Position is approximate": "Position approximative",
+  "Placed at the region centre": "Placé au centre de la région",
+  "Published by {owner}": "Publié par {owner}",
+  "Checked on {date}": "Vérifié le {date}",
+  "Click card to open the stream": "Cliquez sur la carte pour ouvrir le flux",
+  "Open {title}": "Ouvrir {title}",
+  "Live stream source unavailable": "Source des flux en direct indisponible",
+  "Colour shows how a stream plays. Nothing loads until you open one.": "La couleur indique comment un flux se lit. Rien ne se charge tant que vous n'en ouvrez pas un.",
+  "Live stream feed rate limited (HTTP 429)": "Flux en direct limité en débit (HTTP 429)",
+  "Malformed live stream snapshot": "Instantané des flux en direct mal formé",
+  "Discovers geotagged YouTube live streams for the Live Streams layer; keyless, the layer shows its curated cameras": "Découvre des flux YouTube en direct géolocalisés pour la couche Flux en direct ; sans clé, la couche affiche ses caméras sélectionnées",
+  "Adds Windy.com webcams to the Live Streams layer, credited \"Webcams provided by windy.com\"": "Ajoute les webcams Windy.com à la couche Flux en direct, créditées « Webcams provided by windy.com »"
 }

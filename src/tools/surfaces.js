@@ -53,6 +53,8 @@ export const TOOL_SURFACES = Object.freeze({
   // Official alerts and FAA airport status for the LIVE OPS regions.
   get_alerts: Object.freeze({ mcp: true, voice: true }),
   get_airport_status: Object.freeze({ mcp: true, voice: true }),
+  // Live streams are metadata until opened, so both surfaces may list them.
+  find_live_streams: Object.freeze({ mcp: true, voice: true }),
 });
 
 /**
