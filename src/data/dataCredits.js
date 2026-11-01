@@ -281,6 +281,22 @@ export const DATA_CREDITS = [
       "any other use needs FDOT's express written consent",
   },
   {
+    key: 'nvroads-cctv',
+    html:
+      'Traffic cameras (Las Vegas, Nevada): Nevada DOT — ' +
+      '<a href="https://www.nvroads.com/" target="_blank" rel="noopener">Nevada 511 (nvroads.com)</a> (courtesy)',
+  },
+  {
+    key: 'incidents',
+    html:
+      'Live incidents: California Highway Patrol ' +
+      '<a href="https://cad.chp.ca.gov/" target="_blank" rel="noopener">CAD incident log</a>; ' +
+      '<a href="https://data.sfgov.org/" target="_blank" rel="noopener">DataSF</a> dispatched calls (PDDL); ' +
+      '<a href="https://www.lafd.org/alerts" target="_blank" rel="noopener">LAFD alerts</a>; ' +
+      '<a href="https://www.fire.ca.gov/incidents" target="_blank" rel="noopener">CAL FIRE incidents</a>; ' +
+      '<a href="https://www.nvroads.com/" target="_blank" rel="noopener">Nevada 511</a> events (courtesy)',
+  },
+  {
     key: 'catalonia-cctv',
     html:
       'CCTV cameras &amp; frames (Catalonia): ' +
