@@ -9,6 +9,7 @@
   ["cctv", "c"],
   ["directions", "n"],
   ["earthquakes", "e"],
+  ["events", "8"],
   ["fire-perimeters", "2"],
   ["flights", "f"],
   ["gnss-integrity", "3"],

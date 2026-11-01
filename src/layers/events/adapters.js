@@ -118,7 +118,10 @@ export const EVENT_ADAPTER_KINDS = Object.freeze([...KINDS]);
 export function assertEventAdapter(adapter) {
   if (!adapter || typeof adapter !== 'object')
     throw new TypeError('An event adapter must be an object');
-  if (typeof adapter.id !== 'string' || !/^[a-z0-9][a-z0-9-]{0,39}$/.test(adapter.id))
+  if (
+    typeof adapter.id !== 'string' ||
+    !/^[a-z0-9][a-z0-9-]{0,39}$/.test(adapter.id)
+  )
     throw new TypeError('An event adapter needs a short lowercase id');
   if (!KINDS.has(adapter.kind))
     throw new TypeError(
@@ -130,7 +133,10 @@ export function assertEventAdapter(adapter) {
     throw new TypeError(`Event adapter ${adapter.id} layerId must be a string`);
   if (adapter.feed !== undefined && typeof adapter.feed !== 'function')
     throw new TypeError(`Event adapter ${adapter.id} feed must be a function`);
-  if (adapter.subscribe !== undefined && typeof adapter.subscribe !== 'function')
+  if (
+    adapter.subscribe !== undefined &&
+    typeof adapter.subscribe !== 'function'
+  )
     throw new TypeError(
       `Event adapter ${adapter.id} subscribe must be a function`,
     );
@@ -202,56 +208,13 @@ export function _resetEventAdaptersForTest() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Stubs for layers built alongside this framework. Each is a complete */
-/* registration; uncomment it in the layer's application wiring once   */
-/* the layer exposes the accessor it names.                            */
+/* Built-in adapters live in ./adapters/<layer>.js and are registered  */
+/* by src/app/layers/events.js from the catalog's layer instances:     */
+/* cctv, fires, earthquakes, aircraft (flights and military), vessels, */
+/* incidents (LIVE OPS regions, src/layers/incidents) and alerts       */
+/* (src/layers/alerts). The last two reuse their layer's card for the  */
+/* drawer detail through a `describe` callback the wiring supplies, so */
+/* the adapters themselves import neither Cesium nor the catalogs.     */
+/* A new layer follows the same shape: a pure adapter module here, the */
+/* layer instance and any card builder wired in src/app/layers/events. */
 /* ------------------------------------------------------------------ */
-
-// Incidents (LIVE OPS regions): one icon per open incident.
-// import { registerEventAdapter } from '../events/adapters.js';
-// registerEventAdapter({
-//   id: 'incidents',
-//   kind: 'incident',
-//   layerId: 'incidents',
-//   getEvents: ({ limit }) =>
-//     incidentsLayer.getIncidents().slice(0, limit).map((incident) => ({
-//       id: incident.id,
-//       lat: incident.lat,
-//       lon: incident.lon,
-//       title: incident.title,
-//       description: incident.summary,
-//       source: incident.agency,
-//       time: incident.updatedAtMs,
-//       priority: incident.severity,
-//       data: { incidentId: incident.id },
-//     })),
-//   feed: (event) => ({
-//     type: 'detail',
-//     nearestCameras: true,
-//     lines: incidentsLayer.describe(event.data.incidentId),
-//   }),
-// });
-
-// Alerts (warnings and watches): one icon at each alert's centroid.
-// registerEventAdapter({
-//   id: 'alerts',
-//   kind: 'alert',
-//   layerId: 'alerts',
-//   getEvents: ({ limit }) =>
-//     alertsLayer.getAlerts().slice(0, limit).map((alert) => ({
-//       id: alert.id,
-//       lat: alert.lat,
-//       lon: alert.lon,
-//       title: alert.headline,
-//       description: alert.event,
-//       source: alert.sender,
-//       time: alert.sentMs,
-//       priority: alert.urgency,
-//     })),
-// });
-
-// Live streams (src/layers/streams): one icon per curated or discovered
-// stream; the feed is the stream's own embed, created by the drawer on open
-// and destroyed on close. Registered for real in src/app/layers/streams.js.
-// import { createStreamsEventAdapter } from '../streams/eventAdapter.js';
-// registerEventAdapter(createStreamsEventAdapter({ layer: streamsLayer }));

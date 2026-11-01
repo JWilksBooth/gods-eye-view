@@ -51,14 +51,30 @@
   display: none;
 }
 
-.event-hover-card[data-kind='camera'] { border-left-color: var(--event-camera); }
-.event-hover-card[data-kind='stream'] { border-left-color: var(--event-stream); }
-.event-hover-card[data-kind='fire'] { border-left-color: var(--event-fire); }
-.event-hover-card[data-kind='quake'] { border-left-color: var(--event-quake); }
-.event-hover-card[data-kind='aircraft'] { border-left-color: var(--event-aircraft); }
-.event-hover-card[data-kind='vessel'] { border-left-color: var(--event-vessel); }
-.event-hover-card[data-kind='incident'] { border-left-color: var(--event-incident); }
-.event-hover-card[data-kind='alert'] { border-left-color: var(--event-alert); }
+.event-hover-card[data-kind='camera'] {
+  border-left-color: var(--event-camera);
+}
+.event-hover-card[data-kind='stream'] {
+  border-left-color: var(--event-stream);
+}
+.event-hover-card[data-kind='fire'] {
+  border-left-color: var(--event-fire);
+}
+.event-hover-card[data-kind='quake'] {
+  border-left-color: var(--event-quake);
+}
+.event-hover-card[data-kind='aircraft'] {
+  border-left-color: var(--event-aircraft);
+}
+.event-hover-card[data-kind='vessel'] {
+  border-left-color: var(--event-vessel);
+}
+.event-hover-card[data-kind='incident'] {
+  border-left-color: var(--event-incident);
+}
+.event-hover-card[data-kind='alert'] {
+  border-left-color: var(--event-alert);
+}
 
 .event-hover-kind {
   font-size: 9px;
@@ -166,14 +182,30 @@ body.recording-mode .event-feed-drawer {
   border-radius: 999px;
 }
 
-.event-feed-kind[data-kind='camera'] { background: var(--event-camera); }
-.event-feed-kind[data-kind='stream'] { background: var(--event-stream); }
-.event-feed-kind[data-kind='fire'] { background: var(--event-fire); }
-.event-feed-kind[data-kind='quake'] { background: var(--event-quake); }
-.event-feed-kind[data-kind='aircraft'] { background: var(--event-aircraft); }
-.event-feed-kind[data-kind='vessel'] { background: var(--event-vessel); }
-.event-feed-kind[data-kind='incident'] { background: var(--event-incident); }
-.event-feed-kind[data-kind='alert'] { background: var(--event-alert); }
+.event-feed-kind[data-kind='camera'] {
+  background: var(--event-camera);
+}
+.event-feed-kind[data-kind='stream'] {
+  background: var(--event-stream);
+}
+.event-feed-kind[data-kind='fire'] {
+  background: var(--event-fire);
+}
+.event-feed-kind[data-kind='quake'] {
+  background: var(--event-quake);
+}
+.event-feed-kind[data-kind='aircraft'] {
+  background: var(--event-aircraft);
+}
+.event-feed-kind[data-kind='vessel'] {
+  background: var(--event-vessel);
+}
+.event-feed-kind[data-kind='incident'] {
+  background: var(--event-incident);
+}
+.event-feed-kind[data-kind='alert'] {
+  background: var(--event-alert);
+}
 
 .event-feed-title {
   flex: 1 1 auto;
@@ -247,6 +279,10 @@ body.recording-mode .event-feed-drawer {
   gap: 4px 12px;
   margin: 0;
   font-size: 11px;
+}
+
+.event-feed-lines--plain {
+  grid-template-columns: 1fr;
 }
 
 .event-feed-label {

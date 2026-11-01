@@ -1,5 +1,6 @@
 import { clampScopeFeatherPct } from '../scopeMaskPolicy.js';
 import { syncScopeControls } from './displayControls.js';
+import { createGridView } from './gridView.js';
 import { STYLE_STATUS_LABELS } from './visualPresets.js';
 import { RETIRED_STYLES } from '../visualStylePolicy.js';
 import { syncSegmentedControl } from './segmentedControl.js';
@@ -44,14 +45,39 @@ import {
 } from '../cyberSonar.js';
 import { cyberVisualDefaultsForHudTransition } from '../hudLayouts.js';
 import {
+  adoptInitialPerformancePreset,
   getPerformancePreset as activePerformancePreset,
   getPerformanceSettings,
   normalizePerformancePreset,
   persistPerformancePreset,
-  readStoredPerformancePreset,
   setPerformancePreset as activatePerformancePreset,
+  subscribeDrawingBuffer,
+  subscribePerformancePreset,
 } from '../performancePreset.js';
 const DETECTION_ALLOCATION_STORAGE_KEY = 'gev:detection-allocation:v1';
+
+/**
+ * The drawing-buffer readout under Display → PERFORMANCE, e.g.
+ * `1600 × 900 px · MSAA 2×`, so a scaled-down buffer is visible at a glance.
+ * @param {{width?: number, height?: number, msaaSamples?: number, fxaa?: boolean}} buffer
+ * @returns {string} Empty while the canvas has no size.
+ */
+export function formatDrawingBufferReadout({
+  width,
+  height,
+  msaaSamples = 1,
+  fxaa = false,
+} = {}) {
+  if (!(width > 0) || !(height > 0)) return '';
+  const size = { width: String(width), height: String(height) };
+  if (msaaSamples > 1)
+    return t('{width} × {height} px · MSAA {samples}×', {
+      ...size,
+      samples: String(msaaSamples),
+    });
+  if (fxaa) return t('{width} × {height} px · FXAA', size);
+  return t('{width} × {height} px', size);
+}
 
 /** localStorage, or null where even reading the property throws. */
 function preferenceStorage() {
@@ -89,6 +115,7 @@ export class VisualSettings {
       scopeEnabled,
       scopeFeatherPct,
       scopeTerminusPct,
+      gridView,
       mapStack,
       panelState,
       styleParams,
@@ -176,6 +203,8 @@ export class VisualSettings {
         this._scopeFeatherValue.textContent = `${pct}%`;
       setScopeMaskFeather(pct / 100);
     }
+    if (typeof gridView === 'boolean')
+      this.setGridViewEnabled(gridView, { syncShare: false, persist: false });
     // null restores the altitude-adaptive ramp; a number pins the terminus
     // (clamped to the supported 94..100 band, same as the `sce` hash key).
     if (scopeTerminusPct === null) setScopeTerminusOverride(null);
@@ -248,10 +277,13 @@ export class VisualSettings {
     this._detectionAllocationPreference = normalizeAllocationStrategy(
       storedDetectionAllocation,
     );
-    // Display → PERFORMANCE. The stored choice is adopted here, before the
-    // first-load baseline runs, so `_applyPerformancePresetVisuals` can land
-    // its sharpen and density on that baseline; tools.js applies the same
-    // choice to the viewer's scene knobs when the render governor installs.
+    // Display → PERFORMANCE. The page load's preset is settled with the viewer
+    // (app/scene.js: `?quality=`, the remembered choice or the default), so
+    // adopting it here keeps that choice; it settles one only for a host
+    // without the viewer-side install. `_applyPerformancePresetVisuals` lands
+    // the visual half (sharpen permission, detection density) on the
+    // first-load baseline, and every later change, whoever makes it, repaints
+    // this row through the subscription.
     // Tolerates the minimal documents the state-owner tests stub in, which
     // only provide getElementById.
     this._performancePresetBtns = [
@@ -259,9 +291,23 @@ export class VisualSettings {
         '#performance-preset-seg [data-performance]',
       ) ?? []),
     ];
-    const storedPreset = readStoredPerformancePreset(preferenceStorage());
-    if (storedPreset) activatePerformancePreset(storedPreset);
+    this._performancePresetStatus =
+      document.getElementById?.('performance-preset-status') ?? null;
+    adoptInitialPerformancePreset({
+      storage: preferenceStorage(),
+      search: globalThis.location?.search ?? '',
+    });
     this._syncPerformancePresetControl();
+    this._performancePresetVisualsApplied = false;
+    this._performancePresetUnsubscribers = [
+      subscribePerformancePreset(() => {
+        this._syncPerformancePresetControl();
+        // Before the first-load baseline the visual half waits for it.
+        if (this._performancePresetVisualsApplied)
+          this._applyPerformancePresetVisuals();
+      }),
+      subscribeDrawingBuffer(() => this._updatePerformanceReadout()),
+    ];
   }
 
   /** @returns {string} The active Performance preset id. */
@@ -272,8 +318,9 @@ export class VisualSettings {
   /**
    * Select a Performance preset. A device-level preference: remembered in
    * this browser, never written to the share link. The scene knobs follow
-   * through the module's subscribers; the visual half (sharpen, detection
-   * density) is applied here because Display owns those settings.
+   * through the module's subscribers (app/scene.js); the visual half (sharpen
+   * permission, detection density) follows through this owner's subscription
+   * because Display owns those settings.
    * @param {string} preset quality | balanced | performance
    * @param {{persist?: boolean}} [options]
    * @returns {boolean} Whether the preset changed.
@@ -285,10 +332,7 @@ export class VisualSettings {
     const changed = activatePerformancePreset(id);
     if (persist) persistPerformancePreset(id, preferenceStorage());
     this._syncPerformancePresetControl();
-    if (changed) {
-      this._applyPerformancePresetVisuals();
-      governorRequestRender('performance-preset');
-    }
+    if (changed) governorRequestRender('performance-preset');
     return changed;
   }
 
@@ -300,24 +344,129 @@ export class VisualSettings {
         valueOf: (button) => button.dataset.performance,
       },
     );
+    this._updatePerformanceReadout();
   }
 
   /**
-   * The preset's Display settings: the app's own sharpen pass and the
-   * detection density stop. Mode is left alone (a preset never turns
-   * detection on or off) and the operator's detection override is not
-   * claimed — a preset is a device choice, not a hand edit.
+   * The drawing-buffer readout under the PERFORMANCE row: the canvas's pixel
+   * size and the anti-aliasing pass that runs on it. Cesium resizes the
+   * canvas on its next frame after a preset or window change; the drawing
+   * buffer subscription repaints the line then.
+   */
+  _updatePerformanceReadout() {
+    const status = this._performancePresetStatus;
+    if (!status) return;
+    const canvas = this.viewer?.canvas;
+    const scene = this.viewer?.scene;
+    status.textContent = formatDrawingBufferReadout({
+      width: canvas?.width,
+      height: canvas?.height,
+      msaaSamples: scene?.msaaSamples,
+      fxaa: scene?.postProcessStages?.fxaa?.enabled === true,
+    });
+  }
+
+  /**
+   * The preset's Display settings: whether the app's own sharpen pass may run
+   * and the detection density stop. The sharpen toggle and slider keep the
+   * operator's values (a withheld pass returns as it was), detection mode is
+   * left alone (a preset never turns detection on or off) and the operator's
+   * detection override is not claimed — a preset is a device choice, not a
+   * hand edit.
    */
   _applyPerformancePresetVisuals() {
+    this._performancePresetVisualsApplied = true;
     const settings = getPerformanceSettings();
-    if (
-      typeof settings.sharpen === 'boolean' &&
-      settings.sharpen !== this.sharpenEnabled
-    )
-      this._setSharpenEnabled(settings.sharpen);
+    this._applySharpenPermission(settings.sharpenPermitted !== false);
     if (typeof settings.detectionDensityPct === 'number')
       this._applyDetectionPreset({ densityPct: settings.detectionDensityPct });
+    this._updatePerformanceReadout();
     this._syncShareState();
+  }
+  // ── Grid view (Display → GRID, the G key) ───────────────────────────
+  // The controller (src/ui/gridView.js) owns the camera, frustum, base tint
+  // and canvas; this owner keeps the button, the browser-local preference
+  // and the share state in step with it. Created on first use so a stub
+  // document in the state-owner tests never touches the scene.
+
+  /** @returns {boolean} Whether the top-down grid view is on. */
+  get gridViewEnabled() {
+    return this._gridView?.isEnabled() ?? false;
+  }
+
+  _ensureGridView() {
+    if (!this._gridView) {
+      this._gridView = createGridView({
+        viewer: this.viewer,
+        mapStackController: this.mapStackController,
+        requestRender: this.services.governorRequestRender,
+        storage: preferenceStorage(),
+      });
+    }
+    return this._gridView;
+  }
+
+  /**
+   * Turn the grid view on or off.
+   * @param {boolean} enabled
+   * @param {{syncShare?: boolean, persist?: boolean}} [options] A share
+   *   restore passes both false: the link is not the user's own choice.
+   * @returns {boolean} Whether the state changed.
+   */
+  setGridViewEnabled(enabled, { syncShare = true, persist = true } = {}) {
+    const target = Boolean(enabled);
+    if (!target && !this._gridView) {
+      this._updateGridViewButtonState();
+      return false;
+    }
+    const changed = this._ensureGridView().setEnabled(target, { persist });
+    this._updateGridViewButtonState();
+    if (changed && syncShare) this._syncShareState();
+    return changed;
+  }
+
+  /** The G key and the Display button: a user choice, so it claims the lane. */
+  toggleGridView() {
+    this.shareLinkManager?.claimRestoreLane?.('visual');
+    return this.setGridViewEnabled(!this.gridViewEnabled);
+  }
+
+  /** Apply the browser-local preference at start-up (a share link still wins). */
+  restoreStoredGridView() {
+    if (!this._ensureGridView().readStored()) return false;
+    return this.setGridViewEnabled(true, { syncShare: false, persist: false });
+  }
+
+  _updateGridViewButtonState() {
+    const button = this._gridViewBtn;
+    if (!button) return;
+    const on = this.gridViewEnabled;
+    button.classList?.toggle('active', on);
+    button.setAttribute?.('aria-pressed', String(on));
+  }
+
+  /**
+   * Withhold or restore the sharpen pass for the active preset. The button
+   * and slider are disabled while withheld, so a click cannot flip a setting
+   * the operator would not see take effect.
+   * @param {boolean} permitted
+   */
+  _applySharpenPermission(permitted) {
+    // Requests its own frame when the permission changes.
+    this._visualEffects.setSharpenPermitted(permitted);
+    if (this._sharpenBtn) {
+      this._sharpenBtn.disabled = !permitted;
+      this._sharpenBtn.classList?.toggle('pp-toggle-btn--withheld', !permitted);
+      this._sharpenBtn.title = permitted
+        ? t('Sharpening')
+        : t('Sharpening is off in the Performance preset');
+    }
+    if (this._sharpenSlider) this._sharpenSlider.disabled = !permitted;
+  }
+
+  /** @returns {boolean} Whether the active preset lets the sharpen pass run. */
+  get sharpenPermitted() {
+    return this._visualEffects.sharpenPermitted;
   }
   get hud() {
     return this.readHud();
@@ -999,6 +1148,7 @@ export class VisualSettings {
             ? null
             : Math.round(getScopeTerminusOverride() * 100),
         mapStack: this.mapStackController?.getActiveId?.() || 'photoreal',
+        gridView: this.gridViewEnabled,
       },
     };
   }
@@ -1796,6 +1946,8 @@ export class VisualSettings {
     this._layoutRightPanels();
   }
   stop() {
+    for (const unsubscribe of this._performancePresetUnsubscribers.splice(0))
+      unsubscribe();
     this._lifetime.destroy();
     this._styleParameters?.destroy();
     this._visualEffects.stop();
@@ -1812,6 +1964,8 @@ export class VisualSettings {
   destroy() {
     this.stop();
     this.releaseIrBoost();
+    this._gridView?.destroy();
+    this._gridView = null;
     this._visualEffects.destroy();
   }
 }

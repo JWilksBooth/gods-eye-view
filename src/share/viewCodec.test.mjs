@@ -511,6 +511,7 @@ test('the field registry is well formed and permanent', () => {
       [2, 'hudVisible', BY_STYLE],
       [3, 'celestialRing', BY_STYLE],
       [4, 'scopeEnabled', true],
+      [5, 'gridView', false],
     ],
   );
   // The style-applied defaults are frozen meanings too. If the app's style
@@ -860,7 +861,7 @@ test('unknown fields inside a thing view, codes and bits are skipped too', () =>
   thing.textField(20, 'cockpit'); // a future thing field
   const writer = new WireWriter();
   writer.bytes.push(1);
-  writer.sintField(2, 100000).uintField(9, 0b100001); // flag bit 5 unknown
+  writer.sintField(2, 100000).uintField(9, 0b1000001); // flag bit 6 unknown
   writer.bytesField(
     10,
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -883,7 +884,7 @@ test('unknown fields inside a thing view, codes and bits are skipped too', () =>
     result.unknownFields.map((u) => [u.scope, u.field ?? u.code]),
     [
       ['enum:style', 99],
-      ['flags', 32],
+      ['flags', 64],
       ['layer', 160],
       ['panel', 11],
       ['thing', 20],

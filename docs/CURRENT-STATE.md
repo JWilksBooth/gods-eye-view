@@ -324,46 +324,75 @@ Cyber layout keeps its slate/red skin, now green-tinted, and is not the default.
 ## Performance presets — November 1, 2026
 
 Display has a PERFORMANCE row with three presets: Quality, Balanced and
-Performance. Balanced is the default. The choice is a property of this
-browser, remembered under `gev:performance-preset:v1` like the detection
-allocation preference, and it is deliberately not written to share links in
-either form: a link still carries the sharpen and detection values themselves,
-so a recipient sees the same view at their own preset, and a link's `dm`/`dd`
-land on top of the preset on restore exactly as they land on top of the
-first-load baseline.
+Performance. Balanced is the default; a software rasterizer (SwiftShader,
+llvmpipe, the Basic Render Driver) with no remembered choice starts on
+Performance. The choice is a property of this browser, remembered under
+`gev:performance-preset:v1` like the detection allocation preference, and
+`?quality=<preset>` picks one for a single page load without remembering it.
+It is deliberately not written to share links in either form: a link still
+carries the sharpen and detection values themselves, so a recipient sees the
+same view at their own preset, and a link's `dm`/`dd` land on top of the
+preset on restore exactly as they land on top of the first-load baseline.
 
 `src/performancePreset.js` owns the preset table and the active choice; it is
-pure (no DOM, no Cesium) and the viewer, tileset and storage are handed in.
-Each preset sets the drawing-buffer resolution scale, MSAA samples, FXAA, the
-continuous-loop frame-rate cap, whether the app's own sharpen pass is on, the
-detection density stop, a cadence multiplier the live layers read at use time
-(fleet dead-reckoning, vessel visibility passes, CCTV view passes, Contacts
-readouts), the share of the street-traffic dot budget that animates, and the
-photoreal tileset's screen-space error and GPU cache. Quality keeps every
-first-load default (full resolution, 4× MSAA, 60 fps, Dense @ 75, SDK tile
-cache). Balanced is Quality at 2× MSAA. Performance renders at three-quarter
-resolution with FXAA instead of MSAA, caps the continuous loop at 30 fps,
-turns the sharpen pass off, solves Sparse @ 25, doubles the layer cadences,
-halves the traffic dot budget and raises the tileset's screen-space error to
-24 with a 768 MiB cache. Idle mode is unaffected by the frame-rate cap: a
+pure (no DOM, no Cesium) and the viewer, tileset, storage and GPU limits are
+handed in. Each preset sets the drawing buffer in device pixels, MSAA samples,
+FXAA, the continuous-loop frame-rate cap, whether the app's own sharpen pass
+may run, the globe's screen-space error and tile cache, the base map's
+anisotropic filtering, the photoreal tileset's screen-space error, horizon
+relaxation, level skipping and GPU cache, the detection density stop, a
+cadence multiplier the live layers read at use time (fleet dead-reckoning,
+vessel visibility passes, CCTV view passes, Contacts readouts) and the share
+of the street-traffic dot budget that animates.
+
+|                                                         | Quality                     | Balanced                            | Performance                         |
+| ------------------------------------------------------- | --------------------------- | ----------------------------------- | ----------------------------------- |
+| Buffer, device pixels per CSS pixel                     | every one, at most 2        | 0.75 × DPR, at least 1, at most 1.5 | 0.5 × DPR, at least 0.75, at most 1 |
+| Anti-aliasing                                           | 4× MSAA                     | 2× MSAA                             | FXAA                                |
+| Sharpen pass                                            | permitted                   | permitted                           | withheld                            |
+| Globe screen-space error, tile cache                    | 1, 600                      | 1.5, 300                            | 2, 100 (Cesium's)                   |
+| Imagery anisotropy                                      | 16×                         | 8×                                  | 4×                                  |
+| Photoreal tiles: error, horizon factor, skip LOD, cache | 12, 12, no, 2 GiB           | 16, 24, no, 1.5 GiB                 | 24, 32, yes, 768 MiB                |
+| Frame cap, detection, cadence, traffic dots             | 60 fps, Dense @ 75, 1×, all | 60 fps, Dense @ 75, 1×, all         | 30 fps, Sparse @ 25, 2×, half       |
+
+The buffer is clamped so neither side exceeds the GPU's texture, renderbuffer
+or viewport limit, re-checked before every Cesium resize, so a window that
+grows or moves to a denser screen never allocates a framebuffer above it. A
+1600 × 900 window at DPR 1 draws 1600 × 900 in Quality and Balanced and
+1200 × 675 in Performance. Idle mode is unaffected by the frame-rate cap: a
 parked scene still renders on demand only.
 
-`src/app/tools.js` adopts the remembered preset where the render governor is
-installed and keeps the scene knobs in step for the viewer's lifetime.
-`VisualSettings` owns the Display row: it reads the stored choice at
-construction, applies the preset's visual half (sharpen, detection density)
-right after the first-load baseline and before share restoration, persists a
-change, repaints the segmented control and requests one frame. The facade
-exposes `setPerformancePreset` / `getPerformancePreset`. A preset change never
-claims the operator's detection override and never changes the detection
-mode, only its density stop.
+`src/app/scene.js` settles the page load's preset and installs it with the
+viewer, before its first frame: the viewer is constructed in device pixels at
+the preset's MSAA, the photoreal tileset takes the preset before it requests
+a tile, and the base map's imagery layers are built at the preset's
+anisotropy with LINEAR filters (the only filters Cesium mipmaps).
+`MapSourceController.refreshImageryLayer()` rebuilds the live layer when a
+change alters the anisotropy, keeping the old layer underneath until the new
+one has loaded. `VisualSettings` owns the Display row: it adopts the settled
+choice, applies the preset's visual half (sharpen permission, detection
+density) right after the first-load baseline and before share restoration,
+follows every later change through the module's subscription, persists a
+change, repaints the segmented control and the drawing-buffer readout under
+it (`1600 × 900 px · MSAA 2×`), and requests one frame. Performance withholds
+the sharpen stage through `VisualEffects.setSharpenPermitted()` and disables
+the Sharpen button and slider; the operator's toggle and slider values are
+never changed, so the pass returns as it was. The facade exposes
+`setPerformancePreset` / `getPerformancePreset`, `getControlState().sharpen`
+reports `withheld`, and `window.__godsEyeView.describePerformancePreset()`
+returns the buffer, pixel ratio and knobs for QA. A preset change never claims
+the operator's detection override and never changes the detection mode, only
+its density stop.
 
 Measurement: `node scripts/qa-perf-presets.mjs --presets quality,balanced,performance`
 (a running dev server) follows the protocol in docs/PERFORMANCE.md at
 1600 × 900, DPR 1, with synthetic Flights, Vessels and CCTV populations so
-the scenes repeat on a machine without the live feeds; `--profile` attributes
-a slow window to functions and `--trace-readpixels` to the code issuing GPU
-read-backs.
+the scenes repeat on a machine without the live feeds; `--gpu` measures the
+desktop GPU (the discrete one on a two-GPU machine), `--dpr 2` a HiDPI screen,
+`--profile` attributes a slow window to functions and `--trace-readpixels` to
+the code issuing GPU read-backs. `node scripts/qa-sharpness-crops.mjs` takes
+100% crops of fixed San Francisco and Las Vegas views per preset, so two
+builds can be compared pixel for pixel (docs/media/perf/).
 
 ## Surface height samples — November 1, 2026
 

@@ -1,4 +1,4 @@
-import { formatRelativeTime, t } from '../i18n/index.js';
+import { formatRelativeTime, msg, t } from '../i18n/index.js';
 import { getEventAdapter } from '../layers/events/adapters.js';
 import {
   describeFreshness,
@@ -129,7 +129,11 @@ export function createEventFeedDrawer({
   }
 
   function actionButton(label, run) {
-    const button = element('button', 'panel-surface-control event-feed-action', label);
+    const button = element(
+      'button',
+      'panel-surface-control event-feed-action',
+      label,
+    );
     button.type = 'button';
     button.addEventListener('click', () => {
       try {
@@ -144,14 +148,22 @@ export function createEventFeedDrawer({
   function renderLines(container, lines) {
     if (!Array.isArray(lines) || !lines.length) return;
     const list = element('dl', 'event-feed-lines');
+    // Plain lines (an incident card) read as one column; label/value rows
+    // (an aircraft's fields) as two.
+    if (lines.every((line) => !line || typeof line === 'string'))
+      list.classList.add('event-feed-lines--plain');
     for (const line of lines) {
       if (!line) continue;
       if (typeof line === 'string') {
         list.appendChild(element('dd', 'event-feed-line', line));
         continue;
       }
-      list.appendChild(element('dt', 'event-feed-label', t(String(line.label ?? ''))));
-      list.appendChild(element('dd', 'event-feed-value', String(line.value ?? '')));
+      list.appendChild(
+        element('dt', 'event-feed-label', t(String(line.label ?? ''))),
+      );
+      list.appendChild(
+        element('dd', 'event-feed-value', String(line.value ?? '')),
+      );
     }
     container.appendChild(list);
   }
@@ -168,11 +180,18 @@ export function createEventFeedDrawer({
 
   function renderNearestCameras(container, event) {
     const events = layerOf('events');
-    const rows = events?.nearestCameras?.({ lat: event.lat, lon: event.lon }) || [];
+    const rows =
+      events?.nearestCameras?.({ lat: event.lat, lon: event.lon }) || [];
     const section = element('section', 'event-feed-nearby');
-    section.appendChild(element('h3', 'event-feed-subtitle', t('Nearest cameras')));
+    section.appendChild(
+      element('h3', 'event-feed-subtitle', t('Nearest cameras')),
+    );
     if (!rows.length) {
-      section.appendChild(note(t('No cameras within range. Turn the Cameras layer on to list them.')));
+      section.appendChild(
+        note(
+          t('No cameras within range. Turn the Cameras layer on to list them.'),
+        ),
+      );
       container.appendChild(section);
       return;
     }
@@ -237,7 +256,9 @@ export function createEventFeedDrawer({
         cctv.getActiveVideoElement?.(),
       );
       teardown.push(() => surface.stop());
-      caption.textContent = t('Live video · bounded HLS through the camera proxy');
+      caption.textContent = t(
+        'Live video · bounded HLS through the camera proxy',
+      );
       frame.classList.add('event-feed-frame--video');
     } else {
       caption.textContent = feed.isVideo
@@ -251,14 +272,20 @@ export function createEventFeedDrawer({
         run: () => cctv.selectCamera(feed.cameraId, { focus: true }),
       });
     }
-    renderActions(container, actions.map((a) => ({ label: a.label, run: a.run })));
+    renderActions(
+      container,
+      actions.map((a) => ({ label: a.label, run: a.run })),
+    );
     if (camera?.credit || camera?.provider)
       container.appendChild(note(camera.credit || camera.provider));
   }
 
   function renderStreamFeed(container, event, feed) {
     const embed = streamEmbed(feed.stream || feed);
-    const frame = element('figure', 'event-feed-frame event-feed-frame--stream');
+    const frame = element(
+      'figure',
+      'event-feed-frame event-feed-frame--stream',
+    );
     container.appendChild(frame);
     if (!embed) {
       frame.appendChild(note(t('This stream cannot be shown here.')));
@@ -270,7 +297,8 @@ export function createEventFeedDrawer({
       iframe.className = 'event-feed-player';
       iframe.src = embed.url;
       iframe.title = event.title;
-      iframe.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+      iframe.allow =
+        'autoplay; encrypted-media; picture-in-picture; fullscreen';
       iframe.referrerPolicy = 'strict-origin-when-cross-origin';
       iframe.setAttribute('allowfullscreen', '');
       iframe.loading = 'eager';
@@ -351,7 +379,11 @@ export function createEventFeedDrawer({
     nodes.kind.textContent = t(eventKindLabel(event.kind));
     nodes.kind.dataset.kind = event.kind;
     nodes.title.textContent = event.title;
-    const parts = [event.source, freshnessText(event), event.description].filter(Boolean);
+    const parts = [
+      event.source,
+      freshnessText(event),
+      event.description,
+    ].filter(Boolean);
     nodes.meta.textContent = parts.join(' · ');
     nodes.meta.hidden = !parts.length;
     dialog.dataset.kind = event.kind;
@@ -374,8 +406,8 @@ export function createEventFeedDrawer({
       renderDetailFeed(container, event, {
         ...feed,
         lines: feed?.lines || [
-          { label: 'Latitude', value: event.lat.toFixed(4) },
-          { label: 'Longitude', value: event.lon.toFixed(4) },
+          { label: msg('Latitude'), value: event.lat.toFixed(4) },
+          { label: msg('Longitude'), value: event.lon.toFixed(4) },
         ],
       });
   }
@@ -384,7 +416,8 @@ export function createEventFeedDrawer({
     if (!dialog.open) dialog.show();
     if (!removeKeydown) {
       documentRef.addEventListener('keydown', onKeydown);
-      removeKeydown = () => documentRef.removeEventListener('keydown', onKeydown);
+      removeKeydown = () =>
+        documentRef.removeEventListener('keydown', onKeydown);
     }
     nodes.close.focus?.({ preventScroll: true });
     onOpenChange(true);

@@ -6,6 +6,148 @@ specification and should not be used to predict performance on untested systems.
 The original capture artifacts are not included here, so this page records
 results rather than defining a runnable benchmark.
 
+## 2026-11-01: sharpness presets on an RTX 3070
+
+The Display → PERFORMANCE presets now set sharpness as well as cost: each one
+sizes the drawing buffer in device pixels, sets the globe's screen-space error
+and tile cache, caps the base map's anisotropic filtering and sets the
+photoreal tileset's detail (the table under "Performance presets" in
+docs/CURRENT-STATE.md). This capture measures what that costs on the desktop
+GPU the work targets, against main (the presets as they shipped in #4) in the
+same session, and shows the sharpness in 100% crops.
+
+| Setting | Value |
+| --- | --- |
+| Renderer | ANGLE Direct3D 11 on an NVIDIA GeForce RTX 3070, headless Chrome 156. Two GPUs are present; without `--force_high_performance_gpu` (which `--gpu` now passes) headless Chrome renders on the Intel UHD Graphics 770 |
+| Viewport | 1600 x 900 at device pixel ratio 1, and 1600 x 900 CSS pixels at DPR 2 for the HiDPI rows |
+| Scene sample | 8 seconds of scripted motion, then 8 seconds at rest |
+| Population | synthetic: 2,000 aircraft, 6,000 vessels, 4,000 cameras around San Francisco, Los Angeles and Las Vegas; flat synthetic OSM tiles |
+| Builds | main at 94aaace9 and this branch, each preset in a fresh page, run alternately (this branch, then main) and repeated twice at DPR 1 |
+| Machine | no game running; other worktrees' dev servers and a full unit-test run shared the CPU, which read 42-100% busy at the start of a run |
+
+`node scripts/qa-perf-presets.mjs --gpu --presets <preset> --window 8000`
+(add `--dpr 2 --scenes idle,layers` for the HiDPI rows) against each build's
+dev server. On a hardware GPU the frame bracket the harness times
+(`preUpdate` → `postRender`) is main-thread work; the GPU's own time shows up
+only as a lower frame rate.
+
+### DPR 1 (this machine's 1600 x 900 screen)
+
+Mean of the two runs; ± is half the spread when the runs differ by 5 fps or
+more.
+
+| Preset | Scene | Build | fps, motion / rest | Frame ms mean, motion / rest | Buffer, MSAA, FXAA |
+| --- | --- | --- | ---: | ---: | --- |
+| Quality | Idle globe | main | 59.8 / on demand | 3.60 / – | 1600 x 900, 4x, off |
+| Quality | Idle globe | this branch | 58.8 / on demand | 6.01 / – | 1600 x 900, 4x, off |
+| Quality | Flights + Vessels + CCTV | main | 42.6 (±6.9) / 45.2 | 16.18 / 16.18 | 1600 x 900, 4x, off |
+| Quality | Flights + Vessels + CCTV | this branch | 37.8 / 41.1 | 19.02 / 17.88 | 1600 x 900, 4x, off |
+| Quality | Cockpit | main | 22.6 / 28.6 | 35.95 / 27.77 | 1600 x 900, 4x, off |
+| Quality | Cockpit | this branch | 23.0 / 22.8 | 34.06 / 35.30 | 1600 x 900, 4x, off |
+| Balanced (default) | Idle globe | main | 59.7 / on demand | 3.46 / – | 1600 x 900, 2x, off |
+| Balanced (default) | Idle globe | this branch | 59.3 / on demand | 4.42 / – | 1600 x 900, 2x, off |
+| Balanced (default) | Flights + Vessels + CCTV | main | 40.1 / 44.8 | 16.55 / 16.62 | 1600 x 900, 2x, off |
+| Balanced (default) | Flights + Vessels + CCTV | this branch | 45.8 (±8.6) / 52.4 | 14.35 / 12.84 | 1600 x 900, 2x, off |
+| Balanced (default) | Cockpit | main | 25.0 / 26.4 | 33.28 / 30.52 | 1600 x 900, 2x, off |
+| Balanced (default) | Cockpit | this branch | 43.2 (±14.2) / 41.0 | 19.60 / 21.26 | 1600 x 900, 2x, off |
+| Performance | Idle globe | main | 30.0 / on demand | 3.50 / – | 1200 x 675, 1x, on |
+| Performance | Idle globe | this branch | 29.9 / on demand | 3.83 / – | 1200 x 675, 1x, on |
+| Performance | Flights + Vessels + CCTV | main | 29.4 / 29.8 | 14.50 / 14.37 | 1200 x 675, 1x, on |
+| Performance | Flights + Vessels + CCTV | this branch | 29.5 / 29.8 | 14.43 / 14.00 | 1200 x 675, 1x, on |
+| Performance | Cockpit | main | 28.3 / 29.3 | 20.96 / 19.26 | 1200 x 675, 1x, on |
+| Performance | Cockpit | this branch | 28.4 / 28.8 | 21.20 / 19.48 | 1200 x 675, 1x, on |
+
+The cockpit rows are a real Cockpit entry this time (Contacts context with
+Flights and Military on). "On demand" is idle mode: a parked scene renders
+nothing until something changes.
+
+What the table shows, and what it does not:
+
+- At DPR 1 Quality and Balanced draw the same 1600 x 900 buffer on both
+  builds, so the cost of the sharpness work is the finer globe. The idle
+  globe in motion is the clean comparison: Quality's main-thread frame rises
+  from 3.6 to 6.0 ms (the globe refines a level deeper at screen-space error
+  1, so there are more tiles to select and draw) and Balanced's from 3.5 to
+  4.4 ms (error 1.5); both still hold the 60 fps cap. Performance keeps
+  Cesium's globe defaults and is unchanged within noise.
+- The layer and cockpit scenes are main-thread bound by the live layers, and
+  the shared CPU moved them by 5-15 fps between repetitions. Read their
+  differences as noise: nothing in this change touches layer work, and the
+  same build swung by up to 28 fps between runs.
+- Performance holds its 30 fps cap in every scene on both builds.
+
+### DPR 2 (HiDPI), one run each
+
+| Preset | Scene | Build | fps, motion / rest | Frame ms mean, motion / rest | Buffer, MSAA, FXAA |
+| --- | --- | --- | ---: | ---: | --- |
+| Quality | Idle globe | main | 59.9 / on demand | 3.99 / – | 1600 x 900, 4x, off |
+| Quality | Idle globe | this branch | 58.3 / on demand | 7.57 / – | 3200 x 1800, 4x, off |
+| Quality | Flights + Vessels + CCTV | main | 31.4 / 34.8 | 21.59 / 20.18 | 1600 x 900, 4x, off |
+| Quality | Flights + Vessels + CCTV | this branch | 30.7 / 35.5 | 22.91 / 19.73 | 3200 x 1800, 4x, off |
+| Balanced (default) | Idle globe | main | 60.0 / on demand | 3.82 / – | 1600 x 900, 2x, off |
+| Balanced (default) | Idle globe | this branch | 59.9 / on demand | 4.96 / – | 2400 x 1350, 2x, off |
+| Balanced (default) | Flights + Vessels + CCTV | main | 32.1 / 36.1 | 20.81 / 19.16 | 1600 x 900, 2x, off |
+| Balanced (default) | Flights + Vessels + CCTV | this branch | 34.0 / 43.5 | 20.29 / 16.29 | 2400 x 1350, 2x, off |
+
+On a HiDPI screen main drew CSS pixels and let the browser double them; this
+branch draws every device pixel in Quality (four times the pixels, at 4x
+MSAA) and 1.5 per CSS pixel in Balanced. The RTX 3070 absorbs that: the
+frame rate is unchanged within noise and the idle globe still holds 60 fps.
+A weaker GPU will not; Performance (one device pixel per CSS pixel at DPR 2,
+FXAA) is the setting for it.
+
+### Sharpness, in 100% crops
+
+`node scripts/qa-sharpness-crops.mjs --gpu --url <dev server> --label <build>`
+against both builds, Balanced and Quality, on the keyless globe (Esri World
+Imagery on Re:Earth terrain; the worktrees had no map keys, so the photoreal
+tileset's finer error in Quality is not in these images). UI hidden, every
+layer off, captured once the globe reported every tile loaded. Each crop is
+cut at device resolution around 50% / 40% of the viewport.
+
+- San Francisco: 650 m over the Embarcadero, heading 235°, pitch −32°,
+  looking into the Financial District.
+- Las Vegas: 1,300 m (about 680 m above the valley floor) over the south end
+  of the Strip, heading 0°, pitch −32°.
+
+DPR 1, 320 x 200 pixels:
+
+| View | Preset | main | this branch |
+| --- | --- | --- | --- |
+| San Francisco | Balanced | ![](media/perf/sf-balanced-before.png) | ![](media/perf/sf-balanced-after.png) |
+| San Francisco | Quality | ![](media/perf/sf-quality-before.png) | ![](media/perf/sf-quality-after.png) |
+| Las Vegas | Balanced | ![](media/perf/lv-balanced-before.png) | ![](media/perf/lv-balanced-after.png) |
+| Las Vegas | Quality | ![](media/perf/lv-quality-before.png) | ![](media/perf/lv-quality-after.png) |
+
+DPR 2, 200 x 125 CSS pixels (400 x 250 device pixels):
+
+| View | Preset | main | this branch |
+| --- | --- | --- | --- |
+| San Francisco | Balanced | ![](media/perf/sf-balanced-before-dpr2.png) | ![](media/perf/sf-balanced-after-dpr2.png) |
+| San Francisco | Quality | ![](media/perf/sf-quality-before-dpr2.png) | ![](media/perf/sf-quality-after-dpr2.png) |
+| Las Vegas | Balanced | ![](media/perf/lv-balanced-before-dpr2.png) | ![](media/perf/lv-balanced-after-dpr2.png) |
+| Las Vegas | Quality | ![](media/perf/lv-quality-before-dpr2.png) | ![](media/perf/lv-quality-after-dpr2.png) |
+
+Fine detail in each crop, as the mean squared Laplacian of its grey levels
+(higher is more fine detail; it also counts stair-steps and sharpen halos, so
+read it with the images):
+
+| Crop | Balanced, main → this branch | Quality, main → this branch |
+| --- | ---: | ---: |
+| San Francisco, DPR 1 | 10,326 → 10,336 (+0.1%) | 10,321 → 10,354 (+0.3%) |
+| Las Vegas, DPR 1 | 4,104 → 4,228 (+3%) | 4,089 → 4,297 (+5%) |
+| San Francisco, DPR 2 | 3,835 → 4,141 (+8%) | 3,833 → 12,569 (+228%) |
+| Las Vegas, DPR 2 | 1,781 → 1,412 (−21%) | 1,782 → 2,441 (+37%) |
+
+At DPR 1 the buffer is the same on both builds, so the change is finer
+imagery: small in the middle of the frame, larger toward the horizon. Over
+the full Las Vegas frames, the farther ground in the top third (60-340 px from
+the top) gains 14-29% detail in both presets. At DPR 2 the
+gain is the buffer itself: Quality's every-pixel buffer is visibly sharper
+than main's doubled one. Balanced at DPR 2 trades main's doubled buffer for a
+1.5x one; its edges are smoother and less stair-stepped, which this measure
+reads as less detail in Las Vegas.
+
 ## 2026-11-01: pick-render removal and Performance presets
 
 A second capture, taken while adding the Display → PERFORMANCE presets, in
@@ -85,8 +227,9 @@ demand only, so the idle rows differ by noise.
 
 ### Still to capture
 
-- The same three scenes on the RTX 3070 desktop this work targets
-  (`--gpu`), with the game running on the other screen and without it.
+- The same three scenes on the RTX 3070 desktop with the game running on the
+  other screen. Without it they are in "sharpness presets on an RTX 3070"
+  above, on a CPU other work was sharing.
 - Street traffic: the road source was unreachable from the capture
   environment, so the traffic dot budget change is unmeasured here.
 

@@ -7,18 +7,20 @@
     </div>
     <div class="pp-panel-body" data-rail-scroller>
     <!-- PERFORMANCE preset: a device-level choice (remembered in this browser, never
-         in a share link) that sets resolution scale, anti-aliasing, the frame-rate cap,
-         post-processing, detection density and layer cadence. Balanced ships selected
-         in the markup, the same convention as #models3d-toggle; VisualSettings re-syncs
-         it from the stored choice. -->
+         in a share link) that sets the drawing buffer in device pixels, anti-aliasing,
+         the frame-rate cap, whether sharpen may run, imagery and 3D-tile detail,
+         detection density and layer cadence. Balanced ships selected in the markup,
+         the same convention as #models3d-toggle; VisualSettings re-syncs it from the
+         page load's choice. The readout below names the buffer actually drawn. -->
     <div class="pp-toggle-group" id="performance-preset-group">
       <div class="pp-slider-row visible performance-preset-row" id="performance-preset-row">
         <span class="pp-slider-mini-label" data-i18n>Performance</span>
         <div class="gev-segmented pp-mode-seg performance-preset-seg" id="performance-preset-seg" role="radiogroup" aria-label="Rendering performance preset" data-i18n-aria-label>
-          <button class="gev-segment pp-mode-btn" data-performance="quality" role="radio" aria-checked="false" title="Full resolution, 4× anti-aliasing, 60 fps and the full label density" data-i18n data-i18n-title>Quality</button>
-          <button class="gev-segment pp-mode-btn active" data-performance="balanced" role="radio" aria-checked="true" title="Full resolution with 2× anti-aliasing at 60 fps — the default" data-i18n data-i18n-title>Balanced</button>
-          <button class="gev-segment pp-mode-btn" data-performance="performance" role="radio" aria-checked="false" title="Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates" data-i18n data-i18n-title>Performance</button>
+          <button class="gev-segment pp-mode-btn" data-performance="quality" role="radio" aria-checked="false" title="Every screen pixel, 4× anti-aliasing and the sharpest imagery and 3D tiles at 60 fps" data-i18n data-i18n-title>Quality</button>
+          <button class="gev-segment pp-mode-btn active" data-performance="balanced" role="radio" aria-checked="true" title="Every pixel on a standard screen, three quarters on HiDPI, 2× anti-aliasing at 60 fps — the default" data-i18n data-i18n-title>Balanced</button>
+          <button class="gev-segment pp-mode-btn" data-performance="performance" role="radio" aria-checked="false" title="Fewer pixels, FXAA instead of multisampling, no sharpening, coarser tiles, 30 fps, sparse labels and slower layer updates" data-i18n data-i18n-title>Performance</button>
         </div>
+        <output class="performance-preset-status" id="performance-preset-status" aria-live="off" data-i18n-runtime></output>
       </div>
     </div>
     <div class="pp-toggle-group">
@@ -170,6 +172,12 @@
       <button class="pp-toggle-btn" id="celestial-toggle" title="Celestial ring — reveal the full globe" aria-pressed="false" data-i18n-title>
         <span class="pp-icon material-symbols-outlined" aria-hidden="true">flare</span>
         <span class="pp-label" data-i18n>Celestial</span>
+      </button>
+    </div>
+    <div class="pp-toggle-group">
+      <button class="pp-toggle-btn" id="grid-view-toggle" title="Grid view — straight-down, north-up map with a lat/lon and MGRS grid (G)" aria-pressed="false" data-i18n-title>
+        <span class="pp-icon material-symbols-outlined" aria-hidden="true">grid_on</span>
+        <span class="pp-label" data-i18n>Grid</span>
       </button>
     </div>
     <button class="pp-toggle-btn" id="clean-view-toggle" title="Hide UI chrome" data-i18n-title>

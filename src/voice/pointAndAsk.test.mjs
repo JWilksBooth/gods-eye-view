@@ -348,10 +348,11 @@ test('deixis prompt lint: one short rule, and every sentinel it names exists in 
   // policy once (WHERE precedence, AREAS routing, AFTER TOOLS speech) brought
   // it to 51,646. A new tool or rule has to fit under this ceiling. Live
   // Incidents (LIVE OPS) added one generated layer enum value, its alias and
-  // field hints (52,084), so the ceiling moved to 52,200.
+  // field hints (52,084), so the ceiling moved to 52,200. Alerts and the Event
+  // Map (toggle only) added two more enum values (52,231), so it is 52,300.
   const size = instructions.length + JSON.stringify(GEV_REALTIME_TOOLS).length;
   // Live Streams adds one layer enum value, its aliases and field hints
-  // (52,299), so the ceiling moved to 52,400.
+  // (52,341), so the ceiling moved to 52,400.
   assert.ok(size <= 52400, `prompt size ${size}`);
 });
 

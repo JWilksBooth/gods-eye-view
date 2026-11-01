@@ -38,3 +38,14 @@ Source: [`assets/youtube-popular-videos.png`](https://github.com/bilawalsidhu/go
 These files are not covered by the project's MIT License. No permission is granted for standalone reuse or modification. Commercial reuse outside this repository requires separate permission. No share-alike license applies.
 
 The authorization covers the PNGs as project promotional material. It does not claim ownership of platform interfaces, trademarks, avatars, data, or third-party imagery visible within the screenshots. Those elements remain subject to their respective owners' terms.
+
+## Render-sharpness crops
+
+`perf/*.png` are 100% crops of God's Eye View captured with
+`scripts/qa-sharpness-crops.mjs` to compare Performance presets between builds
+(see docs/PERFORMANCE.md). They show the keyless globe: Esri World Imagery
+draped on Re:Earth terrain. Imagery: Powered by Esri — Source: Esri, Maxar,
+Earthstar Geographics, and the GIS User Community. Terrain: Re:Earth /
+Mapterhorn, CC BY 4.0. The crops are kept small and only as project
+documentation of rendering behavior; the imagery and terrain remain subject to
+their providers' terms (DATA_SOURCES.md).

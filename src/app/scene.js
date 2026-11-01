@@ -13,8 +13,34 @@ import {
   uninstallRenderGovernor,
   governorRequestRender,
 } from '../renderGovernor.js';
+import {
+  PERFORMANCE_PRESETS,
+  adoptInitialPerformancePreset,
+  getPerformanceSettings,
+  installPerformancePreset,
+  refreshImageryOnAnisotropyChange,
+} from '../performancePreset.js';
+import { imageryLayerOptions } from '../maps/imagery.js';
 import { describeError } from './errors.js';
 import { t } from '../i18n/index.js';
+
+/**
+ * The longest drawing-buffer side this GPU can back: the smallest of its
+ * texture, renderbuffer and viewport limits. Infinity before a context
+ * exists. Read before every Cesium resize, so it allocates nothing.
+ */
+function webglBufferLimit() {
+  const limits = Cesium.ContextLimits;
+  return Math.min(
+    positiveLimit(limits.maximumTextureSize),
+    positiveLimit(limits.maximumRenderbufferSize),
+    positiveLimit(limits.maximumViewportWidth),
+    positiveLimit(limits.maximumViewportHeight),
+  );
+}
+
+const positiveLimit = (value) =>
+  Number.isFinite(value) && value > 0 ? value : Infinity;
 
 /** Construct the application globe using the caller's local configuration. */
 export async function createApplicationScene({
@@ -49,14 +75,42 @@ export async function createApplicationScene({
   creditContainer.id = 'cesium-credits';
   document.body.appendChild(creditContainer);
   defer(() => creditContainer.remove());
+  // Display → PERFORMANCE: the page load's preset (`?quality=`, else the
+  // remembered choice, else Balanced) shapes the viewer before its first
+  // frame. Once the WebGL renderer is known a software rasterizer that has no
+  // remembered choice drops to Performance, and the preset then owns the
+  // drawing buffer, anti-aliasing, frame-rate cap and globe detail.
+  let presetStorage = null;
+  try {
+    presetStorage = globalThis.localStorage ?? null;
+  } catch {
+    /* storage unavailable: no remembered preset */
+  }
+  const presetSearch = globalThis.location?.search ?? '';
+  const initialPreset =
+    PERFORMANCE_PRESETS[
+      adoptInitialPerformancePreset({
+        search: presetSearch,
+        storage: presetStorage,
+      }).id
+    ];
   const viewer = createApplicationViewer({
     container: 'cesiumContainer',
     creditContainer,
+    msaaSamples: initialPreset.msaaSamples,
+    deviceResolution: true,
   });
   defer(() => {
     uninstallRenderGovernor(viewer);
     if (!viewer.isDestroyed()) viewer.destroy();
   });
+  const performancePreset = installPerformancePreset(viewer, {
+    storage: presetStorage,
+    search: presetSearch,
+    requestRender: governorRequestRender,
+    getMaxTextureSize: webglBufferLimit,
+  });
+  defer(() => performancePreset.uninstall());
   defer(installTrackpadPinchZoom(viewer));
   registerDataCredits(viewer, credits);
   configureCreditKeyboardAccess(document);
@@ -78,6 +132,8 @@ export async function createApplicationScene({
   });
   signal.throwIfAborted();
   if (tileset) {
+    // The preset's 3D-tile detail and cache before the first tile request.
+    performancePreset.attachTileset(tileset);
     viewer.scene.primitives.add(tileset);
     // NOTE: Cesium World Terrain intentionally disabled — conflicts with Google 3D Tiles at high zoom.
     // Google Photorealistic 3D Tiles provide their own terrain/elevation.
@@ -105,6 +161,15 @@ export async function createApplicationScene({
 
   const mapStackController = new MapController(viewer, {
     requestRender: governorRequestRender,
+    // The base map's imagery takes the preset's anisotropy when its layer is
+    // built (Cesium fixes a tile's sampler when its texture uploads).
+    createImageryLayer: (provider) =>
+      new Cesium.ImageryLayer(
+        provider,
+        imageryLayerOptions({
+          maximumAnisotropy: getPerformanceSettings().imageryMaximumAnisotropy,
+        }),
+      ),
     ...mapOptions,
     googleTileset: tileset,
     cesiumToken,
@@ -122,10 +187,17 @@ export async function createApplicationScene({
     onError: (message) => console.warn('[MapStack]', message),
   });
   defer(() => mapStackController.destroy());
+  // A preset with another anisotropy cap rebuilds the live imagery layer from
+  // the same provider; the old layer stays underneath until the new one loads.
+  defer(
+    refreshImageryOnAnisotropyChange(() =>
+      mapStackController.refreshImageryLayer?.(),
+    ),
+  );
   await mapStackController.setStack(tileset ? 'photoreal' : 'esri-imagery', {
     silent: true,
   });
 
   signal.throwIfAborted();
-  return { viewer, tileset, mapStackController, operations };
+  return { viewer, tileset, mapStackController, operations, performancePreset };
 }

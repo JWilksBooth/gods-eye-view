@@ -34,6 +34,7 @@ export const LAYER_NAME_KEYS = Object.freeze({
   'recent-imagery': msg('Recent Imagery'),
   'fire-perimeters': msg('Fire Perimeters'),
   incidents: msg('Live Incidents'),
+  events: msg('Event Map'),
   alerts: msg('Alerts'),
   streams: msg('Live Streams'),
   'gnss-integrity': msg('GNSS Integrity'),

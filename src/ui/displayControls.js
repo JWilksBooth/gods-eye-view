@@ -21,6 +21,7 @@ export function bindDisplayControls({ elements, actions }) {
     ['cleanViewButton', 'toggleCleanView'],
     ['cleanViewExitButton', 'exitCleanView'],
     ['celestialButton', 'toggleCelestial'],
+    ['gridViewButton', 'toggleGridView'],
     ['hudButton', 'toggleHud'],
     ['sonarButton', 'toggleSonar'],
     ['detectionButton', 'cycleDetection'],
