@@ -26,6 +26,7 @@ const KIND_BY_LAYER = Object.freeze({
   'ais-live-vessels': 'vessel',
   satellites: 'satellite',
   'local-firms': 'fire',
+  alerts: 'alert',
 });
 
 const IGNORED_OWNERS = new Set(['trails']);

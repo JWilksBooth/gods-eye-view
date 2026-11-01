@@ -3060,5 +3060,39 @@
   "Rendering performance preset": "Préréglage de performance du rendu",
   "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Résolution complète, anticrénelage 4×, 60 fps et densité d'étiquettes complète",
   "Full resolution with 2× anti-aliasing at 60 fps — the default": "Résolution complète avec anticrénelage 2× à 60 fps – le réglage par défaut",
-  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Résolution aux trois quarts, sans multi-échantillonnage, 30 fps, étiquettes clairsemées et mises à jour des couches plus lentes"
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Résolution aux trois quarts, sans multi-échantillonnage, 30 fps, étiquettes clairsemées et mises à jour des couches plus lentes",
+  "US EPA air-quality readings in the Alerts layer; unhealthy readings become air alerts": "Mesures de qualité de l'air de l'EPA américaine dans la couche Alertes ; les mesures malsaines deviennent des alertes air",
+  "Bay Area and Sonoma County transit service alerts in the Alerts layer": "Alertes de service des transports en commun de Bay Area et Sonoma County dans la couche Alertes",
+  "LA Metro and RTC Southern Nevada service alerts in the Alerts layer": "Alertes de service de LA Metro et RTC Southern Nevada dans la couche Alertes",
+  "Issued {when}": "Émise {when}",
+  "Starts {when}": "Commence {when}",
+  "Until {time}": "Jusqu'à {time}",
+  "Placed at the county centre; the feed gave no shape": "Placée au centre du comté ; le flux ne fournit aucune forme",
+  "Feed copy may be stale": "La copie du flux est peut-être obsolète",
+  "{count} more bulletins": {
+    "one": "{count} autre bulletin",
+    "many": "{count} autres bulletins",
+    "other": "{count} autres bulletins"
+  },
+  "{region} · {count} bulletins": {
+    "one": "{region} · {count} bulletin",
+    "many": "{region} · {count} bulletins",
+    "other": "{region} · {count} bulletins"
+  },
+  "Alerts source unavailable": "Source des alertes indisponible",
+  "key required": "clé requise",
+  "Colour shows severity. Bulletins without a map shape gather at each region's centre.": "La couleur indique la gravité. Les bulletins sans forme sur la carte se regroupent au centre de leur région.",
+  "{live} of {total} feeds live": "{live} flux sur {total} en direct",
+  "Extreme": "Extrême",
+  "Severe": "Grave",
+  "Minor": "Mineur",
+  "Unknown severity": "Gravité inconnue",
+  "Roads": "Routes",
+  "Airports": "Aéroports",
+  "Emergency": "Urgence",
+  "Advisory": "Avis",
+  "Alerts feed rate limited (HTTP 429)": "Flux des alertes limité en débit (HTTP 429)",
+  "Malformed alerts snapshot": "Instantané des alertes mal formé",
+  "Malformed airport status": "État des aéroports mal formé",
+  "Alerts": "Alertes"
 }

@@ -1,5 +1,36 @@
 # God's Eye View Current State
 
+## Alerts layer — November 1, 2026
+
+The Alerts layer (`alerts`, token `7`, enabled-only; Events group) shows
+official alerts for the LIVE OPS regions, whose ids, names, boxes and centres
+come from `src/data/liveOpsRegions.js`; `src/layers/alerts/regions.js` only
+adds each region's alert ids (counties, NWS areas, Caltrans districts,
+airports and the public names statewide bulletins are matched by). It reads
+`/api/alerts`, which assembles NWS warnings and advisories, CAL FIRE
+incidents, Caltrans lane closures, FAA airport status, AirNow air quality,
+BART, 511 SF Bay and Swiftly (LA Metro, RTC Southern Nevada) transit alerts
+and Cal OES, County of Sonoma and LAFD bulletins into one alert shape. Each
+feed sits behind its own governor (cache, single flight, hourly budget,
+cooldown, bounded serve-stale) and reports failures as short codes, never
+upstream text. AirNow (`AIRNOW_API_KEY`, in Provider Settings), 511 SF Bay
+(`BAY_AREA_511_API_KEY`) and Swiftly (`SWIFTLY_API_KEY`) read their keys on
+every load and report "key required" until set.
+
+Alerts with a shape are drawn as light area fills with outlines, point
+alerts as screen-size markers, and alerts without geometry (transit
+advisories, agency news) gather as one bulletin marker at their region's
+centre. Every colour comes from `src/ui/styles/alerts.css` tokens
+(`--alert-severity-*`, `--alert-marker-outline`), resolved when the layer is
+enabled and on each refresh; the row's legend paints the same tokens. The row
+has kind chips, a severity legend with counts and a feed-health line. A click
+on a marker, area or bulletin opens a card with the headline, agency and
+severity, kind and area, issue and end times, the start of the text and the
+source's host; clicking the card opens the source page. Point and bulletin
+markers are claimed for picking (deixis kind `alert`); area polygons are not,
+so sibling cards stay clickable over them. `get_alerts` and
+`get_airport_status` expose the same data to MCP and voice.
+
 ## LIVE OPS region console — November 1, 2026
 
 The LIVE OPS panel (left rail, below Cameras) holds one button per region in
