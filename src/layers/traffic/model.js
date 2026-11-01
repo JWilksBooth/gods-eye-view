@@ -349,7 +349,23 @@ export function createModel({ state: layerState, services, parts, source }) {
    */
 
   function recolorDotsInPlace(label) {
-    if (!layerState._liveMode || !layerState._dots.length) return;
+    if (!layerState._liveMode) return;
+    // Vehicles off: the roads themselves carry the flow, so the late match
+    // recolors their lines (an unchanged match is a no-op rebuild).
+    if (layerState._vehicles === 'off') {
+      if (!layerState._roads.length) return;
+      parts.rendering.rebuildHeatLines(
+        parts.rendering.visibleRoadsForAltitude(
+          layerState._roads,
+          layerState._lastRenderAltitude,
+        ),
+      );
+      console.log(
+        `[Data:Traffic] Flow recolor (${label}): ${layerState._heatLineCount} roads as flow lines`,
+      );
+      return;
+    }
+    if (!layerState._dots.length) return;
     layerState._bucketCounts = { free: 0, slow: 0, jam: 0, sim: 0 };
     let closedDots = 0;
     const now = Date.now();

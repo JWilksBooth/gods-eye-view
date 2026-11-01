@@ -610,6 +610,22 @@ test('the style parameter table agrees with the long form’s `sp` codec', () =>
   }
 });
 
+test('the Street Traffic vehicles switch round-trips and an older code keeps the vehicles on', () => {
+  const off = createDefaultLayerState();
+  off.enabledLayerIds = ['traffic'];
+  off.options.traffic.vehicles = 'off';
+  const code = encodeShareView({ layerState: off });
+  assert.equal(decodeOk(code).state.layerState.options.traffic.vehicles, 'off');
+  assert.deepEqual(decodeOk(code).unknownFields, undefined);
+  // A code written before the switch existed carries no vehicles option.
+  const before = createDefaultLayerState();
+  before.enabledLayerIds = ['traffic'];
+  before.options.traffic.roadMode = 'osm';
+  const older = encodeShareView({ layerState: before });
+  assert.equal(decodeOk(older).state.layerState.options.traffic.vehicles, 'on');
+  assert.ok(payloadBytes(older).length < payloadBytes(code).length + 3);
+});
+
 test('every layer option has a frozen absent meaning', () => {
   for (const entry of LAYER_STATE_REGISTRY) {
     if (!entry.optionOwner) continue;

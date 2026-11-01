@@ -62,10 +62,12 @@ export function createControls({ state: layerState, services, parts, source }) {
     updateInterval: 0,
 
     /**
-     * Update user-adjustable parameters (road source, density and speed scaling).
+     * Update user-adjustable parameters (road source, vehicles switch,
+     * density and speed scaling).
      *
      * @param {Object}  [params]
      * @param {'tomtom'|'osm'|'hybrid'|null} [params.roadMode] - Road source; null = default.
+     * @param {'on'|'off'} [params.vehicles] - Animate simulated vehicles (on) or draw the flow on the roads alone (off).
      * @param {number}  [params.densityScale] - Dot density multiplier (clamped 0.2–2.5).
      * @param {number}  [params.speedScale]   - Dot speed multiplier (clamped 0.3–3.0).
      * @param {{origin?:string}} [options] - Intent origin; restores never beat `?trafficRoads=`.
@@ -150,6 +152,33 @@ export function createControls({ state: layerState, services, parts, source }) {
           parts.style.restyleDotsInPlace();
         }
       }
+      // Vehicles switch: 'off' draws the flow on the roads alone, 'on' (the
+      // default) animates simulated dots. Same roads, same flow, no refetch
+      // when turning off: lines are draped, so the roads on hand paint at
+      // once. Turning on reloads the view instead, because dots need the
+      // measured road heights the flow map never sampled (the session caches
+      // make that quick).
+      if (params.vehicles === 'on' || params.vehicles === 'off') {
+        if (params.vehicles !== layerState._vehicles) {
+          layerState._vehicles = params.vehicles;
+          const roads = layerState._roads.map((road) => road.source || road);
+          const altitude = layerState._lastRenderAltitude;
+          parts.animation.clearDots();
+          if (!layerState._enabled) return;
+          if (params.vehicles === 'off') {
+            if (roads.length)
+              parts.rendering.renderRoadsForAltitude(
+                roads,
+                altitude,
+                'Vehicles off',
+              );
+          } else {
+            layerState._lastBounds = null;
+            layerState._lastViewCenter = null;
+            parts.viewport.onCameraChanged({ immediate: true });
+          }
+        }
+      }
     },
 
     /**
@@ -159,6 +188,7 @@ export function createControls({ state: layerState, services, parts, source }) {
     getParams() {
       return {
         roadMode: layerState._roadMode,
+        vehicles: layerState._vehicles,
         densityScale: layerState._densityScale,
         speedScale: layerState._speedScale,
         uncoveredRoads: layerState._uncoveredMode,
@@ -167,7 +197,11 @@ export function createControls({ state: layerState, services, parts, source }) {
       };
     },
 
-    /** Road-source chips on the Street Traffic row (TomTom / OSM / Hybrid). */
+    /**
+     * Road-source chips on the Street Traffic row (TomTom / OSM / Hybrid),
+     * then the vehicles switch: lit while simulated vehicles animate, unlit
+     * while the flow is drawn on the roads alone.
+     */
     getRowControls() {
       const selected =
         layerState._roadMode || resolveRoadMode(null, layerState._liveMode);
@@ -187,14 +221,30 @@ export function createControls({ state: layerState, services, parts, source }) {
       };
       // TomTom and OSM are provider names and stay as they are.
       const labels = { tomtom: 'TomTom', osm: 'OSM', hybrid: t('Hybrid') };
+      const vehicles = layerState._vehicles !== 'off';
       return {
-        chips: TRAFFIC_ROAD_MODES.map((mode) => ({
-          id: `roads-${mode}`,
-          label: labels[mode],
-          title: titles[mode],
-          active: mode === selected,
-          params: { roadMode: mode },
-        })),
+        chips: [
+          ...TRAFFIC_ROAD_MODES.map((mode) => ({
+            id: `roads-${mode}`,
+            label: labels[mode],
+            title: titles[mode],
+            active: mode === selected,
+            params: { roadMode: mode },
+          })),
+          {
+            id: 'vehicles',
+            label: t('Vehicles'),
+            title: vehicles
+              ? t(
+                  'Simulated vehicles animate the flow; click to draw the flow on the roads alone',
+                )
+              : t(
+                  'Flow drawn on the roads, no simulated vehicles; click to animate them',
+                ),
+            active: vehicles,
+            params: { vehicles: vehicles ? 'off' : 'on' },
+          },
+        ],
       };
     },
 
@@ -358,6 +408,9 @@ export function createControls({ state: layerState, services, parts, source }) {
         // Jam-viz prototype diagnostics (additive — harness contract untouched).
         heatLines: layerState._heatLineCount,
         jamViz: layerState._jamViz,
+        // Vehicles switch: with it off, `count` and `flowBuckets` describe
+        // the roads drawn as flow lines rather than dots.
+        vehicles: layerState._vehicles,
         // Preset-styling diagnostics (additive): active style + profile.
         stylePreset: layerState._stylePreset,
         styleProfile:
