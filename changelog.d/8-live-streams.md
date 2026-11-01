@@ -7,4 +7,4 @@
   webcams, and Broadcastify scanner directories link out. Streams join the
   event map as `stream` icons whose click opens the feed drawer, so nothing
   loads until a stream is opened; `find_live_streams` joins the MCP and voice
-  tools (JWilksBooth, #7).
+  tools (JWilksBooth, #8).
