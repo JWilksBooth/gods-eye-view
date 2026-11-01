@@ -33,7 +33,7 @@ const check = (name, passed, detail) => {
 };
 const readScope = () =>
   page.evaluate(() => {
-    const scope = window.__godsEyeView.styleManager.getVisualState().scope;
+    const scope = window.__osiris.styleManager.getVisualState().scope;
     const canvas = document.getElementById('scope-mask');
     const context = canvas.getContext('2d');
     const radialX = Math.round(
@@ -211,7 +211,7 @@ function checkSceneChrome(name, before, after) {
 async function openApplication(url) {
   await page.goto(url.href, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(
-    () => window.__godsEyeView?.styleManager?._applicationShortcuts,
+    () => window.__osiris?.styleManager?._applicationShortcuts,
     { timeout: 60_000 },
   );
   await page.waitForFunction(
@@ -255,7 +255,7 @@ try {
   await page.goto('about:blank');
   await openApplication(url);
   await page.evaluate(() => {
-    const manager = window.__godsEyeView.styleManager;
+    const manager = window.__osiris.styleManager;
     manager.setPanelCollapsed('pp-toggles', false, {
       persist: false,
       syncShare: false,
@@ -361,7 +361,7 @@ try {
   }
 
   const restored = await page.evaluate(async () => {
-    const manager = window.__godsEyeView.styleManager;
+    const manager = window.__osiris.styleManager;
     const links = manager.shareLinkManager;
     manager._syncShareState();
     const params = links._buildHashParams();
@@ -398,7 +398,7 @@ try {
   for (const layout of ['minimal', 'tactical']) {
     await page.select('#hud-layout-select', layout);
     await page.evaluate(() =>
-      window.__godsEyeView.styleManager.applyVisualState({
+      window.__osiris.styleManager.applyVisualState({
         scope: { enabled: true, featherPct: 100 },
       }),
     );
@@ -464,7 +464,7 @@ try {
       });
     }
     await page.evaluate(() =>
-      window.__godsEyeView.styleManager.applyVisualState({
+      window.__osiris.styleManager.applyVisualState({
         scope: { enabled: false },
       }),
     );
@@ -652,14 +652,14 @@ try {
   for (const layout of ['minimal', 'tactical']) {
     await page.select('#hud-layout-select', layout);
     await page.evaluate(() =>
-      window.__godsEyeView.styleManager.applyVisualState({
+      window.__osiris.styleManager.applyVisualState({
         scope: { enabled: true },
       }),
     );
     await settleTextBackings(true);
     const before = await readSceneChrome();
     await page.evaluate(() =>
-      window.__godsEyeView.styleManager.applyVisualState({
+      window.__osiris.styleManager.applyVisualState({
         scope: { enabled: false },
       }),
     );

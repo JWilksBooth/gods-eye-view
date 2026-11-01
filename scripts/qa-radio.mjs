@@ -86,7 +86,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 // the panels back for the scenarios that follow.
 async function revealRadioControls(page, targetId) {
   const prior = await page.evaluate(async (id) => {
-    const manager = window.__godsEyeView.styleManager;
+    const manager = window.__osiris.styleManager;
     const collapsed = (panelId) => document.getElementById(panelId).classList.contains('collapsed');
     const state = { context: collapsed('global-context-panel'), radio: collapsed('radio-panel') };
     manager.setPanelCollapsed('global-context-panel', false, { explicit: true });
@@ -101,7 +101,7 @@ async function revealRadioControls(page, targetId) {
 
 async function restoreRadioPanels(page, prior) {
   await page.evaluate(({ context, radio }) => {
-    const manager = window.__godsEyeView.styleManager;
+    const manager = window.__osiris.styleManager;
     manager.setPanelCollapsed('radio-panel', radio);
     manager.setPanelCollapsed('global-context-panel', context);
   }, prior);
@@ -111,7 +111,7 @@ async function restoreRadioPanels(page, prior) {
 // not on wall-clock sleeps, particularly with software rendering.
 async function settleRadioFrames(page) {
   await page.evaluate(() => new Promise((resolve, reject) => {
-    const scene = window.__godsEyeView.viewer.scene;
+    const scene = window.__osiris.viewer.scene;
     let remaining = 4;
     const timeout = setTimeout(() => { remove(); reject(new Error('Radio rendered-frame deadline exceeded')); }, 10_000);
     const remove = scene.postRender.addEventListener(() => {
@@ -293,8 +293,8 @@ async function main() {
     });
 
     await page.goto(RADIO_URL.href, { waitUntil: 'domcontentloaded', timeout: 60_000 });
-    await page.waitForFunction(() => window.__godsEyeView?.dataManager, { timeout: 60_000 });
-    await page.waitForFunction(() => window.__godsEyeView?.styleManager?._dataManager?.layers?.has('radio'), { timeout: 60_000 });
+    await page.waitForFunction(() => window.__osiris?.dataManager, { timeout: 60_000 });
+    await page.waitForFunction(() => window.__osiris?.styleManager?._dataManager?.layers?.has('radio'), { timeout: 60_000 });
     await page.waitForFunction(
       () => document.getElementById('loading-screen')?.classList.contains('hidden'),
       { timeout: 60_000 },
@@ -304,25 +304,25 @@ async function main() {
       && typeof window.__gevQaUnregisterLayer === 'function'
     ));
     await page.evaluate(() => {
-      window.__godsEyeView.viewer.camera.cancelFlight();
-      window.__godsEyeView.styleManager.setPanelCollapsed('pp-toggles', true);
-      window.__godsEyeView.styleManager.setPanelCollapsed('cctv-panel', true);
-      window.__godsEyeView.styleManager.setPanelCollapsed('radio-panel', true);
-      window.__godsEyeView.styleManager.setPanelCollapsed('global-context-panel', true);
+      window.__osiris.viewer.camera.cancelFlight();
+      window.__osiris.styleManager.setPanelCollapsed('pp-toggles', true);
+      window.__osiris.styleManager.setPanelCollapsed('cctv-panel', true);
+      window.__osiris.styleManager.setPanelCollapsed('radio-panel', true);
+      window.__osiris.styleManager.setPanelCollapsed('global-context-panel', true);
     });
 
     const enablePanels = await revealRadioControls(page, 'radio-enable-btn');
     const enableStartedAt = Date.now();
     await page.click('#radio-enable-btn');
     await page.waitForFunction(() => {
-      const state = window.__godsEyeView.dataManager.layers.get('radio').module.getUIState();
+      const state = window.__osiris.dataManager.layers.get('radio').module.getUIState();
       return state.enabled && !state.loading && state.stationCount === 750;
     });
     const enableElapsedMs = Date.now() - enableStartedAt;
     // Later scenarios start from the collapsed rail this step began with.
     await restoreRadioPanels(page, enablePanels);
     const initial = await page.evaluate(() => {
-      const module = window.__godsEyeView.dataManager.layers.get('radio').module;
+      const module = window.__osiris.dataManager.layers.get('radio').module;
       const state = module.getUIState();
       const context = document.getElementById('global-context-panel');
       const radio = document.getElementById('radio-panel');
@@ -342,7 +342,7 @@ async function main() {
         fullPlayEnabled: !document.getElementById('radio-play-btn').disabled,
         fullPlayLabel: document.getElementById('radio-play-btn').getAttribute('aria-label'),
         tunerVisible: !document.getElementById('radio-tuner').hidden,
-        tunerCount: window.__godsEyeView.styleManager._radioControls._radioTunerStations.length,
+        tunerCount: window.__osiris.styleManager._radioControls._radioTunerStations.length,
         tunerLabel: document.getElementById('radio-tuner-band-label').textContent,
       };
     });
@@ -369,7 +369,7 @@ async function main() {
       JSON.stringify({ visible: initial.tunerVisible, count: initial.tunerCount, label: initial.tunerLabel }),
     );
     const uncertainPresentation = await page.evaluate(async () => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const style = gev.styleManager;
       const entry = gev.dataManager.layers.get('radio');
       const module = entry.module;
@@ -499,7 +499,7 @@ async function main() {
       JSON.stringify(uncertainPresentation),
     );
     await page.evaluate(() => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const module = gev.dataManager.layers.get('radio').module;
       const originalDisable = module.disable.bind(module);
       module.disable = async (...args) => {
@@ -512,9 +512,9 @@ async function main() {
     });
     await page.waitForFunction(() => window.__qaRadioDisableStarted === true);
     const disablingPresentation = await page.evaluate(() => ({
-      manager: window.__godsEyeView.dataManager.getLayerLifecycleState('radio'),
-      presentationActive: window.__godsEyeView.dataManager.layers.get('radio').module.getUIState().presentationActive,
-      markerSourceVisible: window.__godsEyeView.viewer.dataSources.getByName('Radio stations')[0]?.show,
+      manager: window.__osiris.dataManager.getLayerLifecycleState('radio'),
+      presentationActive: window.__osiris.dataManager.layers.get('radio').module.getUIState().presentationActive,
+      markerSourceVisible: window.__osiris.viewer.dataSources.getByName('Radio stations')[0]?.show,
       full: document.getElementById('radio-enable-btn').textContent,
       layerState: document.getElementById('radio-layer-state').textContent,
       message: document.getElementById('radio-playback-state').textContent,
@@ -543,7 +543,7 @@ async function main() {
       delete window.__qaRadioDisableStarted;
     });
     const explicitRevealBefore = await page.evaluate(async () => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       gev.styleManager.setPanelCollapsed('global-context-panel', false);
       gev.styleManager.setPanelCollapsed('radio-panel', false);
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -564,7 +564,7 @@ async function main() {
     // the real module enable boundary instead so the manager's ENABLING state
     // is observed deterministically without slowing production behavior.
     await page.evaluate(() => {
-      const radio = window.__godsEyeView.dataManager.layers.get('radio').module;
+      const radio = window.__osiris.dataManager.layers.get('radio').module;
       const originalEnable = radio.enable;
       let release;
       const gate = new Promise((resolve) => { release = resolve; });
@@ -578,12 +578,12 @@ async function main() {
     await page.focus('#radio-enable-btn');
     await page.click('#radio-enable-btn');
     await page.waitForFunction(() => (
-      window.__godsEyeView.dataManager.getLayerLifecycleState('radio')?.lifecycleState === 'enabling'
+      window.__osiris.dataManager.getLayerLifecycleState('radio')?.lifecycleState === 'enabling'
     ));
     const enablingPresentation = await page.evaluate(() => ({
-      manager: window.__godsEyeView.dataManager.getLayerLifecycleState('radio'),
-      presentationActive: window.__godsEyeView.dataManager.layers.get('radio').module.getUIState().presentationActive,
-      markerSourceVisible: window.__godsEyeView.viewer.dataSources.getByName('Radio stations')[0]?.show,
+      manager: window.__osiris.dataManager.getLayerLifecycleState('radio'),
+      presentationActive: window.__osiris.dataManager.layers.get('radio').module.getUIState().presentationActive,
+      markerSourceVisible: window.__osiris.viewer.dataSources.getByName('Radio stations')[0]?.show,
       full: document.getElementById('radio-enable-btn').textContent,
       layerState: document.getElementById('radio-layer-state').textContent,
       message: document.getElementById('radio-playback-state').textContent,
@@ -607,7 +607,7 @@ async function main() {
       JSON.stringify(enablingPresentation),
     );
     await page.evaluate(() => window.__qaReleaseRadioEnable?.());
-    await page.waitForFunction(() => window.__godsEyeView.dataManager.isEnabled('radio'));
+    await page.waitForFunction(() => window.__osiris.dataManager.isEnabled('radio'));
     await page.evaluate(() => window.__qaRestoreRadioEnable?.());
     await page.waitForFunction(() => {
       const scroller = document.querySelector('#global-context-panel .global-context-panel-inner');
@@ -618,7 +618,7 @@ async function main() {
         && play.top >= viewport.top && play.bottom <= viewport.bottom;
     }, { timeout: 10_000 });
     const explicitRevealAfter = await page.evaluate(() => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const scroller = document.querySelector('#global-context-panel .global-context-panel-inner');
       const viewport = scroller.getBoundingClientRect();
       const directory = document.querySelector('#radio-panel .radio-directory-row').getBoundingClientRect();
@@ -653,8 +653,8 @@ async function main() {
       JSON.stringify({ before: explicitRevealBefore, after: explicitRevealAfter, cameraDelta: revealCameraDelta }),
     );
     await page.evaluate(() => {
-      window.__godsEyeView.styleManager.setPanelCollapsed('radio-panel', true);
-      window.__godsEyeView.styleManager.setPanelCollapsed('global-context-panel', true);
+      window.__osiris.styleManager.setPanelCollapsed('radio-panel', true);
+      window.__osiris.styleManager.setPanelCollapsed('global-context-panel', true);
     });
     const singletonViews = [];
     const singletonViewSpecs = [
@@ -670,7 +670,7 @@ async function main() {
         { name: 'near', height: 500_000, limit: 32 },
       ]) {
         await page.evaluate(({ lon, height }) => {
-          const viewer = window.__godsEyeView.viewer;
+          const viewer = window.__osiris.viewer;
           viewer.camera.cancelFlight();
           viewer.camera.setView({
             destination: viewer.scene.globe.ellipsoid.cartographicToCartesian({
@@ -685,8 +685,8 @@ async function main() {
         await sleep(700);
         await settleRadioFrames(page);
         const sample = await page.evaluate(async () => {
-          const viewer = window.__godsEyeView.viewer;
-          const radio = window.__godsEyeView.dataManager.layers.get('radio').module;
+          const viewer = window.__osiris.viewer;
+          const radio = window.__osiris.dataManager.layers.get('radio').module;
           const dataSource = Array.from({ length: viewer.dataSources.length }, (_, index) => viewer.dataSources.get(index))
             .find((item) => item.name === 'Radio stations');
           const { getOverlayPaintRect, getWorldOverlayDiagnostics } = await import('/src/overlays/worldOverlay.js');
@@ -761,7 +761,7 @@ async function main() {
       }))),
     );
     const userFacingFailures = await page.evaluate(async () => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const styleManager = gev.styleManager;
       const dataManager = gev.dataManager;
       const unhandled = [];
@@ -1234,7 +1234,7 @@ async function main() {
     );
     catalogDegraded = true;
     const degradedCatalog = await page.evaluate(async () => {
-      const radio = window.__godsEyeView.dataManager.layers.get('radio').module;
+      const radio = window.__osiris.dataManager.layers.get('radio').module;
       await radio.update();
       return {
         state: radio.getUIState(),
@@ -1251,12 +1251,12 @@ async function main() {
     );
     catalogDegraded = false;
     await page.evaluate(async () => {
-      await window.__godsEyeView.dataManager.layers.get('radio').module.update();
+      await window.__osiris.dataManager.layers.get('radio').module.update();
     });
     await page.select('#radio-filter', 'all');
     const allPalette = await page.evaluate(() => {
-      const source = Array.from({ length: window.__godsEyeView.viewer.dataSources.length }, (_, index) => (
-        window.__godsEyeView.viewer.dataSources.get(index)
+      const source = Array.from({ length: window.__osiris.viewer.dataSources.length }, (_, index) => (
+        window.__osiris.viewer.dataSources.get(index)
       )).find((item) => item.name === 'Radio stations');
       const colorFor = (index) => {
         const id = `radio:00000000-0000-4000-8000-${index.toString(16).padStart(12, '0')}`;
@@ -1274,7 +1274,7 @@ async function main() {
       JSON.stringify(allPalette),
     );
     const clusterBadge = await page.evaluate(async () => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       const { getOverlayPaintRect, getWorldOverlayDiagnostics } = await import('/src/overlays/worldOverlay.js');
       const baselineSolveRevision = getWorldOverlayDiagnostics().solveRevision;
       const source = Array.from({ length: viewer.dataSources.length }, (_, index) => viewer.dataSources.get(index))
@@ -1309,7 +1309,7 @@ async function main() {
             pointMaxDistance: cluster.point.distanceDisplayCondition?.far ?? null,
           };
           source.clustering.pixelRange = originalPixelRange;
-          const radio = window.__godsEyeView.dataManager.layers.get('radio').module;
+          const radio = window.__osiris.dataManager.layers.get('radio').module;
           await new Promise((done) => setTimeout(done, 0));
           let painted = null;
           for (let attempt = 0; attempt < 20 && !painted?.rect; attempt += 1) {
@@ -1365,7 +1365,7 @@ async function main() {
       JSON.stringify(clusterBadge),
     );
     await page.evaluate(async () => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       const ellipsoid = viewer.scene.globe.ellipsoid;
       viewer.camera.cancelFlight();
       viewer.camera.setView({
@@ -1381,8 +1381,8 @@ async function main() {
     });
     await settleRadioFrames(page);
     const highGlobalClusterLabels = await page.evaluate(async () => {
-      const viewer = window.__godsEyeView.viewer;
-      const radio = window.__godsEyeView.dataManager.layers.get('radio').module;
+      const viewer = window.__osiris.viewer;
+      const radio = window.__osiris.dataManager.layers.get('radio').module;
       const ellipsoid = viewer.scene.globe.ellipsoid;
       const { getWorldOverlayDiagnostics } = await import('/src/overlays/worldOverlay.js');
       const { distanceFade } = await import('/src/overlays/worldOverlayDraw.js');
@@ -1443,8 +1443,8 @@ async function main() {
     );
     await page.screenshot({ path: path.join(SHOTS_DIR, 'high-global-all-labels.png') });
     const clusterContinuity = await page.evaluate(async () => {
-      const viewer = window.__godsEyeView.viewer;
-      const radio = window.__godsEyeView.dataManager.layers.get('radio').module;
+      const viewer = window.__osiris.viewer;
+      const radio = window.__osiris.dataManager.layers.get('radio').module;
       const ellipsoid = viewer.scene.globe.ellipsoid;
       const { getOverlayPaintRect, getWorldOverlayDiagnostics } = await import('/src/overlays/worldOverlay.js');
       const paintedClusters = () => new Promise((resolve) => {
@@ -1542,8 +1542,8 @@ async function main() {
       JSON.stringify(clusterContinuity),
     );
     const directoryRefreshContinuity = await page.evaluate(async () => {
-      const viewer = window.__godsEyeView.viewer;
-      const radio = window.__godsEyeView.dataManager.layers.get('radio').module;
+      const viewer = window.__osiris.viewer;
+      const radio = window.__osiris.dataManager.layers.get('radio').module;
       const before = radio.getOverlayDiagnostics().clusterMemberships;
       await radio.update();
       viewer.scene.requestRender();
@@ -1570,7 +1570,7 @@ async function main() {
     check('full Play is available before a station is selected', !initial.state.selected && initial.fullPlayEnabled && initial.fullPlayLabel === 'Play nearest radio station');
 
     const multiExpandedPanelLayout = await page.evaluate(async () => {
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       const ids = ['data-panel', 'scene-panel', 'pp-toggles', 'cctv-panel', 'global-context-panel'];
       const prior = {
         panels: Object.fromEntries(ids.map((id) => {
@@ -1820,7 +1820,7 @@ async function main() {
       JSON.stringify(multiExpandedPanelLayout.tacticalDisplayExclusive),
     );
     const parameterizedDisplayScroll = await page.evaluate(async () => {
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       const display = document.getElementById('pp-toggles');
       const parameters = document.getElementById('param-slider-panel');
       const prior = {
@@ -1907,7 +1907,7 @@ async function main() {
       const models3dAll = document.getElementById('models3d-mode-all');
       const scene = document.getElementById('scene-panel');
       const dataPanel = document.getElementById('data-panel');
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       // This block validates portaled DOM controls, while qa-cockpit-utility
       // owns the real tracked-aircraft camera session. Hold the frame update so
       // the intentionally synthetic Cockpit shell is not auto-exited mid-check.
@@ -1975,8 +1975,8 @@ async function main() {
       hud.hidden = false;
       signal.hidden = false;
       dataPanel.classList.remove('collapsed');
-      window.__godsEyeView.styleManager._syncLeftPanelAdaptiveLayout();
-      window.__godsEyeView.styleManager.cockpitView.syncSignalLayout();
+      window.__osiris.styleManager._syncLeftPanelAdaptiveLayout();
+      window.__osiris.styleManager.cockpitView.syncSignalLayout();
       if (display.getAttribute('aria-expanded') === 'true') display.click();
       display.click();
       manager._setHudVariant('tactical');
@@ -2095,15 +2095,15 @@ async function main() {
         ),
       ));
       const toggleBefore = toggleLayerId
-        ? window.__godsEyeView.dataManager.isEnabled(toggleLayerId) : null;
+        ? window.__osiris.dataManager.isEnabled(toggleLayerId) : null;
       toggleButton?.click();
       await waitForLayout();
       const toggleAfter = toggleLayerId
-        ? window.__godsEyeView.dataManager.isEnabled(toggleLayerId) : null;
+        ? window.__osiris.dataManager.isEnabled(toggleLayerId) : null;
       toggleButton?.click();
       await waitForLayout();
       const toggleRestored = toggleLayerId
-        ? window.__godsEyeView.dataManager.isEnabled(toggleLayerId) === toggleBefore : false;
+        ? window.__osiris.dataManager.isEnabled(toggleLayerId) === toggleBefore : false;
       const cockpitPanelInteraction = {
         toggleLayerId,
         contactClearancePx,
@@ -2347,13 +2347,13 @@ async function main() {
     await page.screenshot({ path: path.join(SHOTS_DIR, 'compact.png') });
 
     const firstPlayPrecondition = await page.evaluate(() => (
-      window.__godsEyeView.dataManager.layers.get('radio').module.getUIState().selected?.id || null
+      window.__osiris.dataManager.layers.get('radio').module.getUIState().selected?.id || null
     ));
     check('first Play scenario starts without a leaked Radio selection', firstPlayPrecondition === null,
       `selected=${firstPlayPrecondition}`);
     await page.select('#radio-filter', 'all');
     await page.evaluate(() => {
-      const camera = window.__godsEyeView.viewer.camera;
+      const camera = window.__osiris.viewer.camera;
       window.__qaFirstPlayFlyToCalls = [];
       window.__qaFirstPlayOriginalFlyTo = camera.flyTo;
       camera.flyTo = (options) => window.__qaFirstPlayFlyToCalls.push(options);
@@ -2362,12 +2362,12 @@ async function main() {
     await page.focus('#radio-play-btn');
     await page.click('#radio-play-btn');
     await page.waitForFunction(() => {
-      const state = window.__godsEyeView.dataManager.layers.get('radio').module.getUIState();
+      const state = window.__osiris.dataManager.layers.get('radio').module.getUIState();
       return state.audioState === 'playing' || state.audioState === 'error';
     });
     await restoreRadioPanels(page, firstPlayPanels);
     const postMicroDragPlayback = await page.evaluate(async () => {
-      const mod = window.__godsEyeView.dataManager.layers.get('radio').module;
+      const mod = window.__osiris.dataManager.layers.get('radio').module;
       let state = mod.getUIState();
       if (state.audioState !== 'playing') {
         await mod.play({ origin: 'user' });
@@ -2378,9 +2378,9 @@ async function main() {
     check('micro-drag release leaves the selected station playable',
       postMicroDragPlayback.audioState === 'playing', JSON.stringify(postMicroDragPlayback));
     const firstPlay = await page.evaluate(() => {
-      const module = window.__godsEyeView.dataManager.layers.get('radio').module;
+      const module = window.__osiris.dataManager.layers.get('radio').module;
       const state = module.getUIState();
-      const camera = window.__godsEyeView.viewer.camera;
+      const camera = window.__osiris.viewer.camera;
       const result = {
         state,
         calls: [...window.__qaRadioPlayCalls],
@@ -2401,7 +2401,7 @@ async function main() {
 
     await page.select('#radio-filter', 'news');
     await page.evaluate(() => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       viewer.camera.cancelFlight();
       viewer.camera.setView({
         destination: viewer.scene.globe.ellipsoid.cartographicToCartesian({
@@ -2414,7 +2414,7 @@ async function main() {
     });
     await sleep(700);
     const newsClusterTarget = await page.evaluate(() => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const source = Array.from({ length: gev.viewer.dataSources.length }, (_, index) => gev.viewer.dataSources.get(index))
         .find((item) => item.name === 'Radio stations');
       const points = source.clustering._clusterPointCollection;
@@ -2441,12 +2441,12 @@ async function main() {
     if (!newsClusterTarget.missing) {
       await page.mouse.click(newsClusterTarget.x, newsClusterTarget.y);
       await page.waitForFunction((stationId) => {
-        const state = window.__godsEyeView.dataManager.layers.get('radio').module.getUIState();
+        const state = window.__osiris.dataManager.layers.get('radio').module.getUIState();
         return state.selected?.id === stationId && state.audioState === 'playing';
       }, {}, newsClusterTarget.firstId);
     }
     const newsClusterClick = await page.evaluate(() => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const state = gev.dataManager.layers.get('radio').module.getUIState();
       gev.dataManager.layers.get('radio').module.stopPlayback();
       return { selectedId: state.selected?.id, audioState: state.audioState };
@@ -2462,7 +2462,7 @@ async function main() {
     await page.select('#radio-filter', 'weather');
     await sleep(700);
     const weatherCluster = await page.evaluate(() => {
-      const radio = window.__godsEyeView.dataManager.layers.get('radio').module;
+      const radio = window.__osiris.dataManager.layers.get('radio').module;
       return { texts: radio.getOverlayDiagnostics().clusterTexts };
     });
     check(
@@ -2477,7 +2477,7 @@ async function main() {
       input.dispatchEvent(new Event('input', { bubbles: true }));
     });
     const radioVolume = await page.evaluate(() => ({
-      volume: window.__godsEyeView.dataManager.layers.get('radio').module.getUIState().volume,
+      volume: window.__osiris.dataManager.layers.get('radio').module.getUIState().volume,
       full: document.getElementById('radio-volume').value,
       label: document.getElementById('radio-volume-value').textContent,
     }));
@@ -2490,10 +2490,10 @@ async function main() {
     const voicePause = await page.evaluate(async () => {
       const filter = document.getElementById('radio-filter');
       const firstOption = filter?.options?.[0] || null;
-      await window.__godsEyeView.dataManager.layers.get('radio').module.play();
+      await window.__osiris.dataManager.layers.get('radio').module.play();
       const startedAt = performance.now();
-      window.__godsEyeView.voiceCommands.setStatus('connecting', 'QA voice connect');
-      const state = window.__godsEyeView.dataManager.layers.get('radio').module.getUIState();
+      window.__osiris.voiceCommands.setStatus('connecting', 'QA voice connect');
+      const state = window.__osiris.dataManager.layers.get('radio').module.getUIState();
       return {
         ...state,
         transitionMs: performance.now() - startedAt,
@@ -2511,8 +2511,8 @@ async function main() {
       `${voicePause.transitionMs.toFixed(1)}ms transition`,
     );
     const idleHorizonScans = await page.evaluate(async () => {
-      const radio = window.__godsEyeView.dataManager.layers.get('radio').module;
-      const camera = window.__godsEyeView.viewer.camera;
+      const radio = window.__osiris.dataManager.layers.get('radio').module;
+      const camera = window.__osiris.viewer.camera;
       camera.cancelFlight();
       await new Promise((resolve) => setTimeout(resolve, 350));
       const positionBefore = {
@@ -2537,11 +2537,11 @@ async function main() {
       JSON.stringify(idleHorizonScans),
     );
     const idleVoice = await page.evaluate(() => {
-      const voice = window.__godsEyeView.voiceCommands;
+      const voice = window.__osiris.voiceCommands;
       voice.setMicrophoneEnabled(true);
       voice.setStatus('listening', 'QA standby');
       voice.setVoiceSpeaker('idle');
-      return window.__godsEyeView.dataManager.layers.get('radio').module.getUIState();
+      return window.__osiris.dataManager.layers.get('radio').module.getUIState();
     });
     check(
       'idle voice never auto-resumes a station paused for voice',
@@ -2549,7 +2549,7 @@ async function main() {
       idleVoice.audioState,
     );
     const manualPlayTarget = await page.evaluate(async () => {
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       manager.setPanelCollapsed('global-context-panel', false);
       manager.setPanelCollapsed('radio-panel', false);
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -2576,14 +2576,14 @@ async function main() {
     if (manualPlayTarget.visible && manualPlayTarget.enabled) {
       await page.click('#radio-play-btn');
       await page.waitForFunction(() => (
-        window.__godsEyeView.dataManager.layers.get('radio').module.getUIState().audioState === 'playing'
-        && window.__godsEyeView.voiceCommands.status === 'idle'
+        window.__osiris.dataManager.layers.get('radio').module.getUIState().audioState === 'playing'
+        && window.__osiris.voiceCommands.status === 'idle'
       ));
     }
     const manualTakeover = await page.evaluate(() => ({
-      audioState: window.__godsEyeView.dataManager.layers.get('radio').module.getUIState().audioState,
-      voiceStatus: window.__godsEyeView.voiceCommands.status,
-      voiceDucked: window.__godsEyeView.dataManager.layers.get('radio').module.getUIState().voiceDucked,
+      audioState: window.__osiris.dataManager.layers.get('radio').module.getUIState().audioState,
+      voiceStatus: window.__osiris.voiceCommands.status,
+      voiceDucked: window.__osiris.dataManager.layers.get('radio').module.getUIState().voiceDucked,
     }));
     check(
       'confirmed manual Radio Play closes active voice and preserves playback',
@@ -2592,10 +2592,10 @@ async function main() {
         && !manualTakeover.voiceDucked,
       JSON.stringify(manualTakeover),
     );
-    await page.evaluate(() => window.__godsEyeView.voiceCommands.setStatus('listening', 'QA standby'));
+    await page.evaluate(() => window.__osiris.voiceCommands.setStatus('listening', 'QA standby'));
     const explicitResume = await page.evaluate(async () => {
-      const voice = window.__godsEyeView.voiceCommands;
-      const radio = window.__godsEyeView.dataManager.layers.get('radio').module;
+      const voice = window.__osiris.voiceCommands;
+      const radio = window.__osiris.dataManager.layers.get('radio').module;
       await radio.play();
       const beforeSpace = radio.getUIState().audioState;
       // Simulate an already-started hold-Space session; click-started open mic
@@ -2619,9 +2619,9 @@ async function main() {
       explicitResume.beforeSpace === 'playing' && explicitResume.afterSpace === 'paused' && explicitResume.afterAi === 'paused',
       JSON.stringify(explicitResume),
     );
-    await page.evaluate(() => window.__godsEyeView.voiceCommands.setStatus('idle', 'QA complete'));
+    await page.evaluate(() => window.__osiris.voiceCommands.setStatus('idle', 'QA complete'));
     await page.evaluate(async () => {
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       manager.setPanelCollapsed('global-context-panel', false);
       manager.setPanelCollapsed('radio-panel', false);
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -2635,7 +2635,7 @@ async function main() {
     });
 
     const horizon = await page.evaluate(async () => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       const ellipsoid = viewer.scene.globe.ellipsoid;
       const source = Array.from({ length: viewer.dataSources.length }, (_, index) => viewer.dataSources.get(index))
         .find((item) => item.name === 'Radio stations');
@@ -2665,7 +2665,7 @@ async function main() {
 
     await page.select('#radio-filter', 'all');
     const absoluteTuner = await page.evaluate(async () => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const style = gev.styleManager;
       const radio = gev.dataManager.layers.get('radio').module;
       const slider = document.getElementById('radio-tuner-slider');
@@ -2765,7 +2765,7 @@ async function main() {
       }),
     );
     const tunerCancelRestore = await page.evaluate(() => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const style = gev.styleManager;
       const radio = gev.dataManager.layers.get('radio').module;
       const slider = document.getElementById('radio-tuner-slider');
@@ -2924,7 +2924,7 @@ async function main() {
       JSON.stringify(tunerCancelRestore.sameFilterCleanup),
     );
     const tunerRefreshTarget = await page.evaluate(() => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const slider = document.getElementById('radio-tuner-slider');
       const stations = gev.styleManager._radioControls._radioTunerStations;
       const targetIndex = 1;
@@ -2955,10 +2955,10 @@ async function main() {
     ));
     catalogGeneration = 2;
     await page.evaluate(async () => {
-      await window.__godsEyeView.dataManager.layers.get('radio').module.update();
+      await window.__osiris.dataManager.layers.get('radio').module.update();
     });
     const tunerRefreshRelease = await page.evaluate((target) => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const slider = document.getElementById('radio-tuner-slider');
       const displayedBeforeRelease = document.getElementById('radio-tuner-station').textContent;
       const frozenGeneration = gev.dataManager.layers.get('radio').module.getUIState().tuningCatalogGeneration;
@@ -2999,10 +2999,10 @@ async function main() {
     catalogStations = stations;
     catalogGeneration = 3;
     await page.evaluate(async () => {
-      await window.__godsEyeView.dataManager.layers.get('radio').module.update();
+      await window.__osiris.dataManager.layers.get('radio').module.update();
     });
     const tunerDirectRelease = await page.evaluate(async () => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const slider = document.getElementById('radio-tuner-slider');
       const needle = document.getElementById('radio-tuner-needle');
       const startSlot = Number(slider.value);
@@ -3065,7 +3065,7 @@ async function main() {
       return document.elementFromPoint(x, rect.top + rect.height / 2) === slider;
     });
     const tunerCommitTarget = await page.evaluate(() => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const slider = document.getElementById('radio-tuner-slider');
       const targetIndex = 11;
       slider.dispatchEvent(new PointerEvent('pointercancel', { bubbles: true, pointerId: 1 }));
@@ -3090,7 +3090,7 @@ async function main() {
     await page.mouse.up();
     await sleep(650);
     const tunerCommit = await page.evaluate((target) => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const slider = document.getElementById('radio-tuner-slider');
       const state = gev.dataManager.layers.get('radio').module.getUIState();
       return {
@@ -3117,7 +3117,7 @@ async function main() {
     await page.evaluate(() => window.__qaReleaseRadioPlay());
     await page.waitForFunction(
       (id) => {
-        const state = window.__godsEyeView.dataManager.layers.get('radio').module.getUIState();
+        const state = window.__osiris.dataManager.layers.get('radio').module.getUIState();
         return state.selected?.id === id && state.audioState === 'playing' && !state.tuningActive && !state.tuningStatic;
       },
       {},
@@ -3137,7 +3137,7 @@ async function main() {
       JSON.stringify(broadcastIndicator),
     );
     const microDragStart = await page.evaluate(() => {
-      const style = window.__godsEyeView.styleManager;
+      const style = window.__osiris.styleManager;
       const slider = document.getElementById('radio-tuner-slider');
       const rect = slider.getBoundingClientRect();
       const ratio = Number(slider.value) / Math.max(1, Number(slider.max));
@@ -3156,7 +3156,7 @@ async function main() {
       await page.mouse.move(microDragStart.x + delta, microDragStart.y);
       await sleep(80);
       microDragSamples.push(await page.evaluate((pixelDelta) => {
-        const style = window.__godsEyeView.styleManager;
+        const style = window.__osiris.styleManager;
         const slider = document.getElementById('radio-tuner-slider');
         return {
           pixelDelta,
@@ -3170,7 +3170,7 @@ async function main() {
     await page.mouse.up();
     await page.screenshot({ path: path.join(SHOTS_DIR, 'tuner-micro-drag.png') });
     const microDragPlayback = await page.evaluate(async () => {
-      const mod = window.__godsEyeView.dataManager.layers.get('radio').module;
+      const mod = window.__osiris.dataManager.layers.get('radio').module;
       const deadline = Date.now() + 2_000;
       let state = mod.getUIState();
       while (state.audioState === 'loading' && Date.now() < deadline) {
@@ -3198,7 +3198,7 @@ async function main() {
       JSON.stringify(microDragSamples),
     );
     const viewportTuner = await page.evaluate(async (selectedId) => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const style = gev.styleManager;
       const before = {
         signature: style._radioControls._radioTunerBandSignature,
@@ -3240,8 +3240,8 @@ async function main() {
       JSON.stringify(viewportTuner),
     );
     const nextNeedleBefore = await page.evaluate(() => {
-      const style = window.__godsEyeView.styleManager;
-      const selectedId = window.__godsEyeView.dataManager.layers.get('radio').module.getUIState().selected?.id;
+      const style = window.__osiris.styleManager;
+      const selectedId = window.__osiris.dataManager.layers.get('radio').module.getUIState().selected?.id;
       const selectedIndex = style._radioControls._radioTunerStations.findIndex((station) => station.id === selectedId);
       const selectedPoolIndex = style._radioControls._radioTunerPool.findIndex((station) => station.id === selectedId);
       const expectedPoolIndex = (selectedPoolIndex + 1) % style._radioControls._radioTunerPool.length;
@@ -3255,8 +3255,8 @@ async function main() {
     await page.$eval('#radio-next-btn', (button) => button.click());
     await sleep(1500);
     const nextNeedleAfter = await page.evaluate(() => {
-      const style = window.__godsEyeView.styleManager;
-      const selectedId = window.__godsEyeView.dataManager.layers.get('radio').module.getUIState().selected?.id;
+      const style = window.__osiris.styleManager;
+      const selectedId = window.__osiris.dataManager.layers.get('radio').module.getUIState().selected?.id;
       const selectedIndex = style._radioControls._radioTunerStations.findIndex((station) => station.id === selectedId);
       return {
         signature: style._radioControls._radioTunerBandSignature,
@@ -3279,7 +3279,7 @@ async function main() {
       JSON.stringify({ before: nextNeedleBefore, after: nextNeedleAfter }),
     );
     const tunerKeyboard = await page.evaluate(() => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const style = gev.styleManager;
       const radio = gev.dataManager.layers.get('radio').module;
       const slider = document.getElementById('radio-tuner-slider');
@@ -3366,7 +3366,7 @@ async function main() {
     );
     await page.select('#radio-filter', 'news');
     const filteredTunerCenter = await page.evaluate(() => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const style = gev.styleManager;
       const radio = gev.dataManager.layers.get('radio').module;
       const slider = document.getElementById('radio-tuner-slider');
@@ -3414,7 +3414,7 @@ async function main() {
     );
     await page.select('#radio-filter', 'all');
     const fullPoolNavigation = await page.evaluate(() => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const radio = gev.dataManager.layers.get('radio').module;
       const pool = gev.styleManager._radioControls._radioTunerPool;
       const ids = pool.map((station) => station.id);
@@ -3451,7 +3451,7 @@ async function main() {
       JSON.stringify(fullPoolNavigation),
     );
     await page.evaluate(() => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       viewer.camera.setView({
         destination: viewer.scene.globe.ellipsoid.cartographicToCartesian({
           longitude: Math.PI,
@@ -3463,7 +3463,7 @@ async function main() {
     });
     await sleep(500);
     const failedTuner = await page.evaluate(async () => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const slider = document.getElementById('radio-tuner-slider');
       const rect = slider.getBoundingClientRect();
       const count = gev.styleManager._radioControls._radioTunerStations.length;
@@ -3510,8 +3510,8 @@ async function main() {
     await page.select('#radio-filter', 'news');
 
     const markerTarget = await page.evaluate(async () => {
-      const viewer = window.__godsEyeView.viewer;
-      const radio = window.__godsEyeView.dataManager.layers.get('radio').module;
+      const viewer = window.__osiris.viewer;
+      const radio = window.__osiris.dataManager.layers.get('radio').module;
       const source = Array.from({ length: viewer.dataSources.length }, (_, index) => viewer.dataSources.get(index))
         .find((item) => item.name === 'Radio stations');
       source.clustering.enabled = false;
@@ -3635,16 +3635,16 @@ async function main() {
     if (markerTarget?.found) {
       await page.mouse.click(markerTarget.x + 6, markerTarget.y);
       await page.waitForFunction(
-        (id) => window.__godsEyeView.dataManager.layers.get('radio').module.getUIState().selected?.id === id,
+        (id) => window.__osiris.dataManager.layers.get('radio').module.getUIState().selected?.id === id,
         {},
         markerTarget.id,
       );
-      const offsetSelected = await page.evaluate(() => window.__godsEyeView.dataManager.layers.get('radio').module.getUIState().selected?.id);
+      const offsetSelected = await page.evaluate(() => window.__osiris.dataManager.layers.get('radio').module.getUIState().selected?.id);
       check('an offset click within 8px reliably selects the intended Radio dot', offsetSelected === markerTarget.id, offsetSelected);
     }
 
     await page.evaluate(() => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const camera = gev.viewer.camera;
       const radio = gev.dataManager.layers.get('radio').module;
       camera.cancelFlight();
@@ -3676,13 +3676,13 @@ async function main() {
     });
     await sleep(500);
     await page.evaluate(() => {
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       manager.setPanelCollapsed('global-context-panel', false);
       manager.setPanelCollapsed('radio-panel', false);
     });
     await page.waitForSelector('#radio-next-btn', { visible: true });
     await page.evaluate(() => {
-      window.__qaRadioCameraHeight = window.__godsEyeView.viewer.camera.positionCartographic.height;
+      window.__qaRadioCameraHeight = window.__osiris.viewer.camera.positionCartographic.height;
     });
     const radioOnlyNextDispatched = await page.evaluate(() => {
       const button = document.getElementById('radio-next-btn');
@@ -3693,7 +3693,7 @@ async function main() {
     if (!radioOnlyNextDispatched) throw new Error('Radio next button unavailable');
     await page.waitForFunction(() => typeof window.__qaRejectRadioPlay === 'function');
     await page.evaluate(() => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       viewer.camera.setView({
         destination: viewer.scene.globe.ellipsoid.cartographicToCartesian({
           longitude: Math.PI,
@@ -3704,11 +3704,11 @@ async function main() {
       });
       window.__qaRejectRadioPlay();
     });
-    await page.waitForFunction(() => window.__godsEyeView.dataManager.layers.get('radio').module.getUIState().audioState === 'playing');
+    await page.waitForFunction(() => window.__osiris.dataManager.layers.get('radio').module.getUIState().audioState === 'playing');
     const playing = await page.evaluate(async () => {
-      const radio = window.__godsEyeView.dataManager.layers.get('radio').module;
-      const viewer = window.__godsEyeView.viewer;
-      const selectedEntity = window.__godsEyeView.viewer.entities.values
+      const radio = window.__osiris.dataManager.layers.get('radio').module;
+      const viewer = window.__osiris.viewer;
+      const selectedEntity = window.__osiris.viewer.entities.values
         .find((entity) => String(entity.id).startsWith('radio:selected:'));
       const { getWorldOverlayDiagnostics } = await import('/src/overlays/worldOverlay.js');
       const flightTargets = window.__qaRadioFlyToCalls.map(({ destination }) => {
@@ -3726,7 +3726,7 @@ async function main() {
       flightTargets,
       cameraHeight: window.__qaRadioCameraHeight,
       playLabel: document.getElementById('radio-play-btn').getAttribute('aria-label'),
-      regularMarkerSize: Array.from({ length: window.__godsEyeView.viewer.dataSources.length }, (_, index) => window.__godsEyeView.viewer.dataSources.get(index))
+      regularMarkerSize: Array.from({ length: window.__osiris.viewer.dataSources.length }, (_, index) => window.__osiris.viewer.dataSources.get(index))
         .find((item) => item.name === 'Radio stations')?.entities.values[0]?.point?.pixelSize?.getValue(),
       selectedMarkerSize: selectedEntity?.point?.pixelSize?.getValue(),
       selectedBracketWidth: selectedEntity?.billboard?.width?.getValue(),
@@ -3761,8 +3761,8 @@ async function main() {
       JSON.stringify({ calls: playing.flyToCalls, targets: playing.flightTargets, cameraHeight: playing.cameraHeight }),
     );
     const trackedRadioControls = await page.evaluate(async () => {
-      const viewer = window.__godsEyeView.viewer;
-      const radio = window.__godsEyeView.dataManager.layers.get('radio').module;
+      const viewer = window.__osiris.viewer;
+      const radio = window.__osiris.dataManager.layers.get('radio').module;
       const run = async (ownerPrefix, buttonId) => {
         const owner = viewer.entities.add({
           id: `qa:${ownerPrefix}:radio-camera-owner`,
@@ -3804,7 +3804,7 @@ async function main() {
     );
 
     const delayedTrackingStart = await page.evaluate(() => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       viewer.trackedEntity = undefined;
       window.__qaRadioDelayNextFailure = true;
       const beforeFlyToCalls = window.__qaRadioFlyToCalls.length;
@@ -3813,7 +3813,7 @@ async function main() {
     });
     await page.waitForFunction(() => typeof window.__qaRejectRadioPlay === 'function');
     const delayedTrackingOwner = await page.evaluate(() => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       const owner = viewer.entities.add({
         id: 'qa:flights:delayed-radio-fallback-owner',
         position: viewer.camera.positionWC.clone(),
@@ -3824,15 +3824,15 @@ async function main() {
       window.__qaRejectRadioPlay();
       return owner.gevTrackedId;
     });
-    await page.waitForFunction(() => window.__godsEyeView.dataManager.layers.get('radio').module.getUIState().audioState === 'playing');
+    await page.waitForFunction(() => window.__osiris.dataManager.layers.get('radio').module.getUIState().audioState === 'playing');
     const delayedFallbackOwnership = await page.evaluate((beforeFlyToCalls) => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       const owner = window.__qaDelayedRadioTrackingOwner;
       const result = {
         flyToDelta: window.__qaRadioFlyToCalls.length - beforeFlyToCalls,
         trackedIdentityPreserved: viewer.trackedEntity === owner,
         trackedId: viewer.trackedEntity?.gevTrackedId || null,
-        selectedId: window.__godsEyeView.dataManager.layers.get('radio').module.getUIState().selected?.id || null,
+        selectedId: window.__osiris.dataManager.layers.get('radio').module.getUIState().selected?.id || null,
       };
       viewer.trackedEntity = undefined;
       viewer.entities.remove(owner);
@@ -3848,7 +3848,7 @@ async function main() {
       JSON.stringify(delayedFallbackOwnership),
     );
     await page.evaluate(() => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       viewer.camera.setView({
         destination: viewer.scene.globe.ellipsoid.cartographicToCartesian({
           longitude: Math.PI,
@@ -3874,8 +3874,8 @@ async function main() {
       JSON.stringify({ overlay: playing.overlay, host: playing.host.entriesBySource }),
     );
     const closeSelectedText = await page.evaluate(async () => {
-      const viewer = window.__godsEyeView.viewer;
-      const radio = window.__godsEyeView.dataManager.layers.get('radio').module;
+      const viewer = window.__osiris.viewer;
+      const radio = window.__osiris.dataManager.layers.get('radio').module;
       const selected = radio.getUIState().selected;
       window.__qaRadioVisualView = {
         position: viewer.camera.positionWC.clone(),
@@ -3938,8 +3938,8 @@ async function main() {
     );
     await page.screenshot({ path: path.join(SHOTS_DIR, 'selected-label-desktop.png') });
     const highGlobalSelectedText = await page.evaluate(async () => {
-      const viewer = window.__godsEyeView.viewer;
-      const radio = window.__godsEyeView.dataManager.layers.get('radio').module;
+      const viewer = window.__osiris.viewer;
+      const radio = window.__osiris.dataManager.layers.get('radio').module;
       const selected = radio.getUIState().selected;
       const ellipsoid = viewer.scene.globe.ellipsoid;
       viewer.camera.setView({
@@ -4053,8 +4053,8 @@ async function main() {
     await page.screenshot({ path: path.join(SHOTS_DIR, 'selected-label-high-global.png') });
     await page.setViewport({ width: 560, height: 760, deviceScaleFactor: 1 });
     await page.evaluate(async () => {
-      const viewer = window.__godsEyeView.viewer;
-      window.__godsEyeView.styleManager.toggleCleanView(true);
+      const viewer = window.__osiris.viewer;
+      window.__osiris.styleManager.toggleCleanView(true);
       viewer.resize();
       viewer.scene.requestRender();
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -4062,13 +4062,13 @@ async function main() {
     await page.screenshot({ path: path.join(SHOTS_DIR, 'selected-label-mobile.png') });
     await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
     await page.evaluate(() => {
-      const viewer = window.__godsEyeView.viewer;
-      window.__godsEyeView.styleManager.toggleCleanView(false);
+      const viewer = window.__osiris.viewer;
+      window.__osiris.styleManager.toggleCleanView(false);
       viewer.resize();
       viewer.scene.requestRender();
     });
     await page.evaluate(() => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       const view = window.__qaRadioVisualView;
       viewer.camera.setView({
         destination: view.position,
@@ -4081,7 +4081,7 @@ async function main() {
 
     await page.evaluate(() => {
       window.__qaRadioFlyToCalls = [];
-      window.__godsEyeView.dataManager.layers.get('flights').enabled = false;
+      window.__osiris.dataManager.layers.get('flights').enabled = false;
     });
     const radioOnlyNextClicked = await page.evaluate(() => {
       const button = document.getElementById('radio-next-btn');
@@ -4097,9 +4097,9 @@ async function main() {
     const radioOnlyFocusCalls = await page.evaluate(() => {
       const calls = window.__qaRadioFlyToCalls.length;
       const heights = window.__qaRadioFlyToCalls.map((options) => (
-        window.__godsEyeView.viewer.scene.globe.ellipsoid.cartesianToCartographic(options.destination).height
+        window.__osiris.viewer.scene.globe.ellipsoid.cartesianToCartographic(options.destination).height
       ));
-      window.__godsEyeView.viewer.camera.flyTo = window.__qaRadioOriginalFlyTo;
+      window.__osiris.viewer.camera.flyTo = window.__qaRadioOriginalFlyTo;
       delete window.__qaRadioOriginalFlyTo;
       return { calls, heights, cameraHeight: window.__qaRadioCameraHeight };
     });
@@ -4111,7 +4111,7 @@ async function main() {
     );
 
     const stagedGlobeNavigation = await page.evaluate(async () => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const viewer = gev.viewer;
       const camera = viewer.camera;
       const radio = gev.dataManager.layers.get('radio').module;
@@ -4332,12 +4332,12 @@ async function main() {
     );
 
     await page.evaluate(() => {
-      window.__godsEyeView.styleManager.setPanelCollapsed('radio-panel', true);
-      window.__godsEyeView.styleManager.setPanelCollapsed('global-context-panel', false);
+      window.__osiris.styleManager.setPanelCollapsed('radio-panel', true);
+      window.__osiris.styleManager.setPanelCollapsed('global-context-panel', false);
     });
     const companion = await page.evaluate(() => ({
-      radioEnabled: window.__godsEyeView.dataManager.isEnabled('radio'),
-      state: window.__godsEyeView.dataManager.layers.get('radio').module.getUIState().audioState,
+      radioEnabled: window.__osiris.dataManager.isEnabled('radio'),
+      state: window.__osiris.dataManager.layers.get('radio').module.getUIState().audioState,
       radioCollapsed: document.getElementById('radio-panel').classList.contains('collapsed'),
       contextCollapsed: document.getElementById('global-context-panel').classList.contains('collapsed'),
       nested: document.getElementById('global-context-panel').contains(document.getElementById('radio-panel')),
@@ -4349,7 +4349,7 @@ async function main() {
     );
 
     await page.evaluate(() => {
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       manager.setPanelCollapsed('global-context-panel', false);
       manager.setPanelCollapsed('radio-panel', false);
     });
@@ -4379,17 +4379,17 @@ async function main() {
     );
 
     await page.select('#radio-filter', 'talk');
-    const filtered = await page.evaluate(() => window.__godsEyeView.dataManager.layers.get('radio').module.getUIState());
+    const filtered = await page.evaluate(() => window.__osiris.dataManager.layers.get('radio').module.getUIState());
     check('filter changes markers/navigation without stopping the selected stream', filtered.filteredCount === 75 && filtered.audioState === 'playing' && filtered.selectedIndex === -1, `${filtered.filteredCount} matches`);
 
     const playsBeforeRestore = await page.evaluate(() => window.__qaRadioPlayCalls.length);
     await page.evaluate(async () => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       await gev.dataManager.setEnabled('radio', false);
       await gev.dataManager.setEnabled('radio', true);
     });
     const restored = await page.evaluate(() => ({
-      state: window.__godsEyeView.dataManager.layers.get('radio').module.getUIState(),
+      state: window.__osiris.dataManager.layers.get('radio').module.getUIState(),
       plays: window.__qaRadioPlayCalls.length,
       radioCollapsed: document.getElementById('radio-panel').classList.contains('collapsed'),
     }));
@@ -4400,7 +4400,7 @@ async function main() {
       JSON.stringify(restored),
     );
 
-    await page.evaluate(() => window.__godsEyeView.styleManager.setPanelCollapsed('radio-panel', false));
+    await page.evaluate(() => window.__osiris.styleManager.setPanelCollapsed('radio-panel', false));
     await sleep(350);
     await page.screenshot({ path: path.join(SHOTS_DIR, 'desktop.png') });
     const desktop = await page.$eval('#radio-panel', (element) => {
@@ -4421,7 +4421,7 @@ async function main() {
     check('desktop Context host keeps Radio and its tuner contained', desktop.left >= 0 && desktop.right <= 1440 && desktop.top >= 0 && desktop.bottom <= 900 && desktop.radioInside && desktop.tunerInside, JSON.stringify(desktop));
 
     await page.click('#radio-play-btn');
-    await page.waitForFunction(() => window.__godsEyeView.dataManager.layers.get('radio').module.getUIState().audioState === 'playing');
+    await page.waitForFunction(() => window.__osiris.dataManager.layers.get('radio').module.getUIState().audioState === 'playing');
     await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 1 });
     await sleep(500);
     await page.$eval('#radio-panel', (element) => element.scrollIntoView({ block: 'nearest' }));

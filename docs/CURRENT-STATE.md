@@ -1,4 +1,4 @@
-# God's Eye View Current State
+# Osiris Current State
 
 Docker Compose mounts the checkout with the shared SELinux `:z` label so
 containers can read it on enforcing SELinux hosts. The separate image-owned
@@ -131,12 +131,12 @@ provider registration rejects compositions that cannot fit rather than truncatin
 identities. A malformed or duplicate entry invalidates the complete custom-switch
 field. Existing whole-link size limits still apply.
 
-## God's Eye View in conversations — October 2, 2026
+## Osiris in conversations — October 2, 2026
 
-Tool answers that can be shown in God's Eye View include a view: camera, layers,
+Tool answers that can be shown in Osiris include a view: camera, layers,
 style, map, marks and an aircraft or satellite to follow, written in the
-share-link format (`gods-eye-view/view`). `show_in_gods_eye_view` shows a view as live
-God's Eye View inside clients that display MCP Apps, and as a link everywhere.
+share-link format (`osiris/view`). `show_in_osiris` shows a view as live
+Osiris inside clients that display MCP Apps, and as a link everywhere.
 The panel runs the app's panel build (`npm run build:panel`, served at
 `/panel/`) and loads it, with its data, through the MCP server, so it works
 in Claude Desktop and in the Codex and ChatGPT desktop apps with a local
@@ -164,8 +164,8 @@ Tool argument string lengths follow JSON Schema Unicode code-point counts, so su
 
 Query timestamps outside the representable Date range are reported as null, preserving the rest of the result row.
 
-`gods-eye-view/tools` defines queries that answer questions from the app's data,
-and `gods-eye-view/tools/mcp` exposes a composed catalog over the Model Context
+`osiris/tools` defines queries that answer questions from the app's data,
+and `osiris/tools/mcp` exposes a composed catalog over the Model Context
 Protocol. `npm run mcp` serves Core's tools over stdio to a local MCP client,
 reading from a running app's `/api` routes (default `http://localhost:4173`).
 The development and preview servers also serve the tools over HTTP at `/mcp`,
@@ -650,7 +650,7 @@ partial answers name the unanswered layers. `get_current_view_state` lists enabl
 FIRMS and ALPR entity labels remain English in shared context and tool data;
 voice-card titles and pointer presentation translate those known labels at display
 time, while arbitrary names and callsigns remain unchanged.
-The model-free `gods-eye-view/agent/world-packet` export exposes
+The model-free `osiris/agent/world-packet` export exposes
 `getWorldPacket({ viewer, styleManager, dataManager, sceneDirector })` to
 non-voice consumers. It reads the same enabled-only state and feed
 provenance before voice adds speech/card fields, with no new network requests
@@ -1063,7 +1063,7 @@ sea-surface placement, click ownership and card selection policy are unchanged.
 
 ## Military-flight components and aircraft mechanics
 
-`gods-eye-view/layers/military` exports `createMilitaryFlightLayer`. It uses the
+`osiris/layers/military` exports `createMilitaryFlightLayer`. It uses the
 same normalized observation contract as civil flights, with separate military
 classification, styling, model and tracking policy. Each instance owns its
 contacts, history, scratch objects, model loads and cancellation lifetime.
@@ -1072,7 +1072,7 @@ Applications supply the existing scene services and resolve model asset URLs;
 A source may retain a bounded stale-status reason; the standalone cached-feed
 behavior remains unchanged.
 
-`gods-eye-view/aircraft` exports the existing shared classification, icon,
+`osiris/aircraft` exports the existing shared classification, icon,
 metadata, motion, altitude, model-anchor, proximity and selection calculations.
 It also exports `createMilitaryRegistry`, an explicitly constructed owner for
 known military identities and active-layer transitions. Its optional background
@@ -1085,7 +1085,7 @@ starts no network request. Both standalone aircraft layers use one registry.
 
 ## Civil-flight components
 
-`gods-eye-view/layers/flights` exports `createCivilFlightLayer`. Each instance
+`osiris/layers/flights` exports `createCivilFlightLayer`. Each instance
 owns its contacts, histories, model collections, scratch objects and lifecycle.
 State, ingestion, enrichment, motion/floor interpolation, rendering, tracking and
 queries live in separate files under `src/layers/flights`. The standalone
@@ -1111,7 +1111,7 @@ absent rate stays null rather than reading as level flight.
 `src/data/aircraftEmergency.js` derives one status per poll from the Mode A
 squawk (7500 unlawful interference, 7600 radio failure, 7700 general emergency)
 and the readsb ADS-B emergency/priority field where present. Higher severity
-wins, with ADS-B taking a tie. GEV treats `minfuel` and `lifeguard` as priorities;
+wins, with ADS-B taking a tie. Osiris treats `minfuel` and `lifeguard` as priorities;
 `general`, `unlawful`, `nordo` and `downed` are emergency statuses.
 
 Civil and military fleet billboards, 3D models and Cockpit dots turn red for
@@ -1133,7 +1133,7 @@ and model transitions, Cockpit HUD, clearing and tracking release.
 ## Browser live-source observations
 
 Flights, Military Flights and AIS Vessels obtain snapshots and optional history
-through `gods-eye-view/sources/live`. The standalone adapters use the existing
+through `osiris/sources/live`. The standalone adapters use the existing
 same-origin routes. Aircraft observations distinguish barometric metres from
 WGS84 ellipsoid metres and retain source position/contact epochs; vessel records
 retain separate heading/course and sea-surface datum. History is a best-effort
@@ -1166,7 +1166,7 @@ Scene controls consume playback state and editing outcomes from the director.
 Progress updates carry a small playback snapshot and preserve shot-row identity;
 editing outcomes include a copy of the affected scene or shot. Subscriptions
 start with current state, isolate listener failures and stop on disposal.
-`gods-eye-view/scenes` exports the same director used by the standalone app.
+`osiris/scenes` exports the same director used by the standalone app.
 
 ## UI shell and component ownership
 
@@ -1425,7 +1425,7 @@ Stopping the controller revokes animation before asynchronous UI teardown; final
 destruction removes its stages and restores the borrowed bloom configuration.
 Snow is no longer a visual preset. A share link that names it, in either the
 long or compact form, opens on Normal and drops the Snow shader parameters. A
-view passed to embed mode or `show_in_gods_eye_view`, and a saved scene shot,
+view passed to embed mode or `show_in_osiris`, and a saved scene shot,
 that names Snow also open on Normal.
 Sharpen runs only when enabled with intensity above 0.001. At slider zero its
 stage is disabled; raising the slider resumes it when sharpen is enabled.
@@ -1681,11 +1681,11 @@ The station reader addresses the proxy as `/api/gbfs/<encoded feed URL>`; the
 feed address is read from the path, and a query-string form is refused with a 400. GBFS refuses upstream redirects and enforces its 5 MiB response cap while
 streaming. The 12-second deadline includes reading the body, and rejected or
 stalled downloads are cancelled. Development and preview use the same handler.
-Every upstream request carries `Client-Identifier: gods-eye-view`, which Urban
+Every upstream request carries `Client-Identifier: osiris`, which Urban
 Sharing asks of clients of the Oslo, Bergen and Trondheim Bysykkel feeds
 (`gbfs.urbansharing.com`); other operators ignore it. Requests to Entur
 (`api.entur.io`, Kolumbus and Farte Bysykkel) also carry
-`ET-Client-Name: gods-eye-view-bikeshare`. Entur serves its feeds without a
+`ET-Client-Name: osiris-bikeshare`. Entur serves its feeds without a
 `.json` suffix, so the endpoint check accepts `station_information` and
 `station_status` with or without it. Hosts that front more than GBFS are kept to
 their GBFS tree: `api.entur.io` to `/mobility/v2/gbfs/` and `api.cyclocity.fr`
@@ -1823,8 +1823,8 @@ Local composition now imports separate Node modules for Re:Earth heights,
 TomTom flow tiles, NASA FIRMS detections and GBFS station feeds. Existing routes,
 plugin order, server-key selection, validation, disk caches, budgets, retries
 and stale/error responses remain unchanged. Each has a Node-only package entry
-under `gods-eye-view/server/providers/`. Portable terrain mechanics, traffic tile
-math and GBFS source rules are available under `gods-eye-view/sources/`.
+under `osiris/server/providers/`. Portable terrain mechanics, traffic tile
+math and GBFS source rules are available under `osiris/sources/`.
 The TomTom `/api/tomtom/*` routes run the shared same-site admission gate before
 status, cache or upstream work, refusing cross-site browser requests while
 preserving same-origin app requests and non-browser local callers. The browser
@@ -1888,7 +1888,7 @@ retain their established behavior.
 `server/providers/space/` owns the CelesTrak TLE and Launch Library 2 Node
 proxies. Their routes, six-hour/15-minute caches, disk storage, stale fallback,
 request coalescing and optional LL2 server token retain existing behavior.
-The Node-only `gods-eye-view/server/providers/space` export supplies factories;
+The Node-only `osiris/server/providers/space` export supplies factories;
 `sources/space` supplies fixed upstream URL builders with no I/O or environment
 access. Callers retain validation, transport and response policy.
 
@@ -1916,7 +1916,7 @@ provider families own their middleware and process state in focused modules.
 Provider URLs, key selection, cache behavior, setup restrictions and routes are
 unchanged.
 
-`gods-eye-view/build/vite` is a Node-only export for explicit browser build
+`osiris/build/vite` is a Node-only export for explicit browser build
 settings: Cesium assets, caller-supplied plugins, browser key defines, server
 binding and document/credential protections. It never reads an environment file
 or constructs providers. The standalone caller owns those choices.
@@ -2102,10 +2102,10 @@ in `ais-store.js`. Common response caps, request coalescing and query parsing
 have their own modules. `server/providers/local.js` composes these with the
 remaining providers and retains existing named compatibility exports.
 
-`gods-eye-view/server/providers/live` is a Node-only entry for the existing
+`osiris/server/providers/live` is a Node-only entry for the existing
 plugins and shared request helpers. Importing it starts no sockets or timers.
 The existing aircraft normalizer is separately available through the portable
-`gods-eye-view/sources/adsb-lol` export. Provider URLs, local credentials, cache
+`osiris/sources/adsb-lol` export. Provider URLs, local credentials, cache
 policy, fallback behavior, response shapes and rendering remain unchanged.
 
 ## Control names for assistive technology
@@ -3864,8 +3864,8 @@ Historical planning documents may not match runtime behavior.
 
 ## Current Baseline
 
-- Repository metadata and public URLs use the `bilawalsidhu/gods-eye-view`
-  project identity. Runtime behavior is defined by this document and the current
+- The project is Osiris; repository metadata and public URLs point at
+  `JWilksBooth/gods-eye-view` until the repository itself is renamed. Runtime behavior is defined by this document and the current
   source tree rather than historical branch notes.
 
 ## Runtime Stack
@@ -3909,7 +3909,7 @@ its criteria cannot be silently ignored.
 | FIRMS Active Fires ▲   | NASA FIRMS live (VIIRS ×3 NRT + MODIS NRT, trailing 24h)                                                                                                                                        | `src/data/firmsHeatmap.js`                            | `/api/firms` (`FIRMS_MAP_KEY`)                           | 10 min (proxy TTL 30 min)                                                         |
 | Street Level 📷 | Mapillary street-level imagery (vector tiles, Graph API, MapillaryJS) | `src/layers/streetLevel/` via `src/app/layers/streetLevel.js` | `/api/mapillary/status`, `/api/mapillary/tiles/coverage/{z}/{x}/{y}` (`MAPILLARY_CLIENT_TOKEN`) | camera-driven (320 ms debounce, ≤9 tiles, server memory cache 24 h) |
 | Wind 🌬                 | NOAA GFS 10 m wind (keyless, 0.25°→1° grid; animated particles)                                                                                                                                 | `src/data/wind.js`                                    | `/api/wind`                                              | 1 h (forecast cycle)                                                              |
-| GNSS Integrity 📡 (`gnss-integrity`) | adsb.lol point snapshot, low navigation accuracy binned per 0.5° cell (GEV NIC/NACp threshold + gpsjam.org formula and bands, keyless, ODbL) | `src/layers/gnss/` via `src/app/layers/gnss.js` | `/api/gnss-integrity` | camera-driven (600 ms debounce, minimum 2.5 s between reads) + 60s poll (server cache 60 s; 30 min rolling window) |
+| GNSS Integrity 📡 (`gnss-integrity`) | adsb.lol point snapshot, low navigation accuracy binned per 0.5° cell (Osiris NIC/NACp threshold + gpsjam.org formula and bands, keyless, ODbL) | `src/layers/gnss/` via `src/app/layers/gnss.js` | `/api/gnss-integrity` | camera-driven (600 ms debounce, minimum 2.5 s between reads) + 60s poll (server cache 60 s; 30 min rolling window) |
 | S2 GhostMaps 👻 (`s2-ghostmaps`) | S2 Underground's public GhostMaps repository on GitHub (KMZ intel products, keyless, CC BY-NC-SA 4.0) | `src/layers/ghostMaps/` via `src/app/layers/ghostMaps.js` | `/api/ghostmaps/catalog`, `/api/ghostmaps/events` (server-sent events), `/api/ghostmaps/file/{product}` | branch head checked every 15 s; new commits pushed to the page; 5 min catalog backstop |
 | Fire Perimeters 🔥 | NIFC WFIGS current interagency perimeters (keyless, paged past the 2000-record cap); InciWeb catalog + incident page origin and update time checks for verified incident-page links | `src/layers/perimeters/` via `src/app/layers/perimeters.js` | `/api/fire-perimeters` + `/api/fire-perimeters/inciweb/*` | 5 min (server caches: catalog 1 h; publication 30 min) |
 
@@ -3930,7 +3930,7 @@ age comes from the upstream snapshot and is preserved in the row and voice stats
 Snapshots older than 30 minutes or without a source timestamp are refused.
 Disable/destroy cancels pending requests, timers, subscriptions and primitives.
 
-The GEV classifier remains unvalidated; anomalies do not confirm interference.
+The Osiris classifier remains unvalidated; anomalies do not confirm interference.
 See [method, provenance and limits](../DATA_SOURCES.md#gnss-integrity), including
 MLAT-positioned GPS loss, derived-field exclusions and the NIC 0 exception.
 `scripts/qa-gnss.mjs` covers live freshness, bands, built primitives, camera/globe
@@ -3949,7 +3949,7 @@ shared 360°/flat and captured-since filters (relative days, so a link keeps its
 meaning), one viewer host and one on-globe credit per active provider. Each
 provider draws in one colour (`PROVIDER_COLORS` in
 `src/layers/streetLevel/policy.js`); 360° cones are rings and the selected
-sequence is GEV cyan. Share options: `m` (Mapillary), `r` (the other providers' switches by id,
+sequence is Osiris cyan. Share options: `m` (Mapillary), `r` (the other providers' switches by id,
 e.g. `google-1` for Street View), `p` (`a`/`p`/`f` panoramas), `s` (since, days). Mapillary, Google
 Street View, KartaView and Panoramax are registered. Without
 `MAPILLARY_CLIENT_TOKEN` the panel reads KEY REQUIRED and the controls are
@@ -4044,7 +4044,7 @@ light several keep the one already on, else the first in chip order
 (`litByParams`; reapplying them never flips). Mapillary, free, is lit by
 default. The chip reads GOOGLE STREET VIEW, and an open panorama's globe
 marker is a Google-blue view cone (`marker: {kind: 'view-cone'}`) in place
-of GEV's amber pin. Its
+of Osiris's amber pin. Its
 panoramas are all 360° and it draws no coverage, so it declares `filters: []`
 (a provider's `filters` default to both `pano` and `since`): lookups ignore
 the IMAGERY and SINCE filters, and the panel hides each filter row no lit provider
@@ -4886,7 +4886,7 @@ silently demoting every later lookup for the session.
   auto-calibration and the drape mesh pipeline are deleted. A one-shot activation obstruction
   probe (`pickFromRay` on camera activation, clamping the plane short of the first hit) remains;
   ground placement is superseded by the shared-floor v3 behavior below. Calibration persists to
-  `godsEyeView.cctv.calibration.v2` (wiped clean, no v1 import); a panel-only CAL badge shows
+  `osiris.cctv.calibration.v2` (wiped clean, no v1 import); a panel-only CAL badge shows
   `CALIBRATED`/`CURATED`/`RAW PRIOR` (no in-world tint). Panel is titled "CCTV" (not "CCTV
   MESH"). Staggered geometry/frame loading is active-first and uses 4 records per 120 ms normally,
   or 2 per 250 ms while tracking/cockpit owns the view (re-evaluated each batch), with coalesced progress
@@ -4991,7 +4991,7 @@ Public Overpass instances are not used by default. `OVERPASS_UPSTREAMS` is a
 server-only comma-separated list of HTTP(S) instances the operator runs or pays
 for, resolved lazily after env loading. It replaces the empty default list;
 there is no built-in fallback. Local/private instances are allowed. The stable
-`gods-eye-view/…` User-Agent is unchanged. URLs never appear in response headers
+`osiris/…` User-Agent is unchanged. URLs never appear in response headers
 or upstream errors, including old cached endpoint metadata.
 Disk cache entries for both routes carry a SHA-256 tag of the configured
 instance set (order does not matter) and are served only while it matches, so
@@ -5225,7 +5225,7 @@ and unreachable upstream (502/504) separately from road geometry.
 
 ### Voice Control (June 2026)
 
-`GEV MIC` button (bottom UI) starts an OpenAI Realtime session over WebRTC:
+`OSIRIS MIC` button (bottom UI) starts an OpenAI Realtime session over WebRTC:
 
 - **Token flow**: browser fetches a short-lived client secret from `/api/realtime/token`; the Vite middleware uses `OPENAI_API_KEY` by default, or the signed-in local ChatGPT/Codex OAuth access token when OAuth was explicitly selected in Provider Settings, and posts the full session config (instructions, tool schemas, VAD, truncation) to `api.openai.com/v1/realtime/client_secrets`. Both long-lived credentials stay server-side; OAuth minting is loopback-only. SDP exchange goes directly to `api.openai.com/v1/realtime/calls` with the ephemeral token.
 - **Session defaults** (env-tunable): model `gpt-realtime-2` (or `gpt-realtime-2.1-mini` when the MINI tier is selected — see the model-tier entry below), voice `marin`, reasoning effort `low`, semantic VAD with low eagerness, no response interruption, context window truncated to ~3,000 post-instruction tokens with 0.5 retention ratio — the conversational window stays short because map state is fetched live per turn.
@@ -5257,11 +5257,11 @@ and unreachable upstream (502/504) separately from road geometry.
 - **Visual grounding**: at `local` view scale with no structured identity, the client captures the Cesium canvas (≤1200px JPEG, black-frame detection, double-render for freshness) and sends it as `input_image` with a strict "do not invent labels" instruction.
 - **Context window**: only the latest viewport screenshot stays in context — the client deletes the prior image item (`conversation.item.delete`) before adding a new one (images are the most expensive item, re-billed every turn). Text history is bounded by the **server-side** `truncation: { type: 'retention_ratio', retention_ratio, token_limits.post_instructions }` set in `/api/realtime/token` (cache-friendly batched truncation). There is intentionally **no** client-side per-turn conversation-item cap — deleting from the front of history each turn busts the Realtime prompt cache. A spatially-aware summarize-and-prune policy is specced for a future iteration.
 - **Model tier + spend guard** (`src/voice/voiceCost.js`, August 2026): hosts without the voice panel keep the `STD`/`MINI` toggle and running session-cost readout (`~$0.42`) in the heading. Panel hosts place these controls in Voice Settings and mirror warning, capped or unknown cost states in the heading.
-  - **Tier selection.** `standard` = `gpt-realtime-2` (default), `mini` = `gpt-realtime-2.1-mini` (~3× cheaper per audio token). The client sends `?tier=` to `/api/realtime/token`; the endpoint resolves it through the shared registry, so an unknown, empty, or hostile value falls back to `standard` rather than reaching OpenAI as a model id. Responses echo `X-GEV-Voice-Tier` / `X-GEV-Voice-Model` (plus `X-GEV-Voice-Tier-Fallback: 1` when a bogus tier was downgraded). Persisted at `godsEyeView.voiceCost.tier`.
+  - **Tier selection.** `standard` = `gpt-realtime-2` (default), `mini` = `gpt-realtime-2.1-mini` (~3× cheaper per audio token). The client sends `?tier=` to `/api/realtime/token`; the endpoint resolves it through the shared registry, so an unknown, empty, or hostile value falls back to `standard` rather than reaching OpenAI as a model id. Responses echo `X-GEV-Voice-Tier` / `X-GEV-Voice-Model` (plus `X-GEV-Voice-Tier-Fallback: 1` when a bogus tier was downgraded). Persisted at `osiris.voiceCost.tier`.
   - **Applies NEXT session.** The model is fixed when the ephemeral token is minted, so a live session always keeps the model it connected with; toggling mid-session only records the preference (the button title says so). The cost tracker's lifetime is the session's lifetime and its model binding is immutable from `start()` to `stop()` — rebuilding it on toggle would erase accrued spend and let repeated toggles bypass the cap. The tracker may only be replaced once the session is FULLY SETTLED (`isVoiceSessionSettled()`: not active **and** no data channel **and** no peer connection) — `!isActive()` alone is not enough, because the `error` status reports inactive while the transport can still deliver a late `response.done`. The toggle itself reads and writes only the persisted preference, never the live tracker.
   - **Env overrides.** `OPENAI_REALTIME_MODEL` / `OPENAI_REALTIME_MODEL_MINI` remain authoritative per tier, so a drifted upstream model id is a `.env` fix rather than a code change. Because an override can point a tier at any model, the client prices against the model id the server actually echoed, **not** the tier it requested. An unrecognised id is billed at the most expensive known rates plus one console warning — under-metering is what lets a cap be overrun.
   - **Metering.** Token usage from each `response.done` is folded into a per-session estimate. Cached tokens are subtracted from their modality totals; any aggregate-minus-details residual (and any payload with no detail at all) is attributed to audio rates, so uncertainty always resolves _upward_.
-  - **Thresholds** (one object, persisted at `godsEyeView.voiceCost.limits`): soft warning at **$2** — amber readout plus exactly one console line; hard cap at **$5** — the session ends through the ordinary stop path (data channel and peer connection closed, mic tracks stopped) and the readout reads `Session ended — cost cap`. `0`/negative disables a threshold and round-trips through storage as an `'off'` sentinel (raw `Infinity` would JSON-serialize to `null` and silently restore the default); a corrupt entry falls back to the defaults rather than disarming the cap.
+  - **Thresholds** (one object, persisted at `osiris.voiceCost.limits`): soft warning at **$2** — amber readout plus exactly one console line; hard cap at **$5** — the session ends through the ordinary stop path (data channel and peer connection closed, mic tracks stopped) and the readout reads `Session ended — cost cap`. `0`/negative disables a threshold and round-trips through storage as an `'off'` sentinel (raw `Infinity` would JSON-serialize to `null` and silently restore the default); a corrupt entry falls back to the defaults rather than disarming the cap.
   - **Cap semantics — in-flight tools COMPLETE and are NOT rolled back.** A session-ending latch (`isSessionEnding()`) is checked at the tool-dispatch site, so no _new_ tool is dispatched once the cap trips. `extractFunctionCalls` yields at most one call per event, so that single check covers the whole batch. A tool already executing may still finish its map mutation (a camera flight, a layer toggle, an annotation). This is deliberate: unwinding a partially applied map change has no safe general implementation, and a half-reverted camera/layer/annotation state is worse than a completed one.
   - **In-flight response at teardown → the accounting is INCOMPLETE.** Usage only arrives with `response.done`, which never comes for a response cut off by teardown (`stop()` closes the peer connection, and the server cancels rather than completes it). Rather than invent a token count for it, the tracker is marked `incomplete`: the chip shows a trailing `*` (`~$1.00*`) as a see-note mark and the tooltip carries the reason. Deliberately **not** presented as a lower bound — the estimate can also run high (residuals and unrecognised models bill at worst-case rates, and sub-cent totals round up), so it is partial rather than directional. (A bounded teardown drain was tried and removed: `pc.close()` closes the data channels a drain would listen on, so it was structurally dead.)
   - **⚠️ Model ids and rates are external facts** read from OpenAI's model + pricing pages on 2026-08-18 and marked VERIFY-AT-RELEASE in `voiceCost.js`.
@@ -5274,7 +5274,7 @@ and unreachable upstream (502/504) separately from road geometry.
   3. **Every count names its scope in words** — "42 in your window", "8 in view", "about 30 within 250 km of Austin" — never a bare number. `analyst_query` returns `scopeLabel` so this is mechanical. Two different numbers with named scopes are not a contradiction.
   4. **The loaded-data caveat is stated once when relevant**: counts cover loaded data, and the flights layer loads where you look (appended to `coverage.note` for radius/view scopes over viewport-loaded layers).
 - **Degradation**: API-key mode without `OPENAI_API_KEY` returns 503 as before. Selecting OAuth without a usable local ChatGPT/Codex sign-in starts the local `codex login` browser flow, polls for the resulting local token, and selects OAuth when sign-in completes. If the Codex login flow cannot start or does not complete, the rest of the app is unaffected.
-- **Login lifecycle and storage**: one pending Codex login is shared by the login and status routes. Process failure, success without readable credentials, and a two-minute timeout each report a clear failure; timeout and server shutdown cancel the owned process. The launcher resolves `CODEX_HOME` before changing directories and refuses a mismatched `CODEX_AUTH_JSON`. GEV reads file credentials only, never writes or refreshes them, and does not require the vendor refresh token. Expired access tokens report `CODEX_OAUTH_REAUTH_REQUIRED`. OAuth status and login routes also use the same-site request gate.
+- **Login lifecycle and storage**: one pending Codex login is shared by the login and status routes. Process failure, success without readable credentials, and a two-minute timeout each report a clear failure; timeout and server shutdown cancel the owned process. The launcher resolves `CODEX_HOME` before changing directories and refuses a mismatched `CODEX_AUTH_JSON`. Osiris reads file credentials only, never writes or refreshes them, and does not require the vendor refresh token. Expired access tokens report `CODEX_OAUTH_REAUTH_REQUIRED`. OAuth status and login routes also use the same-site request gate.
 - **Auth button focus**: changing voice auth updates the existing controls in place. Enter, Space, and mouse selection keep focus on the auth button; Tab then follows the normal control order. Pending sign-in blocks repeated activation without removing the button from the focus order. Completion does not take focus from another control or discard text in the key fields. `scripts/qa-voice-auth-focus.mjs` checks these paths in Chromium with fixture sign-in responses.
 - **Support boundary**: the local OAuth option is experimental. OpenAI's documented Sign in with ChatGPT plan-sharing inference endpoint is `/v1/responses`; support for third-party reuse of Codex credentials at `/v1/realtime/client_secrets` remains unconfirmed. Technical success does not establish a supported auth or billing contract.
 
@@ -5574,7 +5574,7 @@ apply to `public/` assets or built-preview serving.
 - A successful Pinokio install writes the owner-only `pinokio/.installed`
   marker. The nested launcher menu resolves that marker from its own directory:
   an absent marker exposes Install, a present marker exposes Start, and a
-  running server with a captured ready URL exposes Open God's Eye View. That
+  running server with a captured ready URL exposes Open Osiris. That
   default item uses Pinokio's `popout` option to open the system browser; the
   Server item retains the launcher console. The app's framing headers stay
   unchanged. This does not assume all Pinokio desktop versions enforce those
@@ -5617,10 +5617,10 @@ apply to `public/` assets or built-preview serving.
   canvas; ordinary wheel, line/page-mode and native touch-pinch paths are left
   unchanged. The application scene owns and removes the relay listener.
 - Z ladder: panels around 100, voice pill 150, toast 200, clean-view exit 300.
-- Panel POSITION keys are versioned `v8` (`godsEyeView.v8.panelPos.<id>`); collapsed-state keys remain `v6`. The one-time position reset clears stale DISPLAY placements that could overlap the Context rail.
+- Panel POSITION keys are versioned `v8` (`osiris.v8.panelPos.<id>`); collapsed-state keys remain `v6`. The one-time position reset clears stale DISPLAY placements that could overlap the Context rail.
 - Map Source lives in the bottom Visual Presets tray. The left accordion contains no MAP STACK panel, and the `k` panel token that addressed it is gone from the share registry, so legacy `ui=k...` state takes the ordinary unknown-token skip.
 - A dock popover (Visual Presets, Location) auto-dismisses on mouse-away unless pinned. Focus inside the tray defers that dismissal only when the browser reports `:focus-visible` — keyboard focus and typed-into fields hold the tray open; a mouse-clicked tile does not, because Chromium focuses a `<button>` on press.
-- GEV MIC control is a glass capsule (var(--glass-bg), blur(24px) saturate(1.4), 999px radius; panel radius in error state).
+- OSIRIS MIC control is a glass capsule (var(--glass-bg), blur(24px) saturate(1.4), 999px radius; panel radius in error state).
 - The desktop right rail (`#right-context-rail`) owns `DISPLAY`, `CCTV`, its active parameter controls, and `GLOBAL CONTEXT` as one fixed responsive stack in that order. Its compact buttons use the same 176 px width as the left accordion and one consistent 50 px height, share the left stack's 52 px edge inset and measured top baseline across HUD variants, then constrain themselves against visible HUD/chrome rectangles and the remaining vertical corridor. `DISPLAY` is no longer draggable and legacy saved coordinates are ignored.
 - The right rail is labeled **DISPLAY** (formerly "MOVE") and groups, in order, HUD, DETECT, Bloom, Sharpen, 3D, Clean-UI (HUD + DETECT promoted to the top). Its expanded controls retain the same compact 176 px width as the right-side tabs instead of growing to the wider Context detail-card width. It starts expanded on first run and respects the user's later `v6` collapse choice. Collapses/expands with directional chevrons (`◀` collapsed, `▶` expanded).
 - Display and Context use matching 330 px expanded widths and matching compact tab dimensions. The parameter panel is part of Display's expanded content. DISPLAY may remain open beside one contextual panel; CCTV and Context are mutually exclusive. In Tactical HUD, expanding CCTV or Context hides the other contextual launcher while DISPLAY remains independently available. The most recently opened right-rail panel owns the constrained lane even when it appears later in DOM order; passive restoration and automatic disclosure do not replace that explicit owner. Minimal and other HUD layouts retain the collapsed launchers; when their active panel exceeds the measured corridor, the rail reserves sibling heights and gaps and scrolls the active panel internally.
@@ -5824,14 +5824,14 @@ easier to meet (detection is now on more often), but does not create it.
   `places_nearby` distances wrap the longitude difference. Raw subtraction put
   Savusavu 38,148 km from a camera over the Lau Islands, so the proximity check
   refused it, and sorted a place 2 km across 180° last.
-- CCTV calibration persists at `godsEyeView.cctv.calibration.v2` (v2 rebuild;
+- CCTV calibration persists at `osiris.cctv.calibration.v2` (v2 rebuild;
   the store was wiped clean, no import from the old `v1` key).
 - CCTV v3 floor QA pins are: zero samples for heading-only edits; zero transient
   samples and constant elevation during E/N drag; one shared-floor resolution on
   release; late one-shot shared-cell work is permitted during viewshed idle. The
   A+B harness intentionally excludes citywide LOD assertions.
-- Panel positions have a versioned storage name, `godsEyeView.v8.panelPos.<panel-id>`, but the current rails lay panels out adaptively and write none. Collapsed state does persist for every panel at `godsEyeView.v6.panelCollapsed.<panel-id>` (`'0'` open, `'1'` closed, absent means the panel's own default).
-- Legacy draggable-panel position keys may remain in local storage for backward compatibility, but the map-mode right rail ignores them; collapsed states still persist at `godsEyeView.v6.panelCollapsed.<panel-id>`.
+- Panel positions have a versioned storage name, `osiris.v8.panelPos.<panel-id>`, but the current rails lay panels out adaptively and write none. Collapsed state does persist for every panel at `osiris.v6.panelCollapsed.<panel-id>` (`'0'` open, `'1'` closed, absent means the panel's own default).
+- Legacy draggable-panel position keys may remain in local storage for backward compatibility, but the map-mode right rail ignores them; collapsed states still persist at `osiris.v6.panelCollapsed.<panel-id>`.
 - Flight/military tracked entities cache dead-reckoned positions per frame to avoid callback desync flicker.
 - Aircraft 3D-model and tracking invariants are covered by `npm run test:track`; run this before touching `flights.js`, `militaryFlights.js`, `detection.js`, or `trackedReadout.js`.
 - Annotation resolver behavior is pinned by `src/annotations/annotationResolver.test.mjs`; re-run that suite before changing place-resolution scoring.

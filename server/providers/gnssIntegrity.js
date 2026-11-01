@@ -78,7 +78,7 @@ export function gnssIntegrityProxy({
           redirect: 'error',
           headers: {
             Accept: 'application/json',
-            'User-Agent': 'gods-eye-view-gnss-integrity/1.0',
+            'User-Agent': 'osiris-gnss-integrity/1.0',
           },
         },
       );

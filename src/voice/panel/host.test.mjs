@@ -214,7 +214,7 @@ test('actual facade remount keeps failed-save live preferences/view and manual c
   old.voiceTimeoutSelect.value = 'custom';
   old.voiceTimeoutSelect.fire('change');
   const preferenceWrites = () =>
-    writes.filter(([key]) => key.startsWith('godsEyeView.voice.')).length;
+    writes.filter(([key]) => key.startsWith('osiris.voice.')).length;
   assert.equal(preferenceWrites(), 2);
   old.providerSelect.value = 'gemini';
   old.providerSelect.fire('change');

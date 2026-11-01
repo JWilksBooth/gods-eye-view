@@ -63,16 +63,16 @@ try {
 
   await page.goto(appUrl, { waitUntil: 'domcontentloaded', timeout: 30_000 });
   await page.waitForFunction(() => (
-    window.__godsEyeView?.voiceCommands
+    window.__osiris?.voiceCommands
     && document.getElementById('gev-voice-button')
     && document.getElementById('loading-screen')?.classList.contains('hidden')
   ), { timeout: 30_000 });
 
   const readState = () => page.evaluate(() => {
-    const voice = window.__godsEyeView?.voiceCommands;
-    const radio = window.__godsEyeView?.dataManager?.layers?.get('radio')?.module;
+    const voice = window.__osiris?.voiceCommands;
+    const radio = window.__osiris?.dataManager?.layers?.get('radio')?.module;
     const radioState = radio?.getUIState?.() || null;
-    const camera = window.__godsEyeView?.viewer?.camera;
+    const camera = window.__osiris?.viewer?.camera;
     const cartographic = camera?.positionCartographic;
     return {
       at: Date.now(),
@@ -101,7 +101,7 @@ try {
     await new Promise(resolve => setTimeout(resolve, 10_000));
     await page.keyboard.up('Space');
     microphoneReleased = await page.evaluate(() => {
-      const status = window.__godsEyeView.voiceCommands.status;
+      const status = window.__osiris.voiceCommands.status;
       return status === 'idle' || Boolean(document.querySelector('[data-microphone="muted"]'));
     });
   } else {

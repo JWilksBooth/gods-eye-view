@@ -23,7 +23,7 @@ const readPage = async (server) => {
     jsonrpc: '2.0',
     id: 1,
     method: 'resources/read',
-    params: { uri: 'ui://gods-eye-view/globe' },
+    params: { uri: 'ui://osiris/globe' },
   });
   return page.result.contents[0].text.match(/"panelKey":"([^"]+)"/)[1];
 };
@@ -52,7 +52,7 @@ test('a panel page from one server process is refused by another without a share
   assert.equal(refused.result.isError, true);
   assert.match(
     refused.result.content[0].text,
-    /Only the God's Eye View panel may make this request/,
+    /Only the Osiris panel may make this request/,
   );
 });
 

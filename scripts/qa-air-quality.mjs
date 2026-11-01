@@ -52,13 +52,13 @@ async function main() {
 
     await page.goto(APP_URL, { waitUntil: 'domcontentloaded', timeout: 90000 });
     await page.waitForFunction(
-      () => window.__godsEyeView?.viewer && window.__godsEyeView?.dataManager,
+      () => window.__osiris?.viewer && window.__osiris?.dataManager,
       { timeout: 90000 },
     );
     await sleep(1500);
 
     const stats = await page.evaluate(async () => {
-      const dm = window.__godsEyeView.dataManager;
+      const dm = window.__osiris.dataManager;
       await dm.setEnabled('air-quality', true);
       const mod = dm.layers.get('air-quality')?.module;
       if (!mod) return { missing: true };
@@ -78,7 +78,7 @@ async function main() {
 
     const records = await page.evaluate(
       () =>
-        window.__godsEyeView.dataManager
+        window.__osiris.dataManager
           .layers.get('air-quality')
           ?.module.getAnalystRecords(500) || [],
     );
@@ -107,7 +107,7 @@ async function main() {
     // over Canada before asserting on it — the default view is over Austin,
     // where an empty in-view list is correct and proves nothing.
     await page.evaluate(() => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const ellipsoid = gev.viewer.scene.globe.ellipsoid;
       const d2r = Math.PI / 180;
       try {
@@ -129,7 +129,7 @@ async function main() {
 
     const controls = await page.evaluate(
       () =>
-        window.__godsEyeView.dataManager
+        window.__osiris.dataManager
           .layers.get('air-quality')
           ?.module.getRowControls?.() || null,
     );

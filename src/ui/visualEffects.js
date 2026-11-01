@@ -61,7 +61,7 @@ export class VisualEffects {
       for (const [name, meta] of Object.entries(shader.uniforms || {}))
         uniforms[name] = meta.default;
       const stage = this.createStage({
-        name: `godsEyeView_${name}`,
+        name: `osiris_${name}`,
         fragmentShader: shader.fragmentShader,
         uniforms,
       });
@@ -99,7 +99,7 @@ export class VisualEffects {
       stepSize: 1.0,
     });
     this.sharpenStage = this.createStage({
-      name: 'godsEyeView_sharpen',
+      name: 'osiris_sharpen',
       fragmentShader: SHARPEN_SHADER,
       uniforms: { amount: 1.3 },
     });

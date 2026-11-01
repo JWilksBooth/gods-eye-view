@@ -35,7 +35,7 @@ try {
   );
   await page.waitForFunction(
     () =>
-      window.__godsEyeView?.styleManager?._cctvControls &&
+      window.__osiris?.styleManager?._cctvControls &&
       document.getElementById('loading-screen')?.classList.contains('hidden'),
     { timeout: 60000 },
   );
@@ -102,7 +102,7 @@ try {
   check('ordinary actions retain their panel sizing', inventory.layout);
 
   await page.evaluate(() => {
-    const manager = window.__godsEyeView.styleManager;
+    const manager = window.__osiris.styleManager;
     const owner = manager._cctvControls;
     owner._cctvUnsubscribe?.();
     owner._cctvUnsubscribe = null;
@@ -232,7 +232,7 @@ try {
   );
   await page.evaluate(() => {
     window.__qaButtonCalls = [];
-    window.__godsEyeView.styleManager._cctvControls._renderCctvState({
+    window.__osiris.styleManager._cctvControls._renderCctvState({
       enabled: false,
     });
   });
@@ -259,7 +259,7 @@ try {
     await page.setViewport({ width, height: 900 });
     for (const panel of ['scene-panel', 'cctv-panel']) {
       await page.evaluate((panel) => {
-        window.__godsEyeView.styleManager.setPanelCollapsed(panel, false, {
+        window.__osiris.styleManager.setPanelCollapsed(panel, false, {
           persist: false,
           syncShare: false,
         });
@@ -290,7 +290,7 @@ try {
     }
   }
   await page.evaluate(() => {
-    const owner = window.__godsEyeView.styleManager._cctvControls;
+    const owner = window.__osiris.styleManager._cctvControls;
     owner.destroy();
     document.getElementById('cctv-next-btn').disabled = false;
     window.__qaButtonCalls = [];
@@ -305,13 +305,13 @@ try {
   await page.goto(localized.href, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(
     () =>
-      window.__godsEyeView?.styleManager?._cctvControls &&
+      window.__osiris?.styleManager?._cctvControls &&
       document.getElementById('loading-screen')?.classList.contains('hidden'),
     { timeout: 60000 },
   );
   for (const panel of ['scene-panel', 'cctv-panel']) {
     await page.evaluate((panel) => {
-      window.__godsEyeView.styleManager.setPanelCollapsed(panel, false, {
+      window.__osiris.styleManager.setPanelCollapsed(panel, false, {
         persist: false,
         syncShare: false,
       });

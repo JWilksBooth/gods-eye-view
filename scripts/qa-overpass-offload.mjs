@@ -336,7 +336,7 @@ try {
     timeout: 60_000,
   });
   await page.waitForFunction(
-    () => window.__godsEyeView?.viewer && window.__godsEyeView?.dataManager,
+    () => window.__osiris?.viewer && window.__osiris?.dataManager,
     { timeout: 60_000, polling: 500 },
   );
   await page.waitForFunction(
@@ -345,14 +345,12 @@ try {
     { timeout: 60_000, polling: 250 },
   );
   // Startup restoration owns its camera flight until the loading cover is gone.
-  await page.evaluate(
-    () => window.__godsEyeView.styleManager.initialRestorePromise,
-  );
+  await page.evaluate(() => window.__osiris.styleManager.initialRestorePromise);
   await page.evaluate(() =>
-    window.__godsEyeView.styleManager.setDetection({ enabled: false }),
+    window.__osiris.styleManager.setDetection({ enabled: false }),
   );
   result.renderer = await page.evaluate(() => {
-    const gl = window.__godsEyeView.viewer.scene.context._gl;
+    const gl = window.__osiris.viewer.scene.context._gl;
     const debug = gl.getExtension('WEBGL_debug_renderer_info');
     return debug
       ? gl.getParameter(debug.UNMASKED_RENDERER_WEBGL)
@@ -366,7 +364,7 @@ try {
   async function fly(lat, lon, height = 2000, heading = 0, pitch = -75) {
     await page.evaluate(
       async (view) => {
-        const { viewer } = window.__godsEyeView;
+        const { viewer } = window.__osiris;
         viewer.camera.cancelFlight();
         await new Promise((resolve) =>
           viewer.camera.flyTo({
@@ -392,7 +390,7 @@ try {
   async function settleTiles() {
     await page.waitForFunction(
       () => {
-        const { scene } = window.__godsEyeView.viewer;
+        const { scene } = window.__osiris.viewer;
         if (scene.globe.show) return scene.globe.tilesLoaded;
         let found = false;
         for (let i = 0; i < scene.primitives.length; i++) {
@@ -417,7 +415,7 @@ try {
       'first-launch modal dismissed',
     );
     await page.evaluate(async () => {
-      window.__godsEyeView.requestRender('qa-overpass-offload');
+      window.__osiris.requestRender('qa-overpass-offload');
       await new Promise((resolve) =>
         requestAnimationFrame(() => requestAnimationFrame(resolve)),
       );
@@ -430,7 +428,7 @@ try {
     const milliseconds = await page.evaluate(
       (allowEmpty) =>
         new Promise((resolve, reject) => {
-          const { viewer, dataManager } = window.__godsEyeView;
+          const { viewer, dataManager } = window.__osiris;
           const start = performance.now();
           const cleanup = () => {
             remove();
@@ -481,7 +479,7 @@ try {
     while (Date.now() < deadline) {
       const states = await page.evaluate(() =>
         ['traffic', 'military-installations', 'alpr-cameras'].map((id) => {
-          const layer = window.__godsEyeView.dataManager.layers.get(id);
+          const layer = window.__osiris.dataManager.layers.get(id);
           return { id, enabled: layer.enabled, ...layer.module.getStats() };
         }),
       );
@@ -496,7 +494,7 @@ try {
     result.settleTimeout = {
       view: currentView.name,
       traffic: await page.evaluate(() =>
-        window.__godsEyeView.dataManager.layers
+        window.__osiris.dataManager.layers
           .get('traffic')
           .module.getLoadingDiagnostics(),
       ),
@@ -511,7 +509,7 @@ try {
   async function measureSurface() {
     return page.evaluate(async () => {
       const C = await import('/node_modules/cesium/Build/Cesium/index.js');
-      const { viewer, dataManager } = window.__godsEyeView;
+      const { viewer, dataManager } = window.__osiris;
       const { scene } = viewer;
       const collections = [];
       for (let i = 0; i < scene.primitives.length; i++) {
@@ -574,7 +572,7 @@ try {
     const view = beginView(name, { lat, lon, height, heading: 0, pitch: -35 });
     console.log(`Measuring ${name} at ${height} m...`);
     await page.evaluate(() =>
-      window.__godsEyeView.dataManager.setEnabled('traffic', false),
+      window.__osiris.dataManager.setEnabled('traffic', false),
     );
     await fly(lat, lon, height, 0, -35);
     await page.evaluate(() => performance.clearMeasures());
@@ -582,7 +580,7 @@ try {
     view.firstDotsMs = result.loadTimes[name];
     for (const id of ['military-installations', 'alpr-cameras'])
       await page.evaluate(
-        (layerId) => window.__godsEyeView.dataManager.setEnabled(layerId, true),
+        (layerId) => window.__osiris.dataManager.setEnabled(layerId, true),
         id,
       );
     view.layers = await waitForSources();
@@ -624,7 +622,7 @@ try {
     );
     view.layers = await waitForSources();
     view.actualCamera = await page.evaluate(() => {
-      const camera = window.__godsEyeView.viewer.camera;
+      const camera = window.__osiris.viewer.camera;
       const position = camera.positionCartographic;
       return {
         lat: (position.latitude * 180) / Math.PI,
@@ -650,7 +648,7 @@ try {
       `${name}: fixed pitch`,
     );
     await page.evaluate(() =>
-      window.__godsEyeView.dataManager.setEnabled('traffic', false),
+      window.__osiris.dataManager.setEnabled('traffic', false),
     );
     await enableTrafficTimed(`${name}-warm`);
     view.warmFirstDotsMs = result.loadTimes[`${name}-warm`];
@@ -663,7 +661,7 @@ try {
   if (compare) {
     // Same photoreal surface, camera and settle rules for every mode.
     await page.evaluate(async () => {
-      const { viewer, dataManager } = window.__godsEyeView;
+      const { viewer, dataManager } = window.__osiris;
       for (const [id, layer] of dataManager.layers)
         if (layer.enabled) await dataManager.setEnabled(id, false);
       viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
@@ -689,13 +687,13 @@ try {
       for (const mode of order) {
         beginView(`${name}-${mode}`, { lat, lon, height, pitch, heading: 0 });
         await page.evaluate(() =>
-          window.__godsEyeView.dataManager.setEnabled('traffic', false),
+          window.__osiris.dataManager.setEnabled('traffic', false),
         );
         await fly(lat, lon, height, 0, pitch);
         await settleTiles();
         await page.evaluate(
           (roadMode) =>
-            window.__godsEyeView.dataManager.setLayerParams(
+            window.__osiris.dataManager.setLayerParams(
               'traffic',
               { roadMode },
               { origin: 'user' },
@@ -715,7 +713,7 @@ try {
           surface.stats.mode === 'live' ? mode : 'osm',
         );
         const actualCamera = await page.evaluate(() => {
-          const camera = window.__godsEyeView.viewer.camera;
+          const camera = window.__osiris.viewer.camera;
           const p = camera.positionCartographic;
           return {
             lat: (p.latitude * 180) / Math.PI,
@@ -745,7 +743,7 @@ try {
           'first-launch modal dismissed',
         );
         await page.evaluate(async () => {
-          window.__godsEyeView.requestRender('qa-overpass-offload');
+          window.__osiris.requestRender('qa-overpass-offload');
           await new Promise((resolve) =>
             requestAnimationFrame(() => requestAnimationFrame(resolve)),
           );
@@ -783,9 +781,8 @@ try {
     await page.click('[data-layer-id="traffic"] [data-chip-id="roads-osm"]');
     await page.waitForFunction(
       () =>
-        window.__godsEyeView.dataManager.layers
-          .get('traffic')
-          .module.getParams().roadMode === 'osm',
+        window.__osiris.dataManager.layers.get('traffic').module.getParams()
+          .roadMode === 'osm',
     );
     await page.waitForFunction(
       () =>
@@ -828,7 +825,7 @@ try {
       beginView(name);
       await page.evaluate(() => {
         performance.clearMeasures();
-        window.__godsEyeView.dataManager.setEnabled('traffic', false);
+        window.__osiris.dataManager.setEnabled('traffic', false);
       });
       await enableTrafficTimed(name);
       await waitForSources();
@@ -848,7 +845,7 @@ try {
   } else if (pan) {
     const sessionBudget = 32; // <= 0.54% of the default 6,000/day upstream budget.
     await page.evaluate(() => {
-      window.__godsEyeView.viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
+      window.__osiris.viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
     });
     beginView('pan-start');
     await fly(30.2672, -97.7431, 450, 0, -35);
@@ -972,7 +969,7 @@ try {
     // for collision avoidance (São Paulo -> Austin raises a 450 m target).
     // Pin the prescribed camera fixtures so the revisit covers identical tiles.
     await page.evaluate(() => {
-      window.__godsEyeView.viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
+      window.__osiris.viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
     });
     for (const city of [
       ['austin', 30.2672, -97.7431],
@@ -1000,7 +997,7 @@ try {
       await page.evaluate(
         (layerId) =>
           Promise.race([
-            window.__godsEyeView.dataManager.setEnabled(layerId, true),
+            window.__osiris.dataManager.setEnabled(layerId, true),
             new Promise((_, reject) =>
               setTimeout(
                 () => reject(new Error('Layer enable timed out')),
@@ -1013,7 +1010,7 @@ try {
     }
     await page.waitForFunction(
       () => {
-        const layers = window.__godsEyeView.dataManager.layers;
+        const layers = window.__osiris.dataManager.layers;
         return ['traffic', 'alpr-cameras'].every((id) => {
           const s = layers.get(id).module.getStats();
           return s.count > 0 && !s.loading && !s.error;
@@ -1022,7 +1019,7 @@ try {
       { timeout: 120_000, polling: 500 },
     );
     const austin = await page.evaluate(() => {
-      const { viewer, dataManager } = window.__godsEyeView;
+      const { viewer, dataManager } = window.__osiris;
       const traffic = dataManager.layers.get('traffic').module.getStats();
       const alpr = dataManager.layers.get('alpr-cameras').module.getStats();
       let cameraEntities = 0;
@@ -1074,14 +1071,14 @@ try {
         pitch: -35,
       });
       await page.evaluate(async () =>
-        window.__godsEyeView.dataManager.setEnabled('traffic', false),
+        window.__osiris.dataManager.setEnabled('traffic', false),
       );
       await fly(30.2672, -97.7431, 450, 0, -35);
       await settleTiles();
       await enableTrafficTimed(`${name}WarmFirstDotsMs`);
       await page.waitForFunction(
         () => {
-          const s = window.__godsEyeView.dataManager.layers
+          const s = window.__osiris.dataManager.layers
             .get('traffic')
             .module.getStats();
           return s.count > 0 && !s.loading && !s.error;
@@ -1130,7 +1127,7 @@ try {
         pitch: -30,
       });
       await page.evaluate(() =>
-        window.__godsEyeView.dataManager.setEnabled('traffic', false),
+        window.__osiris.dataManager.setEnabled('traffic', false),
       );
       await fly(30.2685, -97.7425, 350, 10, -30);
       await settleTiles();
@@ -1154,7 +1151,7 @@ try {
       await settleTiles();
       await page.waitForFunction(
         () => {
-          const s = window.__godsEyeView.dataManager.layers
+          const s = window.__osiris.dataManager.layers
             .get('traffic')
             .module.getStats();
           return s.count > 0 && !s.loading && !s.error;
@@ -1201,17 +1198,17 @@ try {
       });
       await page.waitForFunction(
         () =>
-          window.__godsEyeView?.dataManager &&
+          window.__osiris?.dataManager &&
           document
             .getElementById('loading-screen')
             ?.classList.contains('hidden'),
         { timeout: 90_000 },
       );
       await page.evaluate(
-        () => window.__godsEyeView.styleManager.initialRestorePromise,
+        () => window.__osiris.styleManager.initialRestorePromise,
       );
       await page.evaluate(() =>
-        window.__godsEyeView.styleManager.setDetection({ enabled: false }),
+        window.__osiris.styleManager.setDetection({ enabled: false }),
       );
       beginView('austin-keyless', {
         lat: 30.2672,
@@ -1247,14 +1244,14 @@ try {
     console.log('Checking Camp Mabry...');
     const before = await page.evaluate(
       () =>
-        window.__godsEyeView.dataManager.layers
+        window.__osiris.dataManager.layers
           .get('military-installations')
           .module.getStats().lastUpdate,
     );
     await fly(30.3125, -97.765, 3500, 25, -80);
     await page.waitForFunction(
       (prior) => {
-        const s = window.__godsEyeView.dataManager.layers
+        const s = window.__osiris.dataManager.layers
           .get('military-installations')
           .module.getStats();
         return s.count > 0 && !s.loading && !s.error && s.lastUpdate !== prior;
@@ -1263,7 +1260,7 @@ try {
       before,
     );
     result.military = await page.evaluate(() => {
-      const { viewer, dataManager } = window.__godsEyeView;
+      const { viewer, dataManager } = window.__osiris;
       const center = viewer.scene.globe.ellipsoid.cartographicToCartesian({
         latitude: (30.314 * Math.PI) / 180,
         longitude: (-97.763 * Math.PI) / 180,
@@ -1318,7 +1315,7 @@ try {
     console.log('Checking Fort Cavazos...');
     const priorFort = await page.evaluate(
       () =>
-        window.__godsEyeView.dataManager.layers
+        window.__osiris.dataManager.layers
           .get('military-installations')
           .module.getStats().lastUpdate,
     );
@@ -1326,7 +1323,7 @@ try {
     await settleTiles();
     await page.waitForFunction(
       (prior) => {
-        const s = window.__godsEyeView.dataManager.layers
+        const s = window.__osiris.dataManager.layers
           .get('military-installations')
           .module.getStats();
         return !s.loading && !s.error && s.count > 0 && s.lastUpdate !== prior;
@@ -1335,7 +1332,7 @@ try {
       priorFort,
     );
     result.fortCavazos = await page.evaluate(() => {
-      const { viewer, dataManager } = window.__godsEyeView;
+      const { viewer, dataManager } = window.__osiris;
       let markers = 0,
         outlines = 0;
       for (let i = 0; i < viewer.dataSources.length; i++)
@@ -1387,7 +1384,7 @@ try {
     beginView('annotation-area');
     await page.evaluate(() =>
       ['traffic', 'military-installations', 'alpr-cameras'].forEach((id) =>
-        window.__godsEyeView.dataManager.setEnabled(id, false),
+        window.__osiris.dataManager.setEnabled(id, false),
       ),
     );
     await fly(37.7989, -122.4662, 4000, 0, -45);
@@ -1399,7 +1396,7 @@ try {
       const configured = await fetch('/api/overpass/status')
         .then((response) => response.json())
         .then((body) => body.configured);
-      const annotation = await window.__godsEyeView.annotations.annotate([
+      const annotation = await window.__osiris.annotations.annotate([
         { type: 'area', target: 'Presidio of San Francisco', footprint: true },
       ]);
       return { configured, drawn: annotation.drawn };
@@ -1424,22 +1421,20 @@ try {
         'unconfigured Overpass is never queried',
       );
     await shot('annotation-area');
-    await page.evaluate(() => window.__godsEyeView.annotations.clear?.());
+    await page.evaluate(() => window.__osiris.annotations.clear?.());
   }
   if (!pan && !profile && !compare) {
     beginView('alpr-london');
     await page.evaluate(() =>
-      window.__godsEyeView.dataManager.setEnabled('traffic', false),
+      window.__osiris.dataManager.setEnabled('traffic', false),
     );
     await fly(51.5074, -0.1278, 450, 0, -35);
     await page.evaluate(() =>
-      window.__godsEyeView.dataManager.setEnabled('alpr-cameras', true),
+      window.__osiris.dataManager.setEnabled('alpr-cameras', true),
     );
     await waitForSources();
     result.alprLondon = await page.evaluate(() =>
-      window.__godsEyeView.dataManager.layers
-        .get('alpr-cameras')
-        .module.getStats(),
+      window.__osiris.dataManager.layers.get('alpr-cameras').module.getStats(),
     );
     assert.equal(result.alprLondon.noCoverage, true);
     assert.equal(result.alprLondon.countLabel, '');
@@ -1487,7 +1482,7 @@ try {
     result.diagnostic = await page
       .evaluate(() => ({
         text: document.body.innerText.slice(0, 3000),
-        layers: [...(window.__godsEyeView?.dataManager?.layers || [])]
+        layers: [...(window.__osiris?.dataManager?.layers || [])]
           .filter(([id]) =>
             ['traffic', 'military-installations', 'alpr-cameras'].includes(id),
           )

@@ -1,5 +1,5 @@
-export const VOICE_PREVIEW_STORAGE_KEY = 'godsEyeView.voice.previewEnabled';
-export const VOICE_TIMEOUT_STORAGE_KEY = 'godsEyeView.voice.inactivityMinutes';
+export const VOICE_PREVIEW_STORAGE_KEY = 'osiris.voice.previewEnabled';
+export const VOICE_TIMEOUT_STORAGE_KEY = 'osiris.voice.inactivityMinutes';
 const PRESETS = ['3', '5', '10', '15'];
 
 function parseMinutes(value) {

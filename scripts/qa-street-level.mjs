@@ -219,7 +219,7 @@ function newFixture(overrides = {}) {
 /** Load the app and dismiss the first-run dialog. */
 async function boot(page, url) {
   await page.goto(url, { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => Boolean(window.__godsEyeView?.dataManager), {
+  await page.waitForFunction(() => Boolean(window.__osiris?.dataManager), {
     timeout: 150_000,
   });
   await page.evaluate(() =>
@@ -237,7 +237,7 @@ async function boot(page, url) {
 /** Run `test(uiState, arg)` in the page until it is true. */
 const uiUntil = (page, test, arg = null, timeout = 30_000) =>
   page.waitForFunction(
-    `(${test})(window.__godsEyeView.dataManager.layers.get('street-level').module.getUIState(), ${JSON.stringify(arg)})`,
+    `(${test})(window.__osiris.dataManager.layers.get('street-level').module.getUIState(), ${JSON.stringify(arg)})`,
     { timeout, polling: 100 },
   );
 
@@ -248,9 +248,7 @@ const litAlone = (u, id) =>
 
 const getUI = (page) =>
   page.evaluate(() =>
-    window.__godsEyeView.dataManager.layers
-      .get('street-level')
-      .module.getUIState(),
+    window.__osiris.dataManager.layers.get('street-level').module.getUIState(),
   );
 
 const statusIs = (page, text) =>
@@ -298,7 +296,7 @@ async function expandPanel(page) {
 
 async function assertKeyRequired(page) {
   await page.evaluate(() =>
-    window.__godsEyeView.dataManager.setEnabled('street-level', true, {
+    window.__osiris.dataManager.setEnabled('street-level', true, {
       origin: 'user',
     }),
   );
@@ -321,7 +319,7 @@ async function assertKeyRequired(page) {
 const findPick = (page, prefix, { box = null, step = 3 } = {}) =>
   page.evaluate(
     (want, area, stride) => {
-      const { scene } = window.__godsEyeView.viewer;
+      const { scene } = window.__osiris.viewer;
       const rect = scene.canvas.getBoundingClientRect();
       const { x, y, w, h } = area || {
         x: 0,
@@ -369,7 +367,7 @@ async function findPickUntil(
 async function park(page, at = PARK) {
   for (let attempt = 0; attempt < 5; attempt++) {
     const stayed = await page.evaluate(async (at) => {
-      const v = window.__godsEyeView.viewer;
+      const v = window.__osiris.viewer;
       v.camera.cancelFlight?.();
       const C = v.camera.positionCartographic.constructor;
       v.camera.setView({
@@ -476,7 +474,7 @@ async function main() {
           box === 'column'
             ? await page.evaluate(() => {
                 const { height, width } =
-                  window.__godsEyeView.viewer.scene.canvas.getBoundingClientRect();
+                  window.__osiris.viewer.scene.canvas.getBoundingClientRect();
                 return { x: Math.round(width * 0.3), y: 0, w: 1, h: height };
               })
             : null;
@@ -539,7 +537,7 @@ async function main() {
         'enabling draws coverage and the Mapillary credit',
         async () => {
           await page.evaluate(() =>
-            window.__godsEyeView.dataManager.setEnabled('street-level', true, {
+            window.__osiris.dataManager.setEnabled('street-level', true, {
               origin: 'user',
             }),
           );

@@ -65,7 +65,7 @@ test('the stdio server answers newline-delimited requests using only its data so
     .map((line) => JSON.parse(line));
   const byId = new Map(responses.map((response) => [response.id, response]));
   assert.equal(responses.length, 4);
-  assert.equal(byId.get(1).result.serverInfo.name, 'gods-eye-view');
+  assert.equal(byId.get(1).result.serverInfo.name, 'osiris');
   assert.equal(byId.get(null).error.code, -32700);
   // Every Core tool's services are composed locally.
   assert.deepEqual(
@@ -123,12 +123,12 @@ test('a failed tool call is logged with its reason', async () => {
     log: (line) => logged.push(line),
   });
   input.end(
-    '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"show_in_gods_eye_view"}}\n',
+    '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"show_in_osiris"}}\n',
   );
   await served;
   assert.deepEqual(logged, [
-    'tools/call show_in_gods_eye_view',
-    '   tools/call show_in_gods_eye_view failed: bad area',
+    'tools/call show_in_osiris',
+    '   tools/call show_in_osiris failed: bad area',
   ]);
 });
 
@@ -152,7 +152,7 @@ test("only the key in the server's own panel page opens panel requests", async (
     jsonrpc: '2.0',
     id: 1,
     method: 'resources/read',
-    params: { uri: 'ui://gods-eye-view/globe' },
+    params: { uri: 'ui://osiris/globe' },
   });
   const [, key] = page.result.contents[0].text.match(/"panelKey":"([^"]+)"/);
   assert.ok(key.length >= 40);
@@ -167,7 +167,7 @@ test("only the key in the server's own panel page opens panel requests", async (
     jsonrpc: '2.0',
     id: 4,
     method: 'resources/read',
-    params: { uri: 'ui://gods-eye-view/globe' },
+    params: { uri: 'ui://osiris/globe' },
   });
   assert.doesNotMatch(otherPage.result.contents[0].text, new RegExp(key));
 });
@@ -210,4 +210,33 @@ test('a request the client cancels over stdio is aborted and gets no answer', as
     .split('\n')
     .map((line) => JSON.parse(line).id);
   assert.deepEqual(ids, [2]);
+});
+
+test('the local server still answers show_in_osiris by its former name, unlisted', async () => {
+  const server = createLocalMcpServer({
+    apiBase: 'http://127.0.0.1:5000',
+    fetchImpl: async () => Response.json(usgs),
+  });
+  const listed = await server.handle({
+    jsonrpc: '2.0',
+    id: 1,
+    method: 'tools/list',
+  });
+  const names = listed.result.tools.map((entry) => entry.name);
+  assert.ok(names.includes('show_in_osiris'));
+  assert.ok(!names.includes('show_in_gods_eye_view'));
+  const camera = { lat: 30.267, lon: -97.743, altitude_m: 5000 };
+  const [current, former] = await Promise.all(
+    ['show_in_osiris', 'show_in_gods_eye_view'].map((name, index) =>
+      server.handle({
+        jsonrpc: '2.0',
+        id: index + 2,
+        method: 'tools/call',
+        params: { name, arguments: { camera } },
+      }),
+    ),
+  );
+  assert.equal(current.result.isError, false);
+  assert.deepEqual(former.result, current.result);
+  assert.match(former.result.content[0].text, /^Open .* in Osiris: /);
 });

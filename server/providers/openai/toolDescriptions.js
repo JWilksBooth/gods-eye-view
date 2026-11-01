@@ -6,7 +6,7 @@ import {
 export const ACTION_DESCRIPTIONS = {
   fly_to_location: {
     description:
-      "Fly the God's Eye View camera to a known city, geocoded country/region/city/landmark, or explicit WGS84 coordinate. Countries/cities frame the whole place; landmarks/buildings use close framing.",
+      'Fly the Osiris camera to a known city, geocoded country/region/city/landmark, or explicit WGS84 coordinate. Countries/cities frame the whole place; landmarks/buildings use close framing.',
     $position: 1,
     parameters: {
       properties: {
@@ -26,7 +26,7 @@ export const ACTION_DESCRIPTIONS = {
         },
         viewMode: {
           description:
-            'Optional framing intent. Usually omit this; GEV infers whole-place framing for countries/cities and close framing for landmarks.',
+            'Optional framing intent. Usually omit this; Osiris infers whole-place framing for countries/cities and close framing for landmarks.',
           $position: 2,
         },
         rangeM: {
@@ -86,7 +86,7 @@ export const ACTION_DESCRIPTIONS = {
   },
   set_layer_visibility: {
     description:
-      "Enable or disable one God's Eye View data layer. Every shipped layer is in the enum; never tell the user a listed layer does not exist.",
+      'Enable or disable one Osiris data layer. Every shipped layer is in the enum; never tell the user a listed layer does not exist.',
     $position: 1,
     parameters: {
       properties: {
@@ -158,12 +158,12 @@ export const ACTION_DESCRIPTIONS = {
     },
   },
   set_visual_style: {
-    description: "Set the active God's Eye View visual filter/style.",
+    description: 'Set the active Osiris visual filter/style.',
     $position: 1,
   },
   get_entity_context: {
     description:
-      'Get current GEV scene context, including basemap/3D-tile target context, selected entity metadata if active, and entities currently visible in the camera view.',
+      'Get current Osiris scene context, including basemap/3D-tile target context, selected entity metadata if active, and entities currently visible in the camera view.',
     $position: 1,
     parameters: {
       properties: {
@@ -549,7 +549,7 @@ export const ACTION_DESCRIPTIONS = {
   },
   analyst_query: {
     description:
-      'Counts, lists, superlatives and attribute filters over records loaded by ENABLED layers — "how many flights over Texas", "biggest fire near LA", "ships headed to Oakland", "next rocket launch". A requested list or ranking requires this tool even after set_context_mode returned a Contacts count; that count alone has no requested items. complete:false means the count is a floor ("at least") and rankings cover the records examined; partial names unanswered layers. Items carry lat/lon for a follow-up fly_to_location. ok:false codes: LAYER_OFF (offer to enable), NOT_READY (loading), FOLLOW_UP_MISMATCH (ask again without followUp), UNKNOWN_FIELD/UNKNOWN_SCOPE/BAD_VALUE (retry with the allowed values). Aircraft emergency fields describe broadcasts, not confirmed incidents: narrate emergencyBroadcast with emergencySource. emergencyKind values are general, unlawful, nordo, downed, minfuel and lifeguard; GEV treats the last two as priorities (emergency:false). lastContactAtMs says when the transponder was last heard, not when the status arrived.',
+      'Counts, lists, superlatives and attribute filters over records loaded by ENABLED layers — "how many flights over Texas", "biggest fire near LA", "ships headed to Oakland", "next rocket launch". A requested list or ranking requires this tool even after set_context_mode returned a Contacts count; that count alone has no requested items. complete:false means the count is a floor ("at least") and rankings cover the records examined; partial names unanswered layers. Items carry lat/lon for a follow-up fly_to_location. ok:false codes: LAYER_OFF (offer to enable), NOT_READY (loading), FOLLOW_UP_MISMATCH (ask again without followUp), UNKNOWN_FIELD/UNKNOWN_SCOPE/BAD_VALUE (retry with the allowed values). Aircraft emergency fields describe broadcasts, not confirmed incidents: narrate emergencyBroadcast with emergencySource. emergencyKind values are general, unlawful, nordo, downed, minfuel and lifeguard; Osiris treats the last two as priorities (emergency:false). lastContactAtMs says when the transponder was last heard, not when the status arrived.',
     $position: 1,
     parameters: {
       properties: {

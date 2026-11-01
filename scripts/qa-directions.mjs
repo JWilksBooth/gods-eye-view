@@ -64,7 +64,7 @@ const shot = async (name) => {
 async function lookAt(lat, lon, height) {
   await page.evaluate(
     (la, lo, h) => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       const Cartesian3 = viewer.camera.positionWC.constructor;
       viewer.camera.cancelFlight();
       viewer.camera.setView({
@@ -82,7 +82,7 @@ async function lookAt(lat, lon, height) {
 const screenAt = (lat, lon) =>
   page.evaluate(
     (la, lo) => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       const scene = viewer.scene;
       const Cartesian3 = viewer.camera.positionWC.constructor;
       const Cartographic = viewer.camera.positionCartographic.constructor;
@@ -103,7 +103,7 @@ const screenAt = (lat, lon) =>
 
 const layerState = () =>
   page.evaluate(() => {
-    const gev = window.__godsEyeView;
+    const gev = window.__osiris;
     const manager = gev.dataManager;
     const module = manager.layers.get('directions').module;
     const row = document.querySelector(
@@ -170,16 +170,15 @@ const setMode = async (mode) => {
 const waitForRoute = () =>
   page.waitForFunction(
     () =>
-      window.__godsEyeView.dataManager.layers
-        .get('directions')
-        .module.getStats().count > 0,
+      window.__osiris.dataManager.layers.get('directions').module.getStats()
+        .count > 0,
     { timeout: 40000 },
   );
 
 const waitForMode = (word) =>
   page.waitForFunction(
     (w) =>
-      window.__godsEyeView.dataManager.layers
+      window.__osiris.dataManager.layers
         .get('directions')
         .module.getStats()
         .coverage?.endsWith(w),
@@ -189,7 +188,7 @@ const waitForMode = (word) =>
 
 const cameraPose = () =>
   page.evaluate(() => {
-    const c = window.__godsEyeView.viewer.camera.positionWC;
+    const c = window.__osiris.viewer.camera.positionWC;
     return { x: c.x, y: c.y, z: c.z };
   });
 const poseDelta = (a, b) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
@@ -213,7 +212,7 @@ try {
     waitUntil: 'domcontentloaded',
     timeout: 90000,
   });
-  await page.waitForFunction(() => window.__godsEyeView?.dataManager, {
+  await page.waitForFunction(() => window.__osiris?.dataManager, {
     timeout: 90000,
   });
   // Two module reads the assertions need. Both are the app's OWN module
@@ -342,7 +341,7 @@ try {
   // used to place B and deselect whatever was under it in the same gesture.
   await page.evaluate(() => {
     window.__gevQaLateHandler = [];
-    const canvas = window.__godsEyeView.viewer.scene.canvas;
+    const canvas = window.__osiris.viewer.scene.canvas;
     canvas.addEventListener('pointerup', () => {
       window.__gevQaLateHandler.push(window.__gevQa.pointerOwner());
     });
@@ -455,7 +454,7 @@ try {
 
   // ── 5. Three rapid reroutes leave exactly one route. ─────────────────────
   await page.evaluate(() => {
-    const manager = window.__godsEyeView.dataManager;
+    const manager = window.__osiris.dataManager;
     manager.setLayerParams('directions', { mode: 'foot' }, { origin: 'user' });
     manager.setLayerParams('directions', { mode: 'bike' }, { origin: 'user' });
     manager.setLayerParams('directions', { mode: 'car' }, { origin: 'user' });
@@ -507,7 +506,7 @@ try {
 
   const reroute = async () => {
     await page.evaluate(() =>
-      window.__godsEyeView.dataManager.setLayerParams(
+      window.__osiris.dataManager.setLayerParams(
         'directions',
         { mode: 'foot' },
         { origin: 'user' },
@@ -566,7 +565,7 @@ try {
     // Back to a real route before the next case.
     stub = null;
     await page.evaluate(() =>
-      window.__godsEyeView.dataManager.setLayerParams(
+      window.__osiris.dataManager.setLayerParams(
         'directions',
         { mode: 'car' },
         { origin: 'user' },
@@ -696,7 +695,7 @@ try {
       // Let the shared ground-floor cells warm and the dots re-anchor.
       await sleep(9000);
       const denver = await page.evaluate(() => {
-        const viewer = window.__godsEyeView.viewer;
+        const viewer = window.__osiris.viewer;
         const Cartographic = viewer.camera.positionCartographic.constructor;
         const scene = viewer.scene;
         let collection = null;
@@ -743,7 +742,7 @@ try {
 
   // ── 10. Disable: nothing is left behind. ────────────────────────────────
   const { beforeDisable, directionsBeforeDisable } = await page.evaluate(() => {
-    const entities = [...window.__godsEyeView.viewer.entities.values];
+    const entities = [...window.__osiris.viewer.entities.values];
     return {
       beforeDisable: entities.length,
       directionsBeforeDisable: entities.filter((entity) =>
@@ -752,13 +751,13 @@ try {
     };
   });
   await page.evaluate(() =>
-    window.__godsEyeView.dataManager.setEnabled('directions', false, {
+    window.__osiris.dataManager.setEnabled('directions', false, {
       origin: 'user',
     }),
   );
   await sleep(1500);
   const off = await page.evaluate(() => {
-    const gev = window.__godsEyeView;
+    const gev = window.__osiris;
     const viewer = gev.viewer;
     const left = [...viewer.entities.values].filter((entity) =>
       String(entity.id).startsWith('directions:'),

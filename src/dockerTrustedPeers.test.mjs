@@ -150,7 +150,7 @@ test('Compose resolves shell and project dotenv policy before the launcher start
     );
     assert.ifError(child.error);
     assert.equal(child.status, 0, child.stderr);
-    return JSON.parse(child.stdout).services['gods-eye-view'].environment || {};
+    return JSON.parse(child.stdout).services['osiris'].environment || {};
   }
   const unset = config();
   assert.ok(unset.GEV_KEY_SETUP_TRUSTED_PEERS == null);

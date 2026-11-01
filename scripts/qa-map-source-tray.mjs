@@ -126,8 +126,8 @@ const focusMetrics = (selector = '.style-btn') => page.evaluate((match) => {
     layerId: button.closest('[data-layer-id]')?.dataset.layerId || null,
     text: button.textContent.trim(), ariaLabel: button.getAttribute('aria-label'),
     controls: button.getAttribute('aria-controls'), expanded: button.getAttribute('aria-expanded'),
-    selectedStyle: window.__godsEyeView.styleManager.activeStyle,
-    selectedMap: window.__godsEyeView.styleManager.mapStackController.getActiveId(),
+    selectedStyle: window.__osiris.styleManager.activeStyle,
+    selectedMap: window.__osiris.styleManager.mapStackController.getActiveId(),
     focusVisible: button.matches(':focus-visible'),
     selected: button.classList.contains('active'),
     outlineStyle: css.outlineStyle, outlineWidth, outlineOffset, outlineColor: css.outlineColor,
@@ -189,7 +189,7 @@ const checkResponsiveStyleFocus = async (width) => {
   // The disclosure is only the starting boundary. Every style target below is
   // reached by actual Tab events, never by focusing the style under test.
   const selectedMapBefore = await page.evaluate(() => (
-    window.__godsEyeView.styleManager.mapStackController.getActiveId()
+    window.__osiris.styleManager.mapStackController.getActiveId()
   ));
   if (width <= 720) {
     // Phones show Presets in the More tab's sheet, which focuses its first
@@ -232,7 +232,7 @@ const locationState = async () => ({
   ...await page.evaluate(() => {
     const panel = document.getElementById('location-bar');
     const toggle = document.getElementById('location-bar-toggle');
-    const voice = window.__godsEyeView.voiceCommands;
+    const voice = window.__osiris.voiceCommands;
     return {
       locationExpanded: toggle?.getAttribute('aria-expanded'),
       locationLabel: toggle?.getAttribute('aria-label'),
@@ -249,7 +249,7 @@ const resetLocationTransitions = () => page.evaluate(() => { window.__qaLocation
 const layerFocusState = async (id) => ({
   ...await focusMetrics('.data-toggle-btn'),
   ...await page.evaluate((layerId) => {
-    const manager = window.__godsEyeView.dataManager;
+    const manager = window.__osiris.dataManager;
     const button = document.querySelector(`[data-layer-id="${layerId}"] .data-toggle-btn`);
     // The list scrolls on its own on desktop; in a phone sheet the sheet
     // scrolls instead. Measure whichever container actually scrolls.
@@ -303,7 +303,7 @@ try {
   // launcher on every navigation so its Escape/Space handlers cannot turn a
   // tray assertion into a mission or voice action in a pristine browser.
   await page.goto(`${appUrl}/?welcome=0`, { waitUntil: 'domcontentloaded', timeout: 60_000 });
-  await page.waitForFunction(() => window.__godsEyeView?.styleManager, { timeout: 60_000 });
+  await page.waitForFunction(() => window.__osiris?.styleManager, { timeout: 60_000 });
   await page.waitForFunction(
     () => document.getElementById('loading-screen')?.classList.contains('hidden'),
     { timeout: 60_000 },
@@ -329,7 +329,7 @@ try {
   );
 
   const esriTileFailureFallback = await page.evaluate(async () => {
-    const styleManager = window.__godsEyeView.styleManager;
+    const styleManager = window.__osiris.styleManager;
     const controller = styleManager.mapStackController;
     await styleManager._setMapStack('esri-imagery', { syncShare: false });
     // Cesium updates on-screen credits on a rendered frame, after setStack
@@ -417,9 +417,9 @@ try {
     wantExpanded, wantFocus,
   ).catch(() => {});
 
-  await page.evaluate(() => window.__godsEyeView.styleManager._setMapStack('osm', { syncShare: false }));
+  await page.evaluate(() => window.__osiris.styleManager._setMapStack('osm', { syncShare: false }));
   const keyboardSource = await page.evaluate(() => (
-    window.__godsEyeView.styleManager.mapStackController.getActiveId()
+    window.__osiris.styleManager.mapStackController.getActiveId()
   ));
   check('keyboard checks start on selected OSM as the last tile',
     keyboardSource === 'osm' && await page.evaluate(() => (
@@ -483,7 +483,7 @@ try {
 
   // Force a delayed visible state while using the real controller and keyboard routes.
   const hideTray = () => page.evaluate(() => {
-    const manager = window.__godsEyeView.styleManager;
+    const manager = window.__osiris.styleManager;
     manager.setPanelCollapsed('control-panel', true);
     window.__qaTrayStyles = [...document.querySelectorAll('.map-stack-chip')]
       .map((chip) => [chip, chip.style.cssText]);
@@ -523,7 +523,7 @@ try {
   check('Tab away during the opening transition revokes delayed focus', departure && focusRetained,
     JSON.stringify({ departure, focusRetained }));
 
-  await page.evaluate(() => window.__godsEyeView.styleManager.setPanelCollapsed('control-panel', true, { explicit: true }));
+  await page.evaluate(() => window.__osiris.styleManager.setPanelCollapsed('control-panel', true, { explicit: true }));
   await page.focus('#control-panel-toggle');
   await page.keyboard.press('Enter');
   await page.keyboard.press('Escape');
@@ -552,7 +552,7 @@ try {
   await page.focus('#control-panel-toggle');
   await page.keyboard.press('Enter');
   await page.keyboard.press('Escape');
-  await page.evaluate(() => window.__godsEyeView.styleManager.setPanelCollapsed('control-panel', false));
+  await page.evaluate(() => window.__osiris.styleManager.setPanelCollapsed('control-panel', false));
   await new Promise((resolve) => setTimeout(resolve, 1100));
   check('programmatic reopening cannot inherit a cancelled keyboard handoff', await page.evaluate(() => (
     document.activeElement === document.body
@@ -596,8 +596,8 @@ try {
   // Stub only the provider start seam so timing and focus arbitration can be
   // exercised without opening a live microphone session during browser QA.
   await page.evaluate(() => {
-    const manager = window.__godsEyeView.styleManager;
-    const voice = window.__godsEyeView.voiceCommands;
+    const manager = window.__osiris.styleManager;
+    const voice = window.__osiris.voiceCommands;
     const grid = document.getElementById('style-buttons');
     const root = document.getElementById('gev-voice-control');
     const originalSetStyle = manager.setStyle;
@@ -687,7 +687,7 @@ try {
     shortSpaceReleased = await page.evaluate(() => window.__qaStyleKeyProbe.snapshot());
 
     await page.evaluate(() => {
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       manager.setStyle('retro');
       window.__qaStyleKeyProbe.reset();
       document.querySelector('.style-btn[data-style="normal"]')?.focus();
@@ -710,7 +710,7 @@ try {
     await page.evaluate(() => {
       window.__qaStyleKeyProbe?.restore();
       delete window.__qaStyleKeyProbe;
-      window.__godsEyeView.styleManager.setStyle('normal');
+      window.__osiris.styleManager.setStyle('normal');
     });
   }
   const voiceUntouched = (state) => state.voiceBefore.present
@@ -754,7 +754,7 @@ try {
 
   if (forceKeyless) {
     await page.evaluate(async () => {
-      const styleManager = window.__godsEyeView.styleManager;
+      const styleManager = window.__osiris.styleManager;
       const controller = styleManager.mapStackController;
       if (controller.googleTileset) controller.googleTileset.show = false;
       controller.googleTileset = null;
@@ -771,7 +771,7 @@ try {
       styleManager._initMapStackControl();
     });
     const keylessState = await page.evaluate(() => {
-      const controller = window.__godsEyeView.styleManager.mapStackController;
+      const controller = window.__osiris.styleManager.mapStackController;
       return {
         activeId: controller.getActiveId(),
         hasGoogleTileset: Boolean(controller.googleTileset),
@@ -787,7 +787,7 @@ try {
     );
   }
   const activeBeforeIonAttempt = await page.evaluate(() => (
-    window.__godsEyeView.styleManager.mapStackController.getActiveId()
+    window.__osiris.styleManager.mapStackController.getActiveId()
   ));
   // The long-Space test above deliberately blurs its style button. On a slower
   // keyless rebuild that can give the tray's pending auto-close enough time to
@@ -795,7 +795,7 @@ try {
   // clear that close timer, then ensure the tray is visibly open so this check
   // exercises the unavailable tile rather than a hidden element.
   await page.focus('#control-panel-toggle');
-  await page.evaluate(() => window.__godsEyeView.styleManager.setPanelCollapsed(
+  await page.evaluate(() => window.__osiris.styleManager.setPanelCollapsed(
     'control-panel', false, { persist: false, syncShare: false },
   ));
   await waitTray('true', null);
@@ -816,8 +816,8 @@ try {
     // Cesium creates the imagery provider asynchronously. Wait for controller
     // truth instead of assuming a keyed switch can settle in one animation.
     await page.waitForFunction(
-      () => window.__godsEyeView.styleManager.mapStackController.getActiveId() === 'bing-aerial'
-        || Boolean(window.__godsEyeView.styleManager.mapStackController.getState()?.lastError),
+      () => window.__osiris.styleManager.mapStackController.getActiveId() === 'bing-aerial'
+        || Boolean(window.__osiris.styleManager.mapStackController.getState()?.lastError),
       { timeout: 20_000 },
     ).catch(() => {});
   } else {
@@ -831,7 +831,7 @@ try {
       focused: document.activeElement === chip,
       ariaDisabled: chip.getAttribute('aria-disabled'),
       ariaLabel: chip.getAttribute('aria-label'),
-      activeId: window.__godsEyeView.styleManager.mapStackController.getActiveId(),
+      activeId: window.__osiris.styleManager.mapStackController.getActiveId(),
       active: [...document.querySelectorAll('.map-stack-chip')]
         .filter((candidate) => candidate.getAttribute('aria-pressed') === 'true')
         .map((candidate) => candidate.dataset.stackId),
@@ -860,7 +860,7 @@ try {
     );
   }
   const switching = await page.evaluate(async () => {
-    const styleManager = window.__godsEyeView.styleManager;
+    const styleManager = window.__osiris.styleManager;
     const controller = styleManager.mapStackController;
     const originalSetStack = controller.setStack.bind(controller);
     const before = controller.getActiveId();
@@ -898,7 +898,7 @@ try {
   );
 
   const acquiringLifecycle = await page.evaluate(async () => {
-    const styleManager = window.__godsEyeView.styleManager;
+    const styleManager = window.__osiris.styleManager;
     const status = document.getElementById('global-loading-status');
     const snapshot = () => ({
       hidden: status.hidden,
@@ -959,7 +959,7 @@ try {
   );
 
   const acquiringFailureArbitration = await page.evaluate(async () => {
-    const styleManager = window.__godsEyeView.styleManager;
+    const styleManager = window.__osiris.styleManager;
     const dataManager = styleManager._dataManager;
     const status = document.getElementById('global-loading-status');
     const originalGetAll = dataManager.getAll;
@@ -1086,7 +1086,7 @@ try {
     };
   });
   const clickTileThenLeave = async (stackId) => {
-    await page.evaluate(() => window.__godsEyeView.styleManager
+    await page.evaluate(() => window.__osiris.styleManager
       .setPanelCollapsed('control-panel', false, { explicit: true }));
     await new Promise((resolve) => setTimeout(resolve, 240));
     await page.click(`[data-stack-id="${stackId}"]`);
@@ -1104,12 +1104,12 @@ try {
   // mouse-away that dismisses after a click, opposite outcome — so a fix that
   // simply deleted the focus guard would fail here.
   await setControlPanelPinned(false);
-  await page.evaluate(() => window.__godsEyeView.styleManager
+  await page.evaluate(() => window.__osiris.styleManager
     .setPanelCollapsed('control-panel', true, { explicit: true }));
   await new Promise((resolve) => setTimeout(resolve, 200));
   await page.focus('#control-panel-toggle');
   await page.keyboard.press('Enter'); // opens and hands focus to the active tile
-  const selectedForHold = await page.evaluate(() => window.__godsEyeView.styleManager.mapStackController.getActiveId());
+  const selectedForHold = await page.evaluate(() => window.__osiris.styleManager.mapStackController.getActiveId());
   await waitTray('true', selectedForHold);
   // Keyless starts on OSM, the last tile. Tab forward there correctly leaves
   // the tray, so navigate to a neighbouring tile in the available direction.
@@ -1152,7 +1152,7 @@ try {
   const pinnedForHold = await setControlPanelPinned(true);
   const pinnedHold = await clickTileThenLeave('photoreal');
   await setControlPanelPinned(false);
-  await page.evaluate(() => window.__godsEyeView.styleManager
+  await page.evaluate(() => window.__osiris.styleManager
     ._setMapStack('photoreal', { syncShare: false }));
   // Approach the disclosure before opening: the previous mouse-away case
   // intentionally leaves a pending close, so an unattended programmatic reopen
@@ -1162,7 +1162,7 @@ try {
     return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
   });
   await page.mouse.move(pinApproach.x, pinApproach.y);
-  await page.evaluate(() => window.__godsEyeView.styleManager
+  await page.evaluate(() => window.__osiris.styleManager
     .setPanelCollapsed('control-panel', false, { explicit: true }));
   await new Promise((resolve) => setTimeout(resolve, 240));
   check(
@@ -1267,7 +1267,7 @@ try {
       // so drive the same parse/apply startup contract on the current keyless
       // controller instead.
       await page.evaluate(async (id) => {
-        const styleManager = window.__godsEyeView.styleManager;
+        const styleManager = window.__osiris.styleManager;
         history.replaceState(null, '', `?welcome=0#v=2&lat=30.27&lon=-97.74&map=${id}`);
         const state = styleManager.shareLinkManager.parseInitialHash();
         await styleManager.shareLinkManager.applyState(state, { applyCamera: false });
@@ -1278,19 +1278,19 @@ try {
         waitUntil: 'domcontentloaded',
         timeout: 60_000,
       });
-      await page.waitForFunction(() => window.__godsEyeView?.styleManager, { timeout: 60_000 });
+      await page.waitForFunction(() => window.__osiris?.styleManager, { timeout: 60_000 });
       await page.waitForFunction(
         () => document.getElementById('loading-screen')?.classList.contains('hidden'),
         { timeout: 60_000 },
       );
     }
     await page.waitForFunction(
-      () => window.__godsEyeView.styleManager.mapStackController.getState()?.status !== 'switching',
+      () => window.__osiris.styleManager.mapStackController.getState()?.status !== 'switching',
       { timeout: 20_000 },
     ).catch(() => {});
     const restored = await page.evaluate(() => ({
-      activeId: window.__godsEyeView.styleManager.mapStackController.getActiveId(),
-      lastError: window.__godsEyeView.styleManager.mapStackController.getState()?.lastError || null,
+      activeId: window.__osiris.styleManager.mapStackController.getActiveId(),
+      lastError: window.__osiris.styleManager.mapStackController.getState()?.lastError || null,
       status: document.getElementById('map-stack-status').textContent.trim(),
       pressed: [...document.querySelectorAll('.map-stack-chip')]
         .filter((chip) => chip.getAttribute('aria-pressed') === 'true')
@@ -1313,7 +1313,7 @@ try {
   await page.setViewport({ width: 1000, height: 900, deviceScaleFactor: 1 });
   await page.mouse.move(20, 20);
   await page.evaluate(() => {
-    const manager = window.__godsEyeView.styleManager;
+    const manager = window.__osiris.styleManager;
     for (const id of ['control-panel', 'location-bar']) {
       manager._setCommandDockPanelPinState(id, false, { persist: false, syncShare: false });
       manager.setPanelCollapsed(id, true, { persist: false, syncShare: false });
@@ -1449,7 +1449,7 @@ try {
         continue;
       }
       await page.evaluate(() => {
-        const manager = window.__godsEyeView.styleManager;
+        const manager = window.__osiris.styleManager;
         manager.setPanelCollapsed('control-panel', true, { persist: false, syncShare: false });
         manager.setPanelCollapsed('location-bar', true, { persist: false, syncShare: false });
       });
@@ -1472,7 +1472,7 @@ try {
     await page.evaluate(() => {
       window.__qaLocationFocus?.restore();
       delete window.__qaLocationFocus;
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       for (const id of ['control-panel', 'location-bar']) {
         manager._setCommandDockPanelPinState(id, false, { persist: false, syncShare: false });
         manager.setPanelCollapsed(id, true, { persist: false, syncShare: false });
@@ -1486,7 +1486,7 @@ try {
   let dataSetup;
   try {
     dataSetup = await page.evaluate(async () => {
-      const manager = window.__godsEyeView.dataManager;
+      const manager = window.__osiris.dataManager;
       const production = () => manager.getAll().filter((layer) => !layer.id.startsWith('qa-keyboard-focus-'))
         .map((layer) => ({
           id: layer.id, enabled: layer.enabled, phase: layer.lifecycleState, uncertain: layer.lifecycleUncertain,
@@ -1569,7 +1569,7 @@ try {
           await page.focus('#mobile-tab-bar [data-mobile-sheet="layers"]');
           await page.keyboard.press('Enter');
         }
-        await page.evaluate(() => window.__godsEyeView.styleManager.setPanelCollapsed('data-panel', false, { persist: false, syncShare: false }));
+        await page.evaluate(() => window.__osiris.styleManager.setPanelCollapsed('data-panel', false, { persist: false, syncShare: false }));
         // Resizing schedules rail placement on animation frames. Wait for that
         // pass and its CSS transitions before comparing a focus rectangle with
         // hit testing; a fixed Tab delay can observe two different positions.
@@ -1630,7 +1630,7 @@ try {
 
       await page.setViewport({ width: 1000, height: 900, deviceScaleFactor: 1 });
       await waitForShellSettled();
-      await page.evaluate(() => window.__godsEyeView.styleManager.setPanelCollapsed('data-panel', false, { persist: false, syncShare: false }));
+      await page.evaluate(() => window.__osiris.styleManager.setPanelCollapsed('data-panel', false, { persist: false, syncShare: false }));
       await page.focus('#data-panel .panel-collapse-btn');
       const transitionTab = await tabTo(`[data-layer-id="${dataSetup.transitionId}"] .data-toggle-btn`);
       const transitionBefore = await layerFocusState(dataSetup.transitionId);
@@ -1650,18 +1650,18 @@ try {
         hasVisibleControlFocus(enabling) && enabling.label === 'ENABLING' && !enabling.disabled
           && enabling.ariaDisabled === 'true' && enabling.ariaBusy === 'true', JSON.stringify(enabling));
       const enablingEpoch = await page.evaluate((layerId) => (
-        window.__godsEyeView.dataManager.layers.get(layerId).visibilityIntentEpoch
+        window.__osiris.dataManager.layers.get(layerId).visibilityIntentEpoch
       ), dataSetup.transitionId);
       await page.keyboard.press('Space');
       const enablingRepeat = await page.evaluate((layerId) => ({
         calls: window.__qaDataFocus.transition.enableCalls,
-        epoch: window.__godsEyeView.dataManager.layers.get(layerId).visibilityIntentEpoch,
+        epoch: window.__osiris.dataManager.layers.get(layerId).visibilityIntentEpoch,
       }), dataSetup.transitionId);
       check('Data Layers: repeated Space is inert while ENABLING',
         enablingRepeat.calls === 1 && enablingRepeat.epoch === enablingEpoch, JSON.stringify(enablingRepeat));
       await page.evaluate(() => window.__qaDataFocus.transition.releaseEnable());
       await page.waitForFunction((layerId) => {
-        const state = window.__godsEyeView.dataManager.getLayerLifecycleState(layerId);
+        const state = window.__osiris.dataManager.getLayerLifecycleState(layerId);
         return state.enabled && state.lifecycleState === 'enabled';
       }, { timeout: 5_000 }, dataSetup.transitionId);
       const enabled = await layerFocusState(dataSetup.transitionId);
@@ -1681,18 +1681,18 @@ try {
         hasVisibleControlFocus(disabling) && disabling.label === 'DISABLING' && !disabling.disabled
           && disabling.ariaDisabled === 'true' && disabling.ariaBusy === 'true', JSON.stringify(disabling));
       const disablingEpoch = await page.evaluate((layerId) => (
-        window.__godsEyeView.dataManager.layers.get(layerId).visibilityIntentEpoch
+        window.__osiris.dataManager.layers.get(layerId).visibilityIntentEpoch
       ), dataSetup.transitionId);
       await page.keyboard.press('Space');
       const disablingRepeat = await page.evaluate((layerId) => ({
         calls: window.__qaDataFocus.transition.disableCalls,
-        epoch: window.__godsEyeView.dataManager.layers.get(layerId).visibilityIntentEpoch,
+        epoch: window.__osiris.dataManager.layers.get(layerId).visibilityIntentEpoch,
       }), dataSetup.transitionId);
       check('Data Layers: repeated Space is inert while DISABLING',
         disablingRepeat.calls === 1 && disablingRepeat.epoch === disablingEpoch, JSON.stringify(disablingRepeat));
       await page.evaluate(() => window.__qaDataFocus.transition.releaseDisable());
       await page.waitForFunction((layerId) => {
-        const state = window.__godsEyeView.dataManager.getLayerLifecycleState(layerId);
+        const state = window.__osiris.dataManager.getLayerLifecycleState(layerId);
         return !state.enabled && state.lifecycleState === 'disabled';
       }, { timeout: 5_000 }, dataSetup.transitionId);
       const disabled = await layerFocusState(dataSetup.transitionId);
@@ -1704,14 +1704,14 @@ try {
     const cleaned = await page.evaluate(async () => {
       const state = window.__qaDataFocus;
       if (!state) return { complete: false, reason: 'No fixture setup state' };
-      const manager = window.__godsEyeView.dataManager;
+      const manager = window.__osiris.dataManager;
       state.transition?.releaseEnable?.();
       state.transition?.releaseDisable?.();
       const removed = [];
       for (const id of state.ids) removed.push(await window.__gevQaUnregisterLayer(manager, id));
       const { application } = await import('/src/main.js');
       application.getComponents().data.presentation.panel._renderToggles();
-      window.__godsEyeView.styleManager.setPanelCollapsed('data-panel', state.collapsed, { persist: false, syncShare: false });
+      window.__osiris.styleManager.setPanelCollapsed('data-panel', state.collapsed, { persist: false, syncShare: false });
       // A native user-origin toggle legitimately asks the production state
       // coordinator to persist. Restore the exact pre-fixture value so this
       // hermetic QA journey leaves the user's durable layer snapshot untouched.

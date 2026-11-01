@@ -266,7 +266,7 @@ async function openPage(browser, base) {
     await page.goto(
       `${base}/#v=2&lat=30&lon=-95&alt=17000000&heading=0&pitch=-90&roll=0`,
     );
-    await page.waitForFunction(() => !!window.__godsEyeView?.viewer);
+    await page.waitForFunction(() => !!window.__osiris?.viewer);
     return page;
   } catch (error) {
     await page.close();
@@ -411,7 +411,7 @@ async function main() {
         sample: (batch) =>
           withDeadline(
             page.evaluate(async (cameras) => {
-              const gev = window.__godsEyeView;
+              const gev = window.__osiris;
               const scene = gev.viewer.scene;
               const Cartesian3 = gev.viewer.camera.position.constructor;
               const Cartographic =

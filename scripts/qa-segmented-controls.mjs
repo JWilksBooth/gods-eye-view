@@ -27,7 +27,7 @@ try {
   await page.setViewport({ width: 1440, height: 900 });
   await page.goto(`${base}/?welcome=0`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(
-    () => window.__godsEyeView?.styleManager?._applicationShortcuts,
+    () => window.__osiris?.styleManager?._applicationShortcuts,
     { timeout: 60000 },
   );
   await page.waitForFunction(
@@ -36,7 +36,7 @@ try {
     { timeout: 60000 },
   );
   await page.evaluate(() =>
-    window.__godsEyeView.styleManager.setPanelCollapsed('pp-toggles', false, {
+    window.__osiris.styleManager.setPanelCollapsed('pp-toggles', false, {
       persist: false,
       syncShare: false,
     }),
@@ -75,7 +75,7 @@ try {
   check(
     'model selection reaches both aircraft layers',
     await page.evaluate(() => {
-      const dm = window.__godsEyeView.dataManager;
+      const dm = window.__osiris.dataManager;
       return (
         ['flights', 'military'].every(
           (id) => dm.layers.get(id).module.getParams().models3dMode === 'all',
@@ -115,7 +115,7 @@ try {
     'allocation selection still updates application tuning',
     await page.evaluate(
       () =>
-        window.__godsEyeView.styleManager._detectionAllocationPreference ===
+        window.__osiris.styleManager._detectionAllocationPreference ===
           'WEIGHTED' &&
         document
           .getElementById('detection-allocation-weighted')
@@ -145,7 +145,7 @@ try {
     'panorama choice reaches the Street Level layer',
     await page.evaluate(
       () =>
-        window.__godsEyeView.dataManager.layers
+        window.__osiris.dataManager.layers
           .get('street-level')
           .module.getParams().pano === 'flat',
     ),
@@ -163,7 +163,7 @@ try {
     'Street Level Home retains selection and roving tab state',
     await page.evaluate(
       () =>
-        window.__godsEyeView.dataManager.layers
+        window.__osiris.dataManager.layers
           .get('street-level')
           .module.getParams().pano === 'all' &&
         document
@@ -192,7 +192,7 @@ try {
     'imagery mode reaches its controlled layer state',
     await page.evaluate(
       () =>
-        window.__godsEyeView.dataManager.layers
+        window.__osiris.dataManager.layers
           .get('recent-imagery')
           .module.getSnapshot().mode === 'ab',
     ),
@@ -210,7 +210,7 @@ try {
     'imagery arrows wrap from the current selected value',
     await page.evaluate(
       () =>
-        window.__godsEyeView.dataManager.layers
+        window.__osiris.dataManager.layers
           .get('recent-imagery')
           .module.getSnapshot().mode === 'image' &&
         document
@@ -220,7 +220,7 @@ try {
   );
 
   await page.evaluate(() => {
-    const manager = window.__godsEyeView.styleManager;
+    const manager = window.__osiris.styleManager;
     manager._setDetectionAllocation('ELASTIC', {
       syncShare: false,
       persist: false,
@@ -275,7 +275,7 @@ try {
     JSON.stringify(cyber),
   );
   await page.evaluate(async () => {
-    const { dataManager, styleManager } = window.__godsEyeView;
+    const { dataManager, styleManager } = window.__osiris;
     await dataManager.setEnabled('recent-imagery', true);
     styleManager.setPanelCollapsed('recent-imagery-panel', false, {
       persist: false,

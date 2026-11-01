@@ -245,7 +245,7 @@ export class RealtimeCost {
     if (state.warnCrossed) {
       // Exactly one line — the latch in the tracker guarantees it.
       console.warn(
-        `[GEV voice] session cost ${state.display} crossed the ${formatCostUsd(
+        `[Osiris voice] session cost ${state.display} crossed the ${formatCostUsd(
           state.warnUsd,
         )} warning threshold (model ${state.modelId}); hard cap ${formatCostUsd(state.capUsd)}.`,
       );
@@ -273,7 +273,7 @@ export class RealtimeCost {
     if (this.costCapStopped) return;
     this.costCapStopped = true;
     console.warn(
-      `[GEV voice] session cost ${state.display} reached the ${formatCostUsd(
+      `[Osiris voice] session cost ${state.display} reached the ${formatCostUsd(
         state.capUsd,
       )} cap — ending the voice session.`,
     );

@@ -30,7 +30,7 @@ try {
   );
   await page.waitForFunction(
     () =>
-      window.__godsEyeView?.styleManager?._cctvControls &&
+      window.__osiris?.styleManager?._cctvControls &&
       document.getElementById('loading-screen')?.classList.contains('hidden'),
     { timeout: 60000 },
   );
@@ -64,7 +64,7 @@ try {
   );
   check('native option menus keep the dark scheme', inventory.dark);
   await page.evaluate(() => {
-    const manager = window.__godsEyeView.styleManager;
+    const manager = window.__osiris.styleManager;
     manager.setPanelCollapsed('pp-toggles', false, {
       persist: false,
       syncShare: false,
@@ -85,7 +85,7 @@ try {
       );
   });
   const ownerSetup = await page.evaluate(() => {
-    const owner = window.__godsEyeView.styleManager._cctvControls;
+    const owner = window.__osiris.styleManager._cctvControls;
     owner._cctvUnsubscribe?.();
     owner._cctvUnsubscribe = null;
     window.__qaFormCalls = [];
@@ -190,7 +190,7 @@ try {
   });
   const begin = async (field) => {
     await page.evaluate((field) => {
-      const owner = window.__godsEyeView.styleManager._cctvControls;
+      const owner = window.__osiris.styleManager._cctvControls;
       owner._beginCctvCalValueEdit(
         document.querySelector(`[data-cal-field="${field}"]`),
       );
@@ -234,7 +234,7 @@ try {
   await page.keyboard.press('Backspace');
   await page.type('.cctv-cal-input', '100');
   await page.evaluate(() => {
-    window.__godsEyeView.styleManager._cctvControls._cctvState.activeCamera.basePose.headingDeg = 60;
+    window.__osiris.styleManager._cctvControls._cctvState.activeCamera.basePose.headingDeg = 60;
   });
   await page.keyboard.press('Enter');
   const commit = await page.evaluate(() => window.__qaFormCalls);
@@ -266,8 +266,7 @@ try {
   await begin('heading');
   await page.type('.cctv-cal-input', '90');
   await page.evaluate(() => {
-    window.__godsEyeView.styleManager._cctvControls._cctvState.activeCameraId =
-      'b';
+    window.__osiris.styleManager._cctvControls._cctvState.activeCameraId = 'b';
   });
   await page.keyboard.press('Enter');
   check(
@@ -277,7 +276,7 @@ try {
 
   await page.evaluate(() => {
     for (const panel of ['pp-toggles', 'scene-panel', 'cctv-panel'])
-      window.__godsEyeView.styleManager.setPanelCollapsed(panel, false, {
+      window.__osiris.styleManager.setPanelCollapsed(panel, false, {
         persist: false,
         syncShare: false,
       });
@@ -340,7 +339,7 @@ try {
   );
   await begin('heading');
   await page.evaluate(() => {
-    const owner = window.__godsEyeView.styleManager._cctvControls;
+    const owner = window.__osiris.styleManager._cctvControls;
     window.__qaDetachedInput = document.querySelector('.cctv-cal-input');
     owner.destroy();
     window.__qaDetachedInput.dispatchEvent(new Event('blur'));
@@ -383,7 +382,7 @@ try {
   );
   await page.select('#scene-select', baselineSceneId);
   await page.waitForFunction(
-    (id) => window.__godsEyeView.sceneDirector._getSelectedScene().id !== id,
+    (id) => window.__osiris.sceneDirector._getSelectedScene().id !== id,
     {},
     targetSceneId,
   );
@@ -395,7 +394,7 @@ try {
   await page.keyboard.press('q');
   const sceneSelection = await page.evaluate(() => ({
     id: document.getElementById('scene-select').value,
-    selected: window.__godsEyeView.sceneDirector._getSelectedScene().id,
+    selected: window.__osiris.sceneDirector._getSelectedScene().id,
     changes: window.__qaFormChanges,
     focus: document.activeElement.id,
     outline: getComputedStyle(document.activeElement).outlineStyle,
@@ -414,20 +413,20 @@ try {
   await page.goto(localized.href, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(
     () =>
-      window.__godsEyeView?.styleManager?._cctvControls &&
+      window.__osiris?.styleManager?._cctvControls &&
       document.getElementById('loading-screen')?.classList.contains('hidden'),
     { timeout: 60000 },
   );
   await page.evaluate(() => {
     for (const panel of ['pp-toggles', 'scene-panel', 'cctv-panel'])
-      window.__godsEyeView.styleManager.setPanelCollapsed(panel, false, {
+      window.__osiris.styleManager.setPanelCollapsed(panel, false, {
         persist: false,
         syncShare: false,
       });
   });
   await page.evaluate(() => {
     for (const panel of ['pp-toggles', 'scene-panel', 'cctv-panel'])
-      window.__godsEyeView.styleManager.setPanelCollapsed(panel, false, {
+      window.__osiris.styleManager.setPanelCollapsed(panel, false, {
         persist: false,
         syncShare: false,
       });

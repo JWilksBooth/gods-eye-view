@@ -74,12 +74,12 @@ const boot = async () => {
     if (m.type() === 'error') errors.push(`console: ${m.text()}`.slice(0, 200));
   });
   await page.goto(url, { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => !!window.__godsEyeView?.viewer, {
+  await page.waitForFunction(() => !!window.__osiris?.viewer, {
     timeout: 120_000,
   });
   await sleep(10_000);
   await page.evaluate(async () => {
-    const gev = window.__godsEyeView;
+    const gev = window.__osiris;
     const dm = gev.dataManager;
     for (const [id, e] of dm.layers)
       if (e.enabled) await dm.setEnabled(id, false, { origin: 'user' });
@@ -100,7 +100,7 @@ const boot = async () => {
 
 const snapshot = (page) =>
   page.evaluate(() => {
-    const gev = window.__godsEyeView;
+    const gev = window.__osiris;
     const v = gev.viewer;
     const s = v.scene;
     const t = gev.tileset;
@@ -154,7 +154,7 @@ const sample = async (page, seconds) => {
   await page.evaluate(() => {
     window.__qaRenders = 0;
     window.__qaLong = { count: 0, ms: 0 };
-    const s = window.__godsEyeView.viewer.scene;
+    const s = window.__osiris.viewer.scene;
     window.__qaOff = s.postRender.addEventListener(() => window.__qaRenders++);
     window.__qaObs = new PerformanceObserver((list) => {
       for (const e of list.getEntries()) {
@@ -185,7 +185,7 @@ const sample = async (page, seconds) => {
 const setLayer = (page, id, on) =>
   page.evaluate(
     async ({ id, on }) => {
-      const dm = window.__godsEyeView.dataManager;
+      const dm = window.__osiris.dataManager;
       const e = dm.layers.get(id);
       if (e && Boolean(e.enabled) !== on)
         await dm.setEnabled(id, on, { origin: 'user' });
@@ -214,7 +214,7 @@ try {
   // ── Run A: weather on → exercised → off → baseline check → other layers ──
   const a = await boot();
   const others = await a.page.evaluate(() =>
-    [...window.__godsEyeView.dataManager.layers.keys()].filter((id) =>
+    [...window.__osiris.dataManager.layers.keys()].filter((id) =>
       /^flights$|^satellites$|vessel|firms|earthquake|cables|^military$/.test(
         id,
       ),
@@ -229,7 +229,7 @@ try {
       () =>
         ['weather-radar', 'weather-satellite', 'weather-lightning'].every(
           (id) => {
-            const d = window.__godsEyeView.dataManager.layers
+            const d = window.__osiris.dataManager.layers
               .get(id)
               ?.module?.getDiagnostics?.();
             return d && !d.loading && d.time;
@@ -247,7 +247,7 @@ try {
   await sleep(2000);
   // exercise: history playback, wind reading, storm selection, product switch
   await a.page.evaluate(() => {
-    const dm = window.__godsEyeView.dataManager;
+    const dm = window.__osiris.dataManager;
     dm.setLayerParams('weather-radar', { play: true }, { origin: 'user' });
     dm.setLayerParams('wind', { overlay: 'speed' }, { origin: 'user' });
     dm.setLayerParams('wind', { inspect: true }, { origin: 'user' });
@@ -259,7 +259,7 @@ try {
   });
   await sleep(8000);
   await a.page.evaluate(() => {
-    const dm = window.__godsEyeView.dataManager;
+    const dm = window.__osiris.dataManager;
     const storms =
       dm.layers.get('weather-cyclones')?.module?.getRowControls?.().list
         ?.items || [];

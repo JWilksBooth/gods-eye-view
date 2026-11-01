@@ -23,11 +23,11 @@ try {
     `${process.env.QA_BASE_URL || 'http://localhost:4173'}/?welcome=0`,
     { waitUntil: 'domcontentloaded' },
   );
-  await page.waitForFunction(() => window.__godsEyeView?.dataManager, {
+  await page.waitForFunction(() => window.__osiris?.dataManager, {
     timeout: 60000,
   });
   const results = await page.evaluate(async () => {
-    const manager = window.__godsEyeView.dataManager;
+    const manager = window.__osiris.dataManager;
     const entry = document.querySelector(
       'script[type="module"][src*="/src/main.js"]',
     );
@@ -86,7 +86,7 @@ try {
         'feed state reflects the settled layer snapshot',
         row().querySelector('.data-toggle-btn').dataset.feedState === 'stale',
       ]);
-      const ui = window.__godsEyeView.styleManager;
+      const ui = window.__osiris.styleManager;
       ui._clearSelectedLayersBtn.click();
       result.push([
         'native clear activation presents busy state',

@@ -5,7 +5,7 @@
  * handler (`server/providers/openai/realtime.js`) with a fake upstream fetch
  * and returns the body it would have POSTed to OpenAI. Instructions, tools,
  * tool_choice, reasoning, and truncation therefore cannot drift from what a
- * real GEV mic session receives.
+ * real Osiris mic session receives.
  */
 import { createRealtimeTokenHandler } from '../../server/providers/openai/realtime.js';
 import { realtimeInstructions } from '../../server/providers/openai/instructions.js';

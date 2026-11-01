@@ -105,7 +105,7 @@ export class RealtimeConnection {
       this.cost.bindTranscriptionModel?.(minted.transcribeModel);
       if (!costState.ratesRecognized) {
         console.warn(
-          `[GEV voice] unrecognised Realtime model "${costState.modelId}" — ` +
+          `[Osiris voice] unrecognised Realtime model "${costState.modelId}" — ` +
             'billing this session at the most expensive known rates. Update the ' +
             'rate table in src/voice/voiceCost.js.',
         );

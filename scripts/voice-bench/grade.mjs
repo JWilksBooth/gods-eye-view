@@ -141,7 +141,7 @@ export function gradeDialogue(dialogue, turnCalls) {
   };
 }
 
-// ── JSON-schema argument validation (the subset GEV tools use) ─────────────
+// ── JSON-schema argument validation (the subset Osiris tools use) ─────────────
 
 const TYPE_CHECKS = {
   string: (v) => typeof v === 'string',

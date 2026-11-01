@@ -145,7 +145,7 @@ try {
     timeout: 60_000,
   });
   await page.waitForFunction(
-    () => window.__godsEyeView?.viewer && window.__godsEyeView?.annotations,
+    () => window.__osiris?.viewer && window.__osiris?.annotations,
     { timeout: 90_000, polling: 500 },
   );
   await page.waitForFunction(
@@ -153,16 +153,14 @@ try {
       document.getElementById('loading-screen')?.classList.contains('hidden'),
     { timeout: 90_000, polling: 250 },
   );
-  await page.evaluate(
-    () => window.__godsEyeView.styleManager.initialRestorePromise,
-  );
+  await page.evaluate(() => window.__osiris.styleManager.initialRestorePromise);
   await page.keyboard.press('Escape');
   await page.waitForFunction(
     () => !document.querySelector('#first-run-launcher:not([hidden])'),
     { timeout: 10_000 },
   );
   result.renderer = await page.evaluate(() => {
-    const gl = window.__godsEyeView.viewer.scene.context._gl;
+    const gl = window.__osiris.viewer.scene.context._gl;
     const debug = gl.getExtension('WEBGL_debug_renderer_info');
     return debug
       ? gl.getParameter(debug.UNMASKED_RENDERER_WEBGL)
@@ -172,7 +170,7 @@ try {
 
   // In-page helpers: camera moves, frame timing and annotation state.
   await page.evaluate(() => {
-    const { viewer } = window.__godsEyeView;
+    const { viewer } = window.__osiris;
     const Cesium = window.__CESIUM__;
     window.__qaOutlines = {
       fly(view, duration) {
@@ -267,7 +265,7 @@ try {
     page
       .waitForFunction(
         () => {
-          const { scene } = window.__godsEyeView.viewer;
+          const { scene } = window.__osiris.viewer;
           for (let i = 0; i < scene.primitives.length; i++) {
             const p = scene.primitives.get(i);
             if (p?.show && typeof p.tilesLoaded === 'boolean' && !p.tilesLoaded)
@@ -308,14 +306,14 @@ try {
     const timing = await page.evaluate(
       async (target, flyTo) => {
         const started = performance.now();
-        const response = await window.__godsEyeView.annotations.annotate(
+        const response = await window.__osiris.annotations.annotate(
           [{ type: 'area', target, label: target, footprint: true }],
           { flyTo },
         );
         const resolvedMs = performance.now() - started;
         // "Drawn" = the first rendered frame after the entity visualizers have
         // built the mark's primitives (each tick updates them before render).
-        const { viewer } = window.__godsEyeView;
+        const { viewer } = window.__osiris;
         await new Promise((resolve) => {
           const off = viewer.scene.postRender.addEventListener(() => {
             if (!viewer.dataSourceDisplay.ready) return;
@@ -324,7 +322,7 @@ try {
           });
         });
         const drawnMs = performance.now() - started;
-        const mark = window.__godsEyeView.annotations
+        const mark = window.__osiris.annotations
           .list()
           .find((m) => m.id === response.ids?.[0]);
         return {
@@ -395,7 +393,7 @@ try {
   }
 
   // Start from a clean board and the default layers, as a user would.
-  await page.evaluate(() => window.__godsEyeView.annotations.clear?.());
+  await page.evaluate(() => window.__osiris.annotations.clear?.());
   await page.evaluate(() =>
     window.__qaOutlines.fly(
       { lat: 25.5, lon: -99.6, height: 2_600_000, pitch: -80 },
@@ -448,7 +446,7 @@ try {
   // Close over the shared Travis/Williamson line near Pflugerville: the
   // outline must lie on the photoreal mesh, not float above or sink into it.
   const border = await page.evaluate(() => {
-    const travis = window.__godsEyeView.annotations
+    const travis = window.__osiris.annotations
       .list()
       .find((m) => m.label === 'Travis County, Texas');
     let best = null;
@@ -508,7 +506,7 @@ try {
     ['georgia-country', 'Georgia', 42, 43.6, 700000],
     ['georgia-qualified', 'the country of Georgia', 42, 43.6, 700000],
   ]) {
-    await page.evaluate(() => window.__godsEyeView.annotations.clear());
+    await page.evaluate(() => window.__osiris.annotations.clear());
     await move(name, { lat, lon, height, pitch: -90 }, 1);
     await outline(name, target);
     await shot(name);

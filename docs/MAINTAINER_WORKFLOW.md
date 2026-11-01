@@ -6,7 +6,7 @@ uses this procedure; contributor setup remains in `CONTRIBUTING.md`.
 
 ## 1. Establish the review
 
-Verify upstream is `bilawalsidhu/gods-eye-view`, fetch `main`, and record its SHA
+Verify upstream is `JWilksBooth/gods-eye-view`, fetch `main`, and record its SHA
 as the policy revision. Read this workflow, the skill,
 [SECURITY.md](../SECURITY.md), `CONTRIBUTING.md`, and relevant
 [CURRENT-STATE.md](CURRENT-STATE.md) sections from that revision with

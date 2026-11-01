@@ -259,7 +259,8 @@ test('no unchanged Realtime tool definition drifts silently', () => {
     .digest('hex')
     .slice(0, 16);
   // Analyst additions and ISS wording correction are explicitly excluded above; all other tool definitions retain their pin.
-  assert.equal(digest, '25d1b902ecaa22fb', 'an unchanged Realtime tool definition drifted');
+  // Re-pinned for the rename to Osiris, which rewords the product name only.
+  assert.equal(digest, 'b05a1564b6848405', 'an unchanged Realtime tool definition drifted');
 });
 
 test('Radio volume and mission speed share the Sharpen slider visual language', () => {

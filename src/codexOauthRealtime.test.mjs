@@ -72,7 +72,7 @@ test('Codex OAuth reader accepts a current ChatGPT token and rejects unusable cr
         }),
     }),
     current,
-    'GEV does not require or consume the vendor refresh token',
+    'Osiris does not require or consume the vendor refresh token',
   );
   for (const readFile of [
     () => '{bad json',

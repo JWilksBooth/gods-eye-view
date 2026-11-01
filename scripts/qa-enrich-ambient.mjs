@@ -289,7 +289,7 @@ async function main() {
     console.log('Loading app...');
     await page.goto(APP_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForFunction(
-      () => window.__godsEyeView && window.__godsEyeView.viewer && window.__godsEyeView.dataManager,
+      () => window.__osiris && window.__osiris.viewer && window.__osiris.dataManager,
       { timeout: 60000, polling: 200 }
     );
     console.log('  App globals ready.');
@@ -297,7 +297,7 @@ async function main() {
     // ---- In-page billboard probe (same walk as qa-sprites-b5.mjs) ----------
     await page.evaluate(() => {
       window.__collectBillboards = function () {
-        const v = window.__godsEyeView.viewer;
+        const v = window.__osiris.viewer;
         const out = [];
         const walk = (coll) => {
           const n = coll.length;
@@ -322,7 +322,7 @@ async function main() {
     // (correctly) skips off-screen planes.
     const centerLon = ROW_LON0 + ((SPEC.planes.length - 1) / 2) * ROW_STEP_DEG;
     await page.evaluate(({ lat, lon, height }) => {
-      const v = window.__godsEyeView.viewer;
+      const v = window.__osiris.viewer;
       v.camera.cancelFlight(); // the boot fly-to-Austin otherwise stomps setView
       const C3 = v.camera.position.constructor;
       v.camera.setView({
@@ -333,8 +333,8 @@ async function main() {
 
     console.log('Priming straight-flight history through the render delay (30 s)...');
     const primed = await page.evaluate(async () => {
-      const dm = window.__godsEyeView.dataManager;
-      const v = window.__godsEyeView.viewer;
+      const dm = window.__osiris.dataManager;
+      const v = window.__osiris.viewer;
       window.__ENR.timeOffsetSec = -32;
       await dm.setEnabled('flights', true);
       const fl = dm.layers.get('flights').module;
@@ -455,8 +455,8 @@ async function main() {
     // ========================================================================
     console.log('\nE8 — next poll after enrichment');
     await page.evaluate(async () => {
-      const dm = window.__godsEyeView.dataManager;
-      const v = window.__godsEyeView.viewer;
+      const dm = window.__osiris.dataManager;
+      const v = window.__osiris.viewer;
       await dm.layers.get('flights').module.update(v);
     });
     await sleep(500);
@@ -492,8 +492,8 @@ async function main() {
     const batchHexes = Array.from({ length: BATCH_COUNT }, (_, i) => `ab00${(i + 1).toString(16).padStart(2, '0')}`);
     const startsBeforeBatch = await page.evaluate(() => window.__ENRICH_LOG.starts.length);
     await page.evaluate(async ({ hexes, rowLat, rowLon0, stepDeg }) => {
-      const dm = window.__godsEyeView.dataManager;
-      const v = window.__godsEyeView.viewer;
+      const dm = window.__osiris.dataManager;
+      const v = window.__osiris.viewer;
       // Two fresh rows just north of the original one — still inside the
       // top-down 20 km frame, so the sweep's frustum test keeps them.
       // STATIONARY (speed 0): moving planes drift north out of the frustum at
@@ -521,8 +521,8 @@ async function main() {
     await sleep(1500); // any illegal post-exhaustion enqueue would dispatch within ~200 ms
     // One more poll while exhausted — still nothing new.
     await page.evaluate(async () => {
-      const dm = window.__godsEyeView.dataManager;
-      await dm.layers.get('flights').module.update(window.__godsEyeView.viewer);
+      const dm = window.__osiris.dataManager;
+      await dm.layers.get('flights').module.update(window.__osiris.viewer);
     });
     await sleep(1000);
     const exhausted = await page.evaluate(() => ({
@@ -543,8 +543,8 @@ async function main() {
     await page.evaluate((winMs) => { window.__GEV_ENRICH_AMBIENT_QA.windowMs = winMs; }, RESUME_WINDOW_MS);
     await sleep(RESUME_WINDOW_MS + 200); // a full (shortened) refill window elapses
     await page.evaluate(async () => {
-      const dm = window.__godsEyeView.dataManager;
-      await dm.layers.get('flights').module.update(window.__godsEyeView.viewer);
+      const dm = window.__osiris.dataManager;
+      await dm.layers.get('flights').module.update(window.__osiris.viewer);
     });
     const expectedTotal = startsBeforeBatch + BATCH_COUNT; // every batch plane eventually requested
     const resumed = await page.waitForFunction(

@@ -37,10 +37,10 @@ try {
   await focus.send('Emulation.setFocusEmulationEnabled', { enabled: true });
   await page.goto(url.href, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(
-    () => window.__gevQaRegisterLayer && window.__godsEyeView?.dataManager,
+    () => window.__gevQaRegisterLayer && window.__osiris?.dataManager,
   );
   await page.evaluate(async () => {
-    const manager = window.__godsEyeView.dataManager;
+    const manager = window.__osiris.dataManager;
     window.__qaVisibilityUpdates = 0;
     window.__gevQaRegisterLayer(manager, {
       id: 'qa-document-visibility',
@@ -73,7 +73,7 @@ try {
   check(
     'explicit refresh remains available while hidden',
     await page.evaluate(() =>
-      window.__godsEyeView.dataManager.refreshLayer('qa-document-visibility'),
+      window.__osiris.dataManager.refreshLayer('qa-document-visibility'),
     ),
     true,
   );
@@ -91,11 +91,9 @@ try {
     hiddenCount + 2,
   );
   await page.evaluate(() =>
-    window.__godsEyeView.dataManager.setEnabled(
-      'qa-document-visibility',
-      false,
-      { origin: 'qa' },
-    ),
+    window.__osiris.dataManager.setEnabled('qa-document-visibility', false, {
+      origin: 'qa',
+    }),
   );
   const stopped = await count();
   await focus.send('Emulation.setFocusEmulationEnabled', { enabled: false });
@@ -112,7 +110,7 @@ try {
     'QA layer destroys cleanly',
     await page.evaluate(() =>
       window.__gevQaUnregisterLayer(
-        window.__godsEyeView.dataManager,
+        window.__osiris.dataManager,
         'qa-document-visibility',
       ),
     ),

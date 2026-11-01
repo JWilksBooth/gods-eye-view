@@ -481,7 +481,7 @@ async function main() {
 
     // Wait for the app to expose its globals (Cesium viewer + dataManager).
     await page.waitForFunction(
-      () => window.__godsEyeView && window.__godsEyeView.viewer && window.__godsEyeView.dataManager,
+      () => window.__osiris && window.__osiris.viewer && window.__osiris.dataManager,
       { timeout: 60000, polling: 200 }
     );
     console.log('  App globals ready.\n');
@@ -497,14 +497,14 @@ async function main() {
     // Give the app a moment to finish first-frame init (detection/readout log).
     await page.waitForFunction(
       () => {
-        const dm = window.__godsEyeView.dataManager;
+        const dm = window.__osiris.dataManager;
         return dm && dm.layers && dm.layers.size >= 12;
       },
       { timeout: 30000, polling: 200 }
     ).catch(() => {});
 
     const layerInfo = await evalPage(() => {
-      const dm = window.__godsEyeView.dataManager;
+      const dm = window.__osiris.dataManager;
       return {
         count: dm.layers.size,
         ids: [...dm.layers.keys()],
@@ -541,7 +541,7 @@ async function main() {
         throw new Error(`GLB control asset unavailable: HTTP ${asset.status}`);
       }
       const Cesium = await import('/node_modules/cesium/Build/Cesium/index.js');
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       const modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(
         Cesium.Cartesian3.fromDegrees(-97.7431, 30.2672, 9000),
       );
@@ -562,11 +562,11 @@ async function main() {
     });
     const glbBackendCapable = glbControlStarted && await page.waitForFunction(() => {
       const control = window.__qaGlbControl;
-      window.__godsEyeView.viewer.scene.requestRender();
+      window.__osiris.viewer.scene.requestRender();
       return Boolean(control?.ready);
     }, { timeout: 40000, polling: 250 }).then(() => true).catch(() => false);
     const glbControlDetail = await evalPage((capable) => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       const control = window.__qaGlbControl;
       const error = window.__qaGlbControlError;
       if (control) viewer.scene.primitives.remove(control);
@@ -584,7 +584,7 @@ async function main() {
     // ground-3d group REPLACES this with its counting 187.5 stub, restoring
     // the deterministic pre-round-5 datums everywhere else.
     await evalPage(() => {
-      window.__godsEyeView.viewer.scene.sampleHeight = () => undefined;
+      window.__osiris.viewer.scene.sampleHeight = () => undefined;
     });
 
     // ============================================================
@@ -592,7 +592,7 @@ async function main() {
     // ============================================================
     console.log('\nEnabling flights + military layers (synthetic feed)...');
     const enabled = await evalPage(async () => {
-      const dm = window.__godsEyeView.dataManager;
+      const dm = window.__osiris.dataManager;
       // setEnabled→toggle→init→enable→update(immediate fetch, shimmed).
       await dm.setEnabled('flights', true);
       await dm.setEnabled('military', true);
@@ -618,8 +618,8 @@ async function main() {
         models3dButton.click(); // → ON: the state the rest of the run needs
       }
       // Force one more update each so freshly-shimmed data is ingested.
-      await fl.update(window.__godsEyeView.viewer);
-      await mil.update(window.__godsEyeView.viewer);
+      await fl.update(window.__osiris.viewer);
+      await mil.update(window.__osiris.viewer);
       return {
         flEnabled: dm.isEnabled('flights'),
         milEnabled: dm.isEnabled('military'),
@@ -659,12 +659,12 @@ async function main() {
     // ============================================================
     console.log('\nShare Link v2 — tracked aircraft survives a full reload');
     const shareTracked = await evalPage(() => (
-      window.__godsEyeView.dataManager.layers
+      window.__osiris.dataManager.layers
         .get('flights').module.trackById('aaa001', { origin: 'user' })
     ));
     await page.waitForFunction(
       () => {
-        const flights = window.__godsEyeView?.dataManager?.layers?.get('flights')?.module;
+        const flights = window.__osiris?.dataManager?.layers?.get('flights')?.module;
         // `lo=` alone is NOT discriminating — the 3D-models option already
         // put an `lo` field in the hash before any aircraft was selected.
         // Wait for the tracking assignment itself.
@@ -691,27 +691,27 @@ async function main() {
 
     await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForFunction(
-      () => window.__godsEyeView?.dataManager?.layers?.size >= 12,
+      () => window.__osiris?.dataManager?.layers?.size >= 12,
       { timeout: 60000, polling: 200 },
     );
     await page.waitForFunction(
       () => {
-        const manager = window.__godsEyeView?.dataManager;
+        const manager = window.__osiris?.dataManager;
         const tracked = manager?.layers?.get('flights')?.module?.getTrackedInfo?.();
         return manager?.isEnabled?.('flights')
           && tracked?.icao24 === 'aaa001'
-          && window.__godsEyeView.viewer.trackedEntity?.gevTrackedId === 'flights:aaa001';
+          && window.__osiris.viewer.trackedEntity?.gevTrackedId === 'flights:aaa001';
       },
       { timeout: 30000, polling: 100 },
     );
     const shareReload = await evalPage(() => {
-      const manager = window.__godsEyeView.dataManager;
+      const manager = window.__osiris.dataManager;
       const flights = manager.layers.get('flights').module;
       return {
         flightsEnabled: manager.isEnabled('flights'),
         trackedId: flights.getTrackedInfo()?.icao24 || null,
         durableId: flights.getParams()?.selectedFlightsTrackingId || null,
-        viewerTrackedId: window.__godsEyeView.viewer.trackedEntity?.gevTrackedId || null,
+        viewerTrackedId: window.__osiris.viewer.trackedEntity?.gevTrackedId || null,
       };
     });
     record(
@@ -732,27 +732,27 @@ async function main() {
     await evalPage(() => localStorage.removeItem('gev:layer-state:v2'));
     await page.goto(trackedShareUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForFunction(
-      () => window.__godsEyeView?.dataManager?.layers?.size >= 12,
+      () => window.__osiris?.dataManager?.layers?.size >= 12,
       { timeout: 60000, polling: 200 },
     );
     await page.waitForFunction(
       () => {
-        const manager = window.__godsEyeView?.dataManager;
+        const manager = window.__osiris?.dataManager;
         const tracked = manager?.layers?.get('flights')?.module?.getTrackedInfo?.();
         return manager?.isEnabled?.('flights')
           && tracked?.icao24 === 'aaa001'
-          && window.__godsEyeView.viewer.trackedEntity?.gevTrackedId === 'flights:aaa001';
+          && window.__osiris.viewer.trackedEntity?.gevTrackedId === 'flights:aaa001';
       },
       { timeout: 30000, polling: 100 },
     );
     const cleanRecipient = await evalPage(() => {
-      const manager = window.__godsEyeView.dataManager;
+      const manager = window.__osiris.dataManager;
       const flights = manager.layers.get('flights').module;
       return {
         flightsEnabled: manager.isEnabled('flights'),
         trackedId: flights.getTrackedInfo()?.icao24 || null,
         durableId: flights.getParams()?.selectedFlightsTrackingId || null,
-        viewerTrackedId: window.__godsEyeView.viewer.trackedEntity?.gevTrackedId || null,
+        viewerTrackedId: window.__osiris.viewer.trackedEntity?.gevTrackedId || null,
       };
     });
     record(
@@ -774,7 +774,7 @@ async function main() {
     await page.goto('about:blank', { waitUntil: 'domcontentloaded', timeout: 30000 });
     await page.goto(trackedShareUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForFunction(
-      () => window.__godsEyeView?.dataManager?.layers?.size >= 12,
+      () => window.__osiris?.dataManager?.layers?.size >= 12,
       { timeout: 60000, polling: 200 },
     );
     await page.waitForFunction(
@@ -783,7 +783,7 @@ async function main() {
     );
     await new Promise((resolve) => setTimeout(resolve, 6000));
     const pendingShare = await evalPage(() => ({
-      tracked: window.__godsEyeView.dataManager.layers
+      tracked: window.__osiris.dataManager.layers
         .get('flights').module.getTrackedInfo()?.icao24 || null,
       notice: (document.getElementById('global-loading-label')?.textContent || '').trim(),
       noticeShown: !document.getElementById('global-loading-status')?.hidden,
@@ -800,21 +800,21 @@ async function main() {
     // The aircraft now arrives on a later poll; the latch must take it.
     await evalPage(() => window.sessionStorage.removeItem('__gevWithhold'));
     await evalPage(async () => {
-      const flights = window.__godsEyeView.dataManager.layers.get('flights').module;
+      const flights = window.__osiris.dataManager.layers.get('flights').module;
       for (let i = 0; i < 3; i += 1) {
-        await flights.update(window.__godsEyeView.viewer);
+        await flights.update(window.__osiris.viewer);
         await new Promise((resolve) => setTimeout(resolve, 600));
       }
     });
     await page.waitForFunction(
-      () => window.__godsEyeView?.dataManager?.layers?.get('flights')?.module
+      () => window.__osiris?.dataManager?.layers?.get('flights')?.module
         ?.getTrackedInfo?.()?.icao24 === 'aaa001',
       { timeout: 30000, polling: 200 },
     ).catch(() => {});
     const latchedShare = await evalPage(() => ({
-      tracked: window.__godsEyeView.dataManager.layers
+      tracked: window.__osiris.dataManager.layers
         .get('flights').module.getTrackedInfo()?.icao24 || null,
-      viewerTrackedId: window.__godsEyeView.viewer.trackedEntity?.gevTrackedId || null,
+      viewerTrackedId: window.__osiris.viewer.trackedEntity?.gevTrackedId || null,
     }));
     record(
       'share-v2: the pending subject latches on when it arrives on a later poll',
@@ -827,12 +827,12 @@ async function main() {
     // Flights layer. Restore the harness-only Military companion before the
     // legacy cross-layer invariants continue.
     await evalPage(async () => {
-      const manager = window.__godsEyeView.dataManager;
+      const manager = window.__osiris.dataManager;
       await manager.setEnabled('military', true);
-      await manager.layers.get('military').module.update(window.__godsEyeView.viewer);
+      await manager.layers.get('military').module.update(window.__osiris.viewer);
     });
     await evalPage(() => {
-      window.__godsEyeView.viewer.scene.sampleHeight = () => undefined;
+      window.__osiris.viewer.scene.sampleHeight = () => undefined;
     });
 
     // ============================================================
@@ -852,7 +852,7 @@ async function main() {
         'voice command runner not exposed on this build');
     } else {
       const flightSelected = await evalPage(async () => {
-        const flights = window.__godsEyeView.dataManager.layers.get('flights').module;
+        const flights = window.__osiris.dataManager.layers.get('flights').module;
         // The exact call the canvas click handler makes on a billboard pick.
         flights.trackById('aaa001', { origin: 'user' });
         const result = await window.__gevVoiceCommands.runner('get_entity_context', { scope: 'selected' });
@@ -884,7 +884,7 @@ async function main() {
       // second one: a frozen record left behind would be narrated later at a
       // position its aircraft has long since left.
       const switchedSubject = await evalPage(async () => {
-        const manager = window.__godsEyeView.dataManager;
+        const manager = window.__osiris.dataManager;
         manager.layers.get('flights').module.trackById('aaa002', { origin: 'user' });
         const result = await window.__gevVoiceCommands.runner('get_entity_context', { scope: 'selected' });
         const store = window.__gevContextStore;
@@ -906,7 +906,7 @@ async function main() {
 
       // A military contact is the same click, on the sibling layer.
       const militarySelected = await evalPage(async () => {
-        const manager = window.__godsEyeView.dataManager;
+        const manager = window.__osiris.dataManager;
         manager.layers.get('flights').module.stopTracking();
         manager.layers.get('military').module.trackById('bbb101', { origin: 'user' });
         const result = await window.__gevVoiceCommands.runner('get_entity_context', { scope: 'selected' });
@@ -929,7 +929,7 @@ async function main() {
       // Deselecting must give the slot back — a subject that outlives its
       // selection is the same bug pointed the other way.
       const deselected = await evalPage(async () => {
-        const manager = window.__godsEyeView.dataManager;
+        const manager = window.__osiris.dataManager;
         manager.layers.get('military').module.stopTracking();
         const result = await window.__gevVoiceCommands.runner('get_entity_context', { scope: 'selected' });
         return { scope: result?.scope || null, selected: result?.selected ?? null };
@@ -946,7 +946,7 @@ async function main() {
       // ============================================================
       console.log('\nVoice entity context — a tracked satellite is a selected subject');
       const satelliteContext = await evalPage(async () => {
-        const manager = window.__godsEyeView.dataManager;
+        const manager = window.__osiris.dataManager;
         await manager.setEnabled('satellites', true);
         const satellites = manager.layers.get('satellites').module;
         // Wait for the shimmed stations catalog to build its satrecs.
@@ -970,7 +970,7 @@ async function main() {
         // release the slot rather than linger frozen at its last position.
         satellites.trackById(25544, { origin: 'user' });
         await new Promise((resolve) => setTimeout(resolve, 500));
-        await satellites.update(window.__godsEyeView.viewer);
+        await satellites.update(window.__osiris.viewer);
         await new Promise((resolve) => setTimeout(resolve, 600));
         const afterRebuild = await window.__gevVoiceCommands.runner('get_entity_context', { scope: 'selected' });
 
@@ -983,18 +983,18 @@ async function main() {
         const truncatedTle = fullTle.split('\n').slice(3).join('\n');
         window.__SYNTH.tle = truncatedTle;
         window.__SYNTH.failGroup = 'geo';
-        await satellites.update(window.__godsEyeView.viewer);
+        await satellites.update(window.__osiris.viewer);
         await new Promise((resolve) => setTimeout(resolve, 800));
         const afterPartial = await window.__gevVoiceCommands.runner('get_entity_context', { scope: 'selected' });
         window.__SYNTH.failGroup = null;
         window.__SYNTH.tle = fullTle;
         // Recover, so the release case below starts from a healthy subject.
-        await satellites.update(window.__godsEyeView.viewer);
+        await satellites.update(window.__osiris.viewer);
         await new Promise((resolve) => setTimeout(resolve, 800));
 
         // Now the subject vanishes from a COMPLETE catalog — proven absence.
         window.__SYNTH.tle = fullTle.split('\n').slice(3).join('\n');
-        await satellites.update(window.__godsEyeView.viewer);
+        await satellites.update(window.__osiris.viewer);
         await new Promise((resolve) => setTimeout(resolve, 800));
         const afterSubjectGone = await window.__gevVoiceCommands.runner('get_entity_context', { scope: 'selected' });
         window.__SYNTH.tle = fullTle;
@@ -1013,7 +1013,7 @@ async function main() {
         await new Promise((resolve) => setTimeout(resolve, 600));
         const denseSelected = await window.__gevVoiceCommands.runner('get_entity_context', { scope: 'selected' });
         window.__SYNTH.failDense = true;
-        await satellites.update(window.__godsEyeView.viewer);
+        await satellites.update(window.__osiris.viewer);
         await new Promise((resolve) => setTimeout(resolve, 1200));
         const afterDenseFailure = await window.__gevVoiceCommands.runner('get_entity_context', { scope: 'selected' });
         const catalogModeAfterFailure = satellites.getParams?.().catalog ?? null;
@@ -1115,15 +1115,15 @@ async function main() {
       // ============================================================
       console.log('\nPanel === spoken — one number, through both real call sites');
       const panelVsSpoken = await evalPage(async () => {
-        const manager = window.__godsEyeView.dataManager;
+        const manager = window.__osiris.dataManager;
         if (!manager.isEnabled('flights')) await manager.setEnabled('flights', true);
         if (!manager.isEnabled('military')) await manager.setEnabled('military', true);
         // Enter Contacts the way the operator does, then select a contact so
         // awareness has a real subject.
         const button = document.getElementById('global-context-flights-btn');
-        if (button && !window.__godsEyeView.styleManager.getContextModeState?.().mode) button.click();
+        if (button && !window.__osiris.styleManager.getContextModeState?.().mode) button.click();
         for (let i = 0; i < 80; i += 1) {
-          if (window.__godsEyeView.styleManager.getContextModeState?.().mode) break;
+          if (window.__osiris.styleManager.getContextModeState?.().mode) break;
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
         manager.layers.get('flights').module.trackById('aaa001', { origin: 'user' });
@@ -1187,12 +1187,12 @@ async function main() {
         // The MANUAL path is the one that broke silently — voice never set it.
         button.click();
         for (let i = 0; i < 60; i += 1) {
-          if (window.__godsEyeView.styleManager.getContextModeState?.().mode) break;
+          if (window.__osiris.styleManager.getContextModeState?.().mode) break;
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
         const state = await window.__gevVoiceCommands.runner('get_current_view_state');
         return {
-          internalMode: window.__godsEyeView.styleManager.getContextModeState?.().mode || null,
+          internalMode: window.__osiris.styleManager.getContextModeState?.().mode || null,
           reportedMode: state?.context?.mode ?? null,
           reportedInternal: state?.context?.modeInternal ?? null,
           active: state?.context?.active ?? null,
@@ -1259,7 +1259,7 @@ async function main() {
       // ============================================================
       console.log('\nAnalyst handoff — a looked-up contact can actually be tracked');
       const handoff = await evalPage(async () => {
-        const manager = window.__godsEyeView.dataManager;
+        const manager = window.__osiris.dataManager;
         // This group owns its precondition: earlier groups toggle Contacts,
         // which snapshots and restores layer state around itself.
         if (!manager.isEnabled('military')) await manager.setEnabled('military', true);
@@ -1270,7 +1270,7 @@ async function main() {
           altFt: 1800, track: 210, gsKt: 130, t: 'UH60', r: '6606',
         }];
         try {
-          await mil.update(window.__godsEyeView.viewer);
+          await mil.update(window.__osiris.viewer);
           // Scope is deliberately 'anywhere': what is under test is the
           // identity handoff, not spatial filtering, and an earlier group may
           // have left the camera somewhere else entirely.
@@ -1295,7 +1295,7 @@ async function main() {
         } finally {
           window.__SYNTH.military = priorFixture;
           mil.stopTracking();
-          await mil.update(window.__godsEyeView.viewer);
+          await mil.update(window.__osiris.viewer);
         }
       });
       record(
@@ -1319,10 +1319,10 @@ async function main() {
       // Restore the state the downstream invariants were written against:
       // flights following aaa001, military idle.
       await evalPage(() => {
-        window.__godsEyeView.dataManager.layers.get('flights').module.trackById('aaa001', { origin: 'user' });
+        window.__osiris.dataManager.layers.get('flights').module.trackById('aaa001', { origin: 'user' });
       });
       await page.waitForFunction(
-        () => window.__godsEyeView?.dataManager?.layers?.get('flights')?.module
+        () => window.__osiris?.dataManager?.layers?.get('flights')?.module
           ?.getTrackedInfo?.()?.icao24 === 'aaa001',
         { timeout: 15000, polling: 100 },
       );
@@ -1347,7 +1347,7 @@ async function main() {
     // matrix translation is nearest the tracked display position.
     await evalPage(() => {
       window.__findTrackedModel = function () {
-        const v = window.__godsEyeView.viewer;
+        const v = window.__osiris.viewer;
         const prims = v.scene.primitives;
         const out = [];
         const walk = (coll) => {
@@ -1367,7 +1367,7 @@ async function main() {
         const pool = shown.length ? shown : out;
         if (!pool.length) return null;
         // If tracking, pick the model nearest the tracked display position.
-        const fl = window.__godsEyeView.dataManager.layers.get('flights').module;
+        const fl = window.__osiris.dataManager.layers.get('flights').module;
         // Prefer the tracked model's explicit H1 pick id. A neighboring fleet
         // model can temporarily be nearer while the follow camera/model matrix
         // settles after the cross-layer switch sequence, causing this probe to
@@ -1377,7 +1377,7 @@ async function main() {
           ? pool.find((model) => String(model.id) === trackedInfo.icao24)
           : null;
         if (exactPickModel) return exactPickModel;
-        const ent = window.__godsEyeView.viewer.trackedEntity;
+        const ent = window.__osiris.viewer.trackedEntity;
         let tracked = null;
         if (ent && typeof ent.gevDisplayPosition === 'function') tracked = ent.gevDisplayPosition();
         if (!tracked) return pool[0];
@@ -1402,13 +1402,13 @@ async function main() {
     // 3D model renders (model regime active below the 800 km ceiling).
     const trackedIcao = SYNTH.flights[0].icao;
     await evalPage((icao) => {
-      window.__godsEyeView.dataManager.layers.get('flights').module.trackById(icao);
+      window.__osiris.dataManager.layers.get('flights').module.trackById(icao);
     }, trackedIcao);
     await sleep(1500); // let the follow camera settle + the GLB load kick off
 
     // Wait until the tracked Cesium.Model primitive exists, is ready & shown.
     const modelUp = await page.waitForFunction((icao) => {
-      const fl = window.__godsEyeView.dataManager.layers.get('flights').module;
+      const fl = window.__osiris.dataManager.layers.get('flights').module;
       const ti = fl.getTrackedInfo();
       if (!ti || ti.icao24 !== icao) return false;
       const found = window.__findTrackedModel ? window.__findTrackedModel() : null;
@@ -1423,9 +1423,9 @@ async function main() {
       // entity's exposed display position (what the model uses) must equal the
       // getDetectableObjects() position. This is the exact shared-source contract.
       jitterResult = await sampleFrames(page, 30, (icao) => {
-        const dm = window.__godsEyeView.dataManager;
+        const dm = window.__osiris.dataManager;
         const fl = dm.layers.get('flights').module;
-        const ent = window.__godsEyeView.viewer.trackedEntity;
+        const ent = window.__osiris.viewer.trackedEntity;
         const disp = ent && typeof ent.gevDisplayPosition === 'function' ? ent.gevDisplayPosition() : null;
         const dets = fl.getDetectableObjects({ maxCount: 1000 });
         const me = dets.find((d) => d.id === icao || d.id === (fl.getTrackedInfo() && fl.getTrackedInfo().callsign));
@@ -1441,7 +1441,7 @@ async function main() {
       // computedScale is separate from modelMatrix and includes any
       // minimumPixelSize enlargement, so include it just as the renderer does.
       jitterResult = await sampleFrames(page, 30, (icao) => {
-        const dm = window.__godsEyeView.dataManager;
+        const dm = window.__osiris.dataManager;
         const fl = dm.layers.get('flights').module;
         const ti = fl.getTrackedInfo();
         const model = window.__findTrackedModel();
@@ -1498,16 +1498,16 @@ async function main() {
 
     // Ensure we are tracking A and have a settled (low) follow height first.
     await evalPage((icao) => {
-      window.__godsEyeView.dataManager.layers.get('flights').module.trackById(icao);
+      window.__osiris.dataManager.layers.get('flights').module.trackById(icao);
     }, planeA);
     await sleep(1500);
 
-    const heightBefore = await evalPage(() => window.__godsEyeView.viewer.camera.positionCartographic.height);
+    const heightBefore = await evalPage(() => window.__osiris.viewer.camera.positionCartographic.height);
 
     // Switch to B and immediately start sampling camera height every frame.
     const switchSamples = await page.evaluate(async (icao, frames) => {
-      const v = window.__godsEyeView.viewer;
-      const fl = window.__godsEyeView.dataManager.layers.get('flights').module;
+      const v = window.__osiris.viewer;
+      const fl = window.__osiris.dataManager.layers.get('flights').module;
       const heights = [];
       const onTick = () => { heights.push(v.camera.positionCartographic.height); };
       const remove = v.scene.postRender.addEventListener(onTick);
@@ -1548,7 +1548,7 @@ async function main() {
 
     // Confirm the switch actually took effect (we are now tracking B).
     const nowTrackingB = await evalPage((icao) => {
-      const ti = window.__godsEyeView.dataManager.layers.get('flights').module.getTrackedInfo();
+      const ti = window.__osiris.dataManager.layers.get('flights').module.getTrackedInfo();
       return !!(ti && ti.icao24 === icao);
     }, planeB);
     record('pull-out: track switch actually landed on plane B', nowTrackingB,
@@ -1565,7 +1565,7 @@ async function main() {
 
     // (a) military first, then commercial → military must clear.
     const cross1 = await evalPage(async (hex, icao) => {
-      const dm = window.__godsEyeView.dataManager;
+      const dm = window.__osiris.dataManager;
       const mil = dm.layers.get('military').module;
       const fl = dm.layers.get('flights').module;
       mil.trackById(hex);
@@ -1585,7 +1585,7 @@ async function main() {
 
     // (b) commercial first, then military → commercial must clear.
     const cross2 = await evalPage(async (hex, icao) => {
-      const dm = window.__godsEyeView.dataManager;
+      const dm = window.__osiris.dataManager;
       const mil = dm.layers.get('military').module;
       const fl = dm.layers.get('flights').module;
       fl.trackById(icao);
@@ -1616,13 +1616,13 @@ async function main() {
     console.log('\nRegression H1 — click on the tracked plane is a no-op');
     const h1Icao = SYNTH.flights[0].icao;
     await evalPage((icao) => {
-      window.__godsEyeView.dataManager.layers.get('flights').module.trackById(icao);
+      window.__osiris.dataManager.layers.get('flights').module.trackById(icao);
     }, h1Icao);
     await sleep(1500); // follow camera settles; tracked GLB load kicks off
 
     // (i) The tracked standalone model must expose its pick id (= the icao).
     const h1ModelUp = await page.waitForFunction((icao) => {
-      const fl = window.__godsEyeView.dataManager.layers.get('flights').module;
+      const fl = window.__osiris.dataManager.layers.get('flights').module;
       const ti = fl.getTrackedInfo();
       if (!ti || ti.icao24 !== icao) return false;
       const found = window.__findTrackedModel ? window.__findTrackedModel() : null;
@@ -1650,8 +1650,8 @@ async function main() {
     // or the tracked entity) so the click is deterministic — a miss would be
     // a LEGIT empty-space deselect, not the H1 signature.
     const h1ClickPoint = await evalPage(() => {
-      const v = window.__godsEyeView.viewer;
-      const fl = window.__godsEyeView.dataManager.layers.get('flights').module;
+      const v = window.__osiris.viewer;
+      const fl = window.__osiris.dataManager.layers.get('flights').module;
       const ti = fl.getTrackedInfo();
       if (!ti) return null;
       const ent = v.trackedEntity;
@@ -1688,12 +1688,12 @@ async function main() {
       skip('H1: click on tracked plane does not pull the camera out',
         'scene.pick could not resolve the tracked plane at its screen position (GL backend picking)');
     } else {
-      const h1HeightBefore = await evalPage(() => window.__godsEyeView.viewer.camera.positionCartographic.height);
+      const h1HeightBefore = await evalPage(() => window.__osiris.viewer.camera.positionCartographic.height);
       // Trusted mouse click through the browser event pipeline → the layer's
       // ScreenSpaceEventHandler LEFT_CLICK path (the exact H1 code path).
       await page.mouse.click(h1ClickPoint.x, h1ClickPoint.y);
       const h1Heights = await page.evaluate(async (frames) => {
-        const v = window.__godsEyeView.viewer;
+        const v = window.__osiris.viewer;
         const heights = [];
         await new Promise((res) => {
           let n = 0;
@@ -1719,8 +1719,8 @@ async function main() {
         return heights;
       }, 45);
       const h1StillTracking = await evalPage((icao) => {
-        const ti = window.__godsEyeView.dataManager.layers.get('flights').module.getTrackedInfo();
-        return !!(ti && ti.icao24 === icao) && !!window.__godsEyeView.viewer.trackedEntity;
+        const ti = window.__osiris.dataManager.layers.get('flights').module.getTrackedInfo();
+        return !!(ti && ti.icao24 === icao) && !!window.__osiris.viewer.trackedEntity;
       }, h1Icao);
       record('H1: click on tracked plane keeps tracking (no deselect)', h1StillTracking,
         `picked via ${h1ClickPoint.via}; still tracking=${h1StillTracking}`);
@@ -1742,13 +1742,13 @@ async function main() {
     console.log('\nRegression M3 — tracked plane age-out releases the camera in place');
     const m3Icao = SYNTH.flights[0].icao;
     await evalPage((icao) => {
-      window.__godsEyeView.dataManager.layers.get('flights').module.trackById(icao);
+      window.__osiris.dataManager.layers.get('flights').module.trackById(icao);
     }, m3Icao);
     await sleep(1200); // settle in the low follow band
 
     const m3 = await evalPage(async (icao) => {
-      const v = window.__godsEyeView.viewer;
-      const fl = window.__godsEyeView.dataManager.layers.get('flights').module;
+      const v = window.__osiris.viewer;
+      const fl = window.__osiris.dataManager.layers.get('flights').module;
       const beforeTracking = !!fl.getTrackedInfo();
       // Simulate the age-out via the shim: the plane stops arriving.
       window.__SYNTH.flights = window.__SYNTH.flights.filter((f) => f.icao !== icao);
@@ -1784,7 +1784,7 @@ async function main() {
     // snap — it stays where the follow left it. Sample heights across frames
     // (any transient flyTo would show up here), then read the settled pose.
     const m3Heights = await page.evaluate(async (frames) => {
-      const v = window.__godsEyeView.viewer;
+      const v = window.__osiris.viewer;
       const heights = [];
       await new Promise((res) => {
         let n = 0;
@@ -1811,7 +1811,7 @@ async function main() {
     }, 90);
     await sleep(800); // any (regressed) 0.6 s flyTo would have finished by now
     const m3Final = await evalPage(() => {
-      const c = window.__godsEyeView.viewer.camera.positionCartographic;
+      const c = window.__osiris.viewer.camera.positionCartographic;
       return {
         lonDeg: (c.longitude * 180) / Math.PI,
         latDeg: (c.latitude * 180) / Math.PI,
@@ -1845,8 +1845,8 @@ async function main() {
     // ============================================================
     console.log('\nChange 2a — landing-ghost fast cull (1 missed poll; cruise grace intact)');
     const fastCull = await evalPage(async () => {
-      const v = window.__godsEyeView.viewer;
-      const dm = window.__godsEyeView.dataManager;
+      const v = window.__osiris.viewer;
+      const dm = window.__osiris.dataManager;
       const fl = dm.layers.get('flights').module;
       const mil = dm.layers.get('military').module;
       const has = (mod, id) => mod.getAllPositions(2000).some((p) => p.id === id);
@@ -1898,8 +1898,8 @@ async function main() {
     // ============================================================
     console.log('\nChange 2b — tracked readout STALE cue during missed-poll grace');
     const staleCheck = await evalPage(async () => {
-      const v = window.__godsEyeView.viewer;
-      const fl = window.__godsEyeView.dataManager.layers.get('flights').module;
+      const v = window.__osiris.viewer;
+      const fl = window.__osiris.dataManager.layers.get('flights').module;
       const labelText = () => {
         const ent = v.trackedEntity;
         if (!ent) return null;
@@ -1950,8 +1950,8 @@ async function main() {
     // ============================================================
     console.log('\nChange 3 — ground traffic: full-alpha style, in-place transitions, fast cull');
     const ground = await evalPage(async () => {
-      const v = window.__godsEyeView.viewer;
-      const dm = window.__godsEyeView.dataManager;
+      const v = window.__osiris.viewer;
+      const dm = window.__osiris.dataManager;
       const fl = dm.layers.get('flights').module;
       const mil = dm.layers.get('military').module;
       const findBB = (id) => {
@@ -2122,7 +2122,7 @@ async function main() {
     let g3dCleanupFailure = null;
     try {
       g3dSetup = await evalPage(() => {
-        const gev = window.__godsEyeView;
+        const gev = window.__osiris;
         const scene = gev.viewer.scene;
         const dm = gev.dataManager;
         const flights = dm.layers.get('flights').module;
@@ -2239,8 +2239,8 @@ async function main() {
       // Ingest one grounded plane per layer, then park the camera 8 km above them
       // (inside the model regime + add radius; on-screen so they win cap slots).
       const g3dIngest = await evalPage(async () => {
-      const v = window.__godsEyeView.viewer;
-      const dm = window.__godsEyeView.dataManager;
+      const v = window.__osiris.viewer;
+      const dm = window.__osiris.dataManager;
       const fl = dm.layers.get('flights').module;
       const mil = dm.layers.get('military').module;
       window.__SYNTH.flights.push({ icao: 'aaa077', callsign: 'GND077', lon: -97.7445, lat: 30.2668, alt: 150, vel: 0, track: 45, onGround: true });
@@ -2286,7 +2286,7 @@ async function main() {
       // In-page model finder by pick id (fleet AND tracked standalone models carry it).
       await evalPage(() => {
         window.__g3dFindModel = function (id) {
-          const v = window.__godsEyeView.viewer;
+          const v = window.__osiris.viewer;
           let found = null;
           const walk = (coll) => {
             const n = coll.length;
@@ -2322,7 +2322,7 @@ async function main() {
       if (g3dModelsUp) {
         // (c) + handoff + (e): heights snapped, billboards handed off, snap one-shot.
         const g3dState = await evalPage(() => {
-          const v = window.__godsEyeView.viewer;
+          const v = window.__osiris.viewer;
           const findBB = (id) => {
             let found = null;
             const walk = (coll) => {
@@ -2395,7 +2395,7 @@ async function main() {
         // 1.51 m airliner belly offset on a faster runtime.
         const ACCESSOR_SEPARATION_EPSILON_M = 0.25;
         const weld = await page.evaluate(async (frames) => {
-          const gev = window.__godsEyeView;
+          const gev = window.__osiris;
           const v = gev.viewer;
           const dm = gev.dataManager;
           const targets = [
@@ -2493,7 +2493,7 @@ async function main() {
         // render frame while the standalone model was loading.
         const trackedTransitionCallsBefore = callsAfter;
         await evalPage(() => {
-          window.__godsEyeView.dataManager.layers.get('flights').module.trackById('aaa077');
+          window.__osiris.dataManager.layers.get('flights').module.trackById('aaa077');
         });
         const trackedTransitionWindow = await sampleFrames(
           page, 30, () => window.__g3dSampleCalls,
@@ -2509,7 +2509,7 @@ async function main() {
             && (trackedTransitionCallsAfter - trackedTransitionCallsBefore) <= 8,
           `sampleHeight growth from before trackById across 30 verified frames=${trackedTransitionCallsAfter - trackedTransitionCallsBefore} (per-frame would be ~30+)`);
         const g3dTrackedUp = await page.waitForFunction(() => {
-          const fl = window.__godsEyeView.dataManager.layers.get('flights').module;
+          const fl = window.__osiris.dataManager.layers.get('flights').module;
           const ti = fl.getTrackedInfo();
           if (!ti || ti.icao24 !== 'aaa077') return false;
           const m = window.__g3dFindModel('aaa077');
@@ -2560,7 +2560,7 @@ async function main() {
         // dead-reckoned position rather than having been quietly repurposed.
         if (g3dTrackedUp) {
           const trackedWeld = await evalPage(() => {
-            const ent = window.__godsEyeView.viewer.trackedEntity;
+            const ent = window.__osiris.viewer.trackedEntity;
             const m = window.__g3dFindModel('aaa077');
             if (!m) return { error: 'no tracked model' };
             const matrix = m.modelMatrix;
@@ -2618,7 +2618,7 @@ async function main() {
       if (g3dSetup) {
         try {
           const cleanupFailures = await evalPage(async (priorModels3d) => {
-        const gev = window.__godsEyeView;
+        const gev = window.__osiris;
         const v = gev.viewer;
         const dm = gev.dataManager;
         const fl = dm.layers.get('flights').module;
@@ -2703,8 +2703,8 @@ async function main() {
     // ============================================================
     console.log('\nChange 4 — arrival rotation: moveEnd settle pass + horizon-reveal pass');
     const arrival = await evalPage(async () => {
-      const v = window.__godsEyeView.viewer;
-      const dm = window.__godsEyeView.dataManager;
+      const v = window.__osiris.viewer;
+      const dm = window.__osiris.dataManager;
       const { screenProjectedRotation } = await import(`${window.__gevQaSourceBase || '/src'}/data/iconOrientation.js`);
       const { observeArrivalRotation } = await import(`${window.__gevQaSourceBase || '/src'}/tooling/trackArrivalObservation.mjs`);
       // 3D models OFF for this phase: a model-handed-off billboard is hidden
@@ -2831,7 +2831,7 @@ async function main() {
 
     const dfSetup = await evalPage(async () => {
       const Cesium = await import('/node_modules/cesium/Build/Cesium/index.js');
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const v = gev.viewer;
       const fl = gev.dataManager.layers.get('flights').module;
       // Hermetic: the ground-3d group's cleanup restored the REAL sampleHeight,
@@ -3066,7 +3066,7 @@ async function main() {
       };
       // Read the application's surface owner, then prove it is the one
       // used by the actual poll/render path with the unchanged floor seed.
-      window.__dfCandidates = window.__godsEyeView.surfaceServices?.groundFloor ? ['application surface'] : [];
+      window.__dfCandidates = window.__osiris.surfaceServices?.groundFloor ? ['application surface'] : [];
       return { candidates: window.__dfCandidates.length };
     });
     record('display-floor: ground-floor service owner found', dfSetup.candidates > 0,
@@ -3080,12 +3080,12 @@ async function main() {
     // path only; the clamp under test reads the DISPLAY cell, which stays cold
     // here, so a broken fix cannot fake a pass.
     const dfIdentity = await evalPage(async (lat, lon, seedM) => {
-      const v = window.__godsEyeView.viewer;
-      const fl = window.__godsEyeView.dataManager.layers.get('flights').module;
+      const v = window.__osiris.viewer;
+      const fl = window.__osiris.dataManager.layers.get('flights').module;
       const tried = [];
       for (let i = 0; i < window.__dfCandidates.length; i++) {
         const url = window.__dfCandidates[i];
-        const gf = window.__godsEyeView.surfaceServices.groundFloor;
+        const gf = window.__osiris.surfaceServices.groundFloor;
         if (typeof gf.reportMeshFloorCell !== 'function') { tried.push({ url, h: null }); continue; }
         gf.setMeshFloorPreferred(true);
         gf._clearMeshFloorCellsForTest();
@@ -3121,8 +3121,8 @@ async function main() {
         'the identity probe above failed — assertions would be meaningless');
     } else {
       const dfDrift = await evalPage(async (lat, lon) => {
-        const v = window.__godsEyeView.viewer;
-        const fl = window.__godsEyeView.dataManager.layers.get('flights').module;
+        const v = window.__osiris.viewer;
+        const fl = window.__osiris.dataManager.layers.get('flights').module;
         const gf = window.__dfGf;
         const icao = window.__dfIcao;
         const cell = (x) => Number(x.toFixed(3));
@@ -3212,8 +3212,8 @@ async function main() {
       // it through the real DEM resolve. A control cell the same distance away,
       // which no corridor covers, must stay cold.
       const dfCorridor = await evalPage(async (lat, lon) => {
-        const v = window.__godsEyeView.viewer;
-        const fl = window.__godsEyeView.dataManager.layers.get('flights').module;
+        const v = window.__osiris.viewer;
+        const fl = window.__osiris.dataManager.layers.get('flights').module;
         const gf = window.__dfGf;
         const cell = (x) => Number(x.toFixed(3));
         gf._clearMeshFloorCellsForTest(); // DEM only — sampleHeight is stubbed off
@@ -3354,9 +3354,9 @@ async function main() {
       // _trackedDisplayPosition, so selecting a correctly floored grounded
       // billboard used to swap it for an unfloored cyan target under the mesh.
       const dfTracked = await evalPage(async () => {
-        const v = window.__godsEyeView.viewer;
+        const v = window.__osiris.viewer;
         const Cesium = await import('/node_modules/cesium/Build/Cesium/index.js');
-        const fl = window.__godsEyeView.dataManager.layers.get('flights').module;
+        const fl = window.__osiris.dataManager.layers.get('flights').module;
         const gf = window.__dfGf;
         const cell = (x) => Number(x.toFixed(3));
         const bbBefore = window.__dfFindBB('aaa097');
@@ -3614,9 +3614,9 @@ async function main() {
       // FLEET's draw-call budget only, and the tracked contact must still take
       // its model on zoom without the operator arming anything.
       const dfRetained = await evalPage(async () => {
-        const v = window.__godsEyeView.viewer;
+        const v = window.__osiris.viewer;
         const Cesium = await import('/node_modules/cesium/Build/Cesium/index.js');
-        const fl = window.__godsEyeView.dataManager.layers.get('flights').module;
+        const fl = window.__osiris.dataManager.layers.get('flights').module;
         const gf = window.__dfGf;
         const cell = (x) => Number(x.toFixed(3));
         // This scenario INHERITS the open deterministic skin from the block
@@ -3746,9 +3746,9 @@ async function main() {
       // not simulate Cesium's internal loading/draw state. The tracked check
       // below separately samples the no-rendering-model window.
       const dfLoading = await evalPage(async () => {
-        const v = window.__godsEyeView.viewer;
+        const v = window.__osiris.viewer;
         const Cesium = await import('/node_modules/cesium/Build/Cesium/index.js');
-        const fl = window.__godsEyeView.dataManager.layers.get('flights').module;
+        const fl = window.__osiris.dataManager.layers.get('flights').module;
         const gf = window.__dfGf;
         const cell = (x) => Number(x.toFixed(3));
         const floorAround = (c, seeded) => {
@@ -3940,8 +3940,8 @@ async function main() {
       // display would measure the same thing half a minute later.
       const dfHold = await evalPage(async () => {
         const Cesium = await import('/node_modules/cesium/Build/Cesium/index.js');
-        const v = window.__godsEyeView.viewer;
-        const fl = window.__godsEyeView.dataManager.layers.get('flights').module;
+        const v = window.__osiris.viewer;
+        const fl = window.__osiris.dataManager.layers.get('flights').module;
         // Test the registered instance directly, including catalogs constructed
         // with their own sources. Never import a second compatibility instance.
         const ns = fl.testing;
@@ -4075,7 +4075,7 @@ async function main() {
     // Cleanup: drop the synthetics and the seeded cells so nothing leaks into
     // the run-wide console/HTTP checks below.
     await evalPage(async () => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const v = gev.viewer;
       const fl = gev.dataManager.layers.get('flights').module;
       window.__SYNTH.flights = window.__SYNTH.flights.filter((f) => !/^aaa09/.test(f.icao));
@@ -4137,7 +4137,7 @@ async function main() {
 async function sampleFrames(page, count, sampleFn, ...args) {
   const { values, timedOut } = await page.evaluate(async (fnStr, n, extra) => {
     const fn = new Function('return (' + fnStr + ')')();
-    const v = window.__godsEyeView.viewer;
+    const v = window.__osiris.viewer;
     const out = [];
     let timedOut = false;
     await new Promise((resolve) => {

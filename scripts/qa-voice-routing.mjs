@@ -14,7 +14,7 @@
  *
  *  LAYER 2 — BEHAVIOR (free, deterministic, no model):
  *    Drives window.__gevVoiceCommands.runner(toolName, args) in a headless
- *    page against the dev server and asserts world state via __godsEyeView /
+ *    page against the dev server and asserts world state via __osiris /
  *    __gevAnnotations (camera altitude bands, annotation counts, route
  *    geometry, framing modes). This is the instrument that later gates new
  *    tools (analyst queries, camera verbs) without anyone speaking.
@@ -697,11 +697,11 @@ async function runDeixisLiveLayer() {
       timeout: 60000,
     });
     await page.waitForFunction(
-      () => window.__godsEyeView?.viewer && window.__gevVoiceCommands?.session,
+      () => window.__osiris?.viewer && window.__gevVoiceCommands?.session,
       { timeout: 120000, polling: 250 },
     );
     await page.evaluate(() =>
-      window.__godsEyeView.viewer.camera.cancelFlight(),
+      window.__osiris.viewer.camera.cancelFlight(),
     );
     await run('fly_to_location', { query: 'Austin, Texas' });
     await settle(9000);
@@ -750,7 +750,7 @@ async function runDeixisLiveLayer() {
           let at = p;
           if (p?.aircraftId) {
             // Aircraft move: project the contact's live position in this step.
-            const { viewer, dataManager } = window.__godsEyeView;
+            const { viewer, dataManager } = window.__osiris;
             // The billboard position, which is what the pick hits.
             const found = (
               dataManager.layers
@@ -846,8 +846,8 @@ async function runDeixisLiveLayer() {
     }
 
     const size = await page.evaluate(() => ({
-      w: window.__godsEyeView.viewer.scene.canvas.clientWidth,
-      h: window.__godsEyeView.viewer.scene.canvas.clientHeight,
+      w: window.__osiris.viewer.scene.canvas.clientWidth,
+      h: window.__osiris.viewer.scene.canvas.clientHeight,
     }));
     const events = await turn('How many flights are around here?', {
       x: size.w * 0.3,
@@ -965,7 +965,7 @@ function summarizeSpeech(logDir) {
 /** An on-screen aircraft whose billboard really answers a pick, or null. */
 function findPickableAircraft(page) {
   return page.evaluate(() => {
-    const { viewer, dataManager } = window.__godsEyeView;
+    const { viewer, dataManager } = window.__osiris;
     const module = dataManager.layers.get('flights')?.module;
     const canvas = viewer.scene.canvas;
     const eye = viewer.camera.positionWC;
@@ -1137,7 +1137,7 @@ async function runDeixisBehavior(page, run, settle) {
     await shot('result-card.png');
     const tracked = await run('track_entity', { query: 'pointer' });
     const trackedId = await page.evaluate(() => {
-      const info = window.__godsEyeView.dataManager.layers
+      const info = window.__osiris.dataManager.layers
         .get('flights')
         ?.module?.getTrackedInfo?.();
       return info?.icao24 || info?.id || null;
@@ -1155,7 +1155,7 @@ async function runDeixisBehavior(page, run, settle) {
 
   // D2 — bare ground: the chip gives coordinates and "around here" is a radius.
   const size = await page.evaluate(() => {
-    const canvas = window.__godsEyeView.viewer.scene.canvas;
+    const canvas = window.__osiris.viewer.scene.canvas;
     return { w: canvas.clientWidth, h: canvas.clientHeight };
   });
   let groundTurn = null;
@@ -1346,14 +1346,14 @@ async function runBehaviorLayer() {
     });
     await page.waitForFunction(
       () =>
-        window.__godsEyeView?.viewer &&
+        window.__osiris?.viewer &&
         window.__gevVoiceCommands?.runner &&
         window.__gevAnnotations,
       { timeout: 120000, polling: 250 },
     );
     // House rule: the intro flight clobbers teleports issued mid-flight.
     await page.evaluate(() =>
-      window.__godsEyeView.viewer.camera.cancelFlight(),
+      window.__osiris.viewer.camera.cancelFlight(),
     );
 
     const run = (name, args) =>
@@ -1371,7 +1371,7 @@ async function runBehaviorLayer() {
       );
     const camState = () =>
       page.evaluate(() => {
-        const c = window.__godsEyeView.viewer.camera;
+        const c = window.__osiris.viewer.camera;
         const p = c.positionCartographic;
         return {
           lat: (p.latitude * 180) / Math.PI,
@@ -1402,7 +1402,7 @@ async function runBehaviorLayer() {
     // final tween frame. Cancel that already-arrived flight so the assertion
     // measures Radio's camera ownership, not residual navigation motion.
     await page.evaluate(() =>
-      window.__godsEyeView.viewer.camera.cancelFlight(),
+      window.__osiris.viewer.camera.cancelFlight(),
     );
     await settle(250);
     const radioCameraBefore = await camState();
@@ -1535,7 +1535,7 @@ async function runBehaviorLayer() {
     // camera policy with synthetic target records only. This proves ordering
     // without claiming that the live AIS stream delivered a vessel.
     const ownerTransfer = await page.evaluate(async () => {
-      const app = window.__godsEyeView;
+      const app = window.__osiris;
       const runner = window.__gevVoiceCommands?.runner;
       const { viewer, dataManager, styleManager } = app || {};
       const fireEntry = dataManager?.layers?.get('local-firms');
@@ -1769,7 +1769,7 @@ async function runBehaviorLayer() {
     await page
       .waitForFunction(
         () =>
-          window.__godsEyeView.viewer.camera.positionCartographic.height /
+          window.__osiris.viewer.camera.positionCartographic.height /
             1000 >
           12000,
         { timeout: 30_000, polling: 250 },
@@ -1790,7 +1790,7 @@ async function runBehaviorLayer() {
     await page
       .waitForFunction(
         () =>
-          window.__godsEyeView.viewer.camera.positionCartographic.height /
+          window.__osiris.viewer.camera.positionCartographic.height /
             1000 <
           900,
         { timeout: 40_000, polling: 250 },
@@ -1860,7 +1860,7 @@ async function runBehaviorLayer() {
     // (6c) move_camera orbit ONCE: bounded eased ~30° heading advance.
     const heading = () =>
       page.evaluate(
-        () => (window.__godsEyeView.viewer.camera.heading * 180) / Math.PI,
+        () => (window.__osiris.viewer.camera.heading * 180) / Math.PI,
       );
     let h0 = await heading();
     r = await run('move_camera', { motion: 'orbit', mode: 'once' });
@@ -1988,7 +1988,7 @@ async function runBehaviorLayer() {
         mode: 'continuous',
       });
       const trackingReleased = await page.evaluate(
-        () => !window.__godsEyeView.viewer.trackedEntity,
+        () => !window.__osiris.viewer.trackedEntity,
       );
       const orbitStop = await run('move_camera', { motion: 'stop' });
       report(
@@ -2023,7 +2023,7 @@ async function runBehaviorLayer() {
       await run('fly_to_location', { query: 'Austin, Texas' });
       await settle(6000);
       const stillTracked = await page.evaluate(() =>
-        Boolean(window.__godsEyeView.viewer.trackedEntity),
+        Boolean(window.__osiris.viewer.trackedEntity),
       );
       const camHere = await camState();
       const nearAustin =
@@ -2042,7 +2042,7 @@ async function runBehaviorLayer() {
 
     // (6e5) tilt at the clamp answers honestly instead of silently no-oping.
     await page.evaluate(() => {
-      const c = window.__godsEyeView.viewer.camera;
+      const c = window.__osiris.viewer.camera;
       c.setView({
         orientation: {
           heading: c.heading,
@@ -2112,7 +2112,7 @@ async function runBehaviorLayer() {
     r = await run('set_context_mode', { mode: 'contacts' });
     await settle(2500);
     const contextEntered = await page.evaluate(
-      () => window.__godsEyeView?.styleManager?.getContextModeState?.() || null,
+      () => window.__osiris?.styleManager?.getContextModeState?.() || null,
     );
     report(
       r?.ok === true && contextEntered?.mode === 'flights',
@@ -2131,12 +2131,12 @@ async function runBehaviorLayer() {
     // (9b) Cockpit entry with nothing to fly is an honest failure, never a
     // silent success that leaves the operator staring at an unchanged map.
     const cockpitBefore = await page.evaluate(() =>
-      Boolean(window.__godsEyeView?.styleManager?.cockpitView?.active),
+      Boolean(window.__osiris?.styleManager?.cockpitView?.active),
     );
     r = await run('control_cockpit', { action: 'enter' });
     await settle(1200);
     const cockpitAfter = await page.evaluate(() =>
-      Boolean(window.__godsEyeView?.styleManager?.cockpitView?.active),
+      Boolean(window.__osiris?.styleManager?.cockpitView?.active),
     );
     // Either it genuinely entered (an aircraft was tracked) or it refused with
     // a reason — the one thing it must never do is claim success while inert.
@@ -2159,7 +2159,7 @@ async function runBehaviorLayer() {
     // (9d) An unavailable context mode is refused, and the live mode survives.
     r = await run('set_context_mode', { mode: 'orbital-weather' });
     const contextAfterRefusal = await page.evaluate(
-      () => window.__godsEyeView?.styleManager?.getContextModeState?.() || null,
+      () => window.__osiris?.styleManager?.getContextModeState?.() || null,
     );
     report(
       r?.ok === false &&
@@ -2180,7 +2180,7 @@ async function runBehaviorLayer() {
       limit: 3,
     });
     const awarenessFlights = await page.evaluate(() => {
-      const snap = window.__godsEyeView?.dataManager?.layers
+      const snap = window.__osiris?.dataManager?.layers
         ?.get('military-awareness')
         ?.module?.getContextSnapshot?.();
       const cohort = snap?.cohorts?.find((c) => c.id === 'flights');
@@ -2205,7 +2205,7 @@ async function runBehaviorLayer() {
     // airliner.
     if (
       await page.evaluate(() =>
-        Boolean(window.__godsEyeView?.styleManager?.cockpitView?.active),
+        Boolean(window.__osiris?.styleManager?.cockpitView?.active),
       )
     ) {
       await run('control_cockpit', { action: 'exit' });
@@ -2218,7 +2218,7 @@ async function runBehaviorLayer() {
     await settle(1200);
     const layerAfter = r?.state?.subject?.layerId ?? null;
     const cockpitOn = await page.evaluate(() =>
-      Boolean(window.__godsEyeView?.styleManager?.cockpitView?.active),
+      Boolean(window.__osiris?.styleManager?.cockpitView?.active),
     );
     report(
       (r?.ok === true && layerAfter === 'military' && cockpitOn) ||
@@ -2237,7 +2237,7 @@ async function runBehaviorLayer() {
       targetLayer: 'ais-live-vessels',
     });
     const vesselCockpit = await page.evaluate(() =>
-      Boolean(window.__godsEyeView?.styleManager?.cockpitView?.active),
+      Boolean(window.__osiris?.styleManager?.cockpitView?.active),
     );
     report(
       r?.ok === false &&
@@ -2251,7 +2251,7 @@ async function runBehaviorLayer() {
     r = await run('set_context_mode', { mode: 'off' });
     await settle(2000);
     const contextExited = await page.evaluate(
-      () => window.__godsEyeView?.styleManager?.getContextModeState?.() || null,
+      () => window.__osiris?.styleManager?.getContextModeState?.() || null,
     );
     report(
       r?.ok !== false && !contextExited?.mode,
@@ -2265,7 +2265,7 @@ async function runBehaviorLayer() {
     r = await run('control_cockpit', { action: 'status' });
     const gateReport = r?.state || {};
     const cockpitBeforeGate = await page.evaluate(() =>
-      Boolean(window.__godsEyeView?.styleManager?.cockpitView?.active),
+      Boolean(window.__osiris?.styleManager?.cockpitView?.active),
     );
     report(
       gateReport.active === false &&
@@ -2280,10 +2280,10 @@ async function runBehaviorLayer() {
     // rather than the voice tool's own Contacts bootstrap.
     const gated = await page.evaluate(
       () =>
-        window.__godsEyeView?.styleManager?.controlCockpit?.('enter') || null,
+        window.__osiris?.styleManager?.controlCockpit?.('enter') || null,
     );
     const cockpitAfterGate = await page.evaluate(() =>
-      Boolean(window.__godsEyeView?.styleManager?.cockpitView?.active),
+      Boolean(window.__osiris?.styleManager?.cockpitView?.active),
     );
     report(
       gated?.ok === false &&

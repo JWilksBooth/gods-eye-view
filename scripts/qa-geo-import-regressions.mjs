@@ -96,7 +96,7 @@ try {
     { timeout: 90000 },
   );
   await page.evaluate(async () => {
-    const { viewer, dataManager } = window.__godsEyeView,
+    const { viewer, dataManager } = window.__osiris,
       C = window.__CESIUM__;
     for (const id of dataManager.layers.keys())
       await dataManager.setEnabled(id, false);
@@ -113,7 +113,7 @@ try {
     if (!/^(data:|blob:)/.test(r.url())) requests.push(r.url());
   });
   const results = await page.evaluate(async () => {
-    const { viewer } = window.__godsEyeView,
+    const { viewer } = window.__osiris,
       C = window.__CESIUM__,
       tool = window.__gevGeoImport;
     const results = [],

@@ -31,7 +31,7 @@ const MAX_SUBSCRIBERS = 64;
 const MAX_REF_BYTES = 64 * 1024;
 const MAX_TREE_BYTES = 16 * 1024 * 1024;
 const MAX_COMMIT_BYTES = 2 * 1024 * 1024;
-const USER_AGENT = 'gods-eye-view-ghostmaps/1.0';
+const USER_AGENT = 'osiris-ghostmaps/1.0';
 const REPO_PATH = `${GHOSTMAPS_REPO.owner}/${GHOSTMAPS_REPO.name}`;
 
 /** Poll interval from GHOSTMAPS_POLL_SECONDS, bounded below at 5 s. */

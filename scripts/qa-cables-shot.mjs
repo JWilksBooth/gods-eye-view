@@ -27,10 +27,10 @@ try {
   const page = await browser.newPage();
   await page.setViewport({ width: 1440, height: 860 });
   await page.goto(url, { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => !!window.__godsEyeView?.viewer, { timeout: 90_000 });
+  await page.waitForFunction(() => !!window.__osiris?.viewer, { timeout: 90_000 });
   await new Promise((r) => setTimeout(r, 12_000));
   await page.evaluate(async (layerId) => {
-    const gev = window.__godsEyeView;
+    const gev = window.__osiris;
     gev.viewer.camera.cancelFlight();
     for (const [id, entry] of gev.dataManager.layers) {
       if (entry.enabled && id !== layerId) {
@@ -46,7 +46,7 @@ try {
   ];
   for (const view of views) {
     await page.evaluate((v) => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       const ell = viewer.scene.globe.ellipsoid;
       viewer.camera.setView({
         destination: ell.cartographicToCartesian({
@@ -57,7 +57,7 @@ try {
     }, view);
     // Let the sweep + labels settle with frames flowing.
     await page.evaluate(() => new Promise((resolve) => {
-      const v = window.__godsEyeView.viewer;
+      const v = window.__osiris.viewer;
       let ticks = 0;
       const tick = () => {
         v.scene.requestRender?.();

@@ -172,7 +172,7 @@ async function newPage() {
 async function load(page, url) {
   await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
   await page.waitForFunction(
-    (id) => window.__godsEyeView?.dataManager?.layers?.has(id),
+    (id) => window.__osiris?.dataManager?.layers?.has(id),
     { timeout: 60_000 },
     fixtureId,
   );
@@ -180,7 +180,7 @@ async function load(page, url) {
 
 async function loadedState(page) {
   return page.evaluate((id) => {
-    const manager = window.__godsEyeView.dataManager;
+    const manager = window.__osiris.dataManager;
     return {
       enabled: manager.isEnabled(id),
       flights: manager.isEnabled('flights'),
@@ -213,7 +213,7 @@ try {
   await load(sender.page, `${origin}/?welcome=0`);
   const toggled = await sender.page.evaluate(
     (id) =>
-      window.__godsEyeView.dataManager.setEnabled(id, true, { origin: 'user' }),
+      window.__osiris.dataManager.setEnabled(id, true, { origin: 'user' }),
     fixtureId,
   );
   assert.equal(toggled, true, 'synthetic layer enables through manager');
@@ -255,7 +255,7 @@ try {
     timeout: 60_000,
   });
   await recipient.page.waitForFunction(
-    (id) => window.__godsEyeView?.dataManager?.layers?.has(id),
+    (id) => window.__osiris?.dataManager?.layers?.has(id),
     { timeout: 60_000 },
     fixtureId,
   );
@@ -267,7 +267,7 @@ try {
 
   const disabled = await recipient.page.evaluate(
     (id) =>
-      window.__godsEyeView.dataManager.setEnabled(id, false, {
+      window.__osiris.dataManager.setEnabled(id, false, {
         origin: 'user',
       }),
     fixtureId,

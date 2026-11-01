@@ -24,11 +24,11 @@ Bilawal Sidhu created and owns the following 17 GIFs and has authorized their in
 
 Copyright © Bilawal Sidhu. These files are not covered by the project's MIT License. Permission is limited to their inclusion and redistribution with this repository and its project documentation. No permission is granted for standalone reuse or modification. Commercial reuse outside this repository requires separate permission. No share-alike license applies.
 
-The GIFs are promotional captures of God's Eye View. They include Google Photorealistic 3D Tiles and public or third-party data layers with in-frame attribution. Bilawal Sidhu's ownership and permission cover the captures and his likeness; they do not replace the terms of Google Maps Platform or any displayed data provider. Keep the visible attribution intact.
+The GIFs are promotional captures of the original project Osiris is forked from. They include Google Photorealistic 3D Tiles and public or third-party data layers with in-frame attribution. Bilawal Sidhu's ownership and permission cover the captures and his likeness; they do not replace the terms of Google Maps Platform or any displayed data provider. Keep the visible attribution intact.
 
 ## Public README PNGs
 
-Bilawal Sidhu published the following PNGs in the existing public `bilawalsidhu/gods-eye-view` repository and authorized their continued inclusion and redistribution with this repository and its project documentation:
+Bilawal Sidhu published the following PNGs in the original project's public repository (`bilawalsidhu/gods-eye-view`, see the credits line in the README) and authorized their continued inclusion and redistribution with this repository and its project documentation:
 
 - `youtube-popular-videos.png`
 - `open-source-survey.png`

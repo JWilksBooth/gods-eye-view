@@ -6,11 +6,11 @@ import {
   serializeCostLimits,
 } from './voiceCost.js';
 
-// Voice cost control (repo-wide `godsEyeView.<feature>.<field>` convention;
+// Voice cost control (repo-wide `osiris.<feature>.<field>` convention;
 // the neighbouring ERROR_STORAGE_KEY predates it).
-const VOICE_TIER_STORAGE_KEY = 'godsEyeView.voiceCost.tier';
+const VOICE_TIER_STORAGE_KEY = 'osiris.voiceCost.tier';
 
-const VOICE_LIMITS_STORAGE_KEY = 'godsEyeView.voiceCost.limits';
+const VOICE_LIMITS_STORAGE_KEY = 'osiris.voiceCost.limits';
 
 /** Best-effort localStorage handle; absent in tests and locked-down browsers. */
 function voiceStorage(storage) {

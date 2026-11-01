@@ -20,7 +20,7 @@ export function filtersOf(provider) {
  * @property {boolean} [groundClick]   No coverage: a ground click at street zoom opens its nearest image.
  * @property {string} [requiresMapStack]   Usable only on this map stack.
  * @property {boolean} [defaultOn]     Default true; the first that defaults on is lit.
- * @property {{kind: 'view-cone', color: string}} [marker]   Default: GEV's pin.
+ * @property {{kind: 'view-cone', color: string}} [marker]   Default: Osiris's pin.
  * @property {Array<'pano'|'since'>} [filters]   Filters it honours (default both).
  * @property {{noun: string, action: string}} [coverageLabel]   How the panel counts its lines and says what a click does (default: sequences, "click a line for its photos").
  * @property {'capture'|'upload'} [sinceBasis]   What SINCE compares (default 'capture'); 'upload' notes "(by upload date)" beside the SINCE value while the provider is lit.

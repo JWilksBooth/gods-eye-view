@@ -122,7 +122,7 @@ export class RealtimeTurns {
 
   sendTextCommand(text) {
     if (!this.dc || this.dc.readyState !== 'open') {
-      throw new Error('GEV voice is not connected');
+      throw new Error('Osiris voice is not connected');
     }
     const cleanText = String(text || '').trim();
     if (!cleanText) return;
@@ -280,7 +280,7 @@ export class RealtimeTurns {
         // Never replay: the rejected turn is dropped, not retried. Re-arming
         // here is how one collision becomes the same sentence twice.
         this.pendingUserTextResponse = false;
-        console.warn('[GEV Realtime] Skipped overlapping response.create');
+        console.warn('[Osiris Realtime] Skipped overlapping response.create');
         this.debugLog('response.create.skipped_active', {
           eventId: payload.event_id,
           activeResponseMessage: payload.error?.message || null,
@@ -295,7 +295,7 @@ export class RealtimeTurns {
       // event_id of a delete we issued.
       if (this.viewport.consumeDeleteError(payload)) {
         console.warn(
-          '[GEV Realtime] Ignored stale viewport item_not_found',
+          '[Osiris Realtime] Ignored stale viewport item_not_found',
           payload.error?.code || null,
         );
         this.debugLog('viewport_delete.item_not_found', {
@@ -725,7 +725,7 @@ export class RealtimeTurns {
           : null;
         result = {
           ok: false,
-          error: error?.message || 'GEV command failed',
+          error: error?.message || 'Osiris command failed',
           tool: call.name,
           ...(isRadioFeatureCall
             ? readLayerLifecycleSummary(this.dataManager, 'radio', {
