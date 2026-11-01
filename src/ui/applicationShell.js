@@ -17,6 +17,9 @@ import { CockpitCoordinator } from './cockpitCoordinator.js';
 import { ContextControls } from './context.js';
 import { CctvControls } from './cctv.js';
 import { StreetLevelControls } from './streetLevelControls.js';
+import { LiveOpsControls } from './liveOpsControls.js';
+import { createLiveOpsHeadlineSource } from '../sources/liveOpsHeadlines.js';
+import { LIVE_OPS_LAYERS } from '../data/liveOpsRegions.js';
 import { RadioControls } from './radio.js';
 import { LocalSdrControls } from './localSdrControls.js';
 import { LocationNavigation } from './locationNavigation.js';
@@ -572,6 +575,7 @@ export class StyleManager extends ShellFacade {
           this.setCelestialRingEnabled(...args),
         _setModels3dEnabled: (...args) => this._setModels3dEnabled(...args),
         _syncModels3dModeRow: (...args) => this._syncModels3dModeRow(...args),
+        setPerformancePreset: (...args) => this.setPerformancePreset(...args),
         _setModels3dMode: (...args) => this._setModels3dMode(...args),
       },
       readState: () => ({
@@ -584,6 +588,7 @@ export class StyleManager extends ShellFacade {
         _models3dEnabled: this._models3dEnabled,
         _models3dModeBtns: this._models3dModeBtns,
         _detectionAllocationBtns: this._detectionAllocationBtns,
+        _performancePresetBtns: this._performancePresetBtns,
       }),
       claimDetection: () => {
         this._visualSettings._detectionUserOverridden = true;
@@ -601,6 +606,7 @@ export class StyleManager extends ShellFacade {
     this._initRadioPanel();
     this._initCctvPanel();
     this._initStreetLevelPanel();
+    this._initLiveOpsPanel();
     this._initGlobalContextPanel();
     this._initLocationBar();
     this._initMobileShell();
@@ -610,6 +616,9 @@ export class StyleManager extends ShellFacade {
     this._initHUDToggle();
     this._initModels3dToggle();
     this._applyGlobalPostDefaults();
+    // The remembered Performance preset's visual half lands on the baseline,
+    // and a share link's own values still land on top of both.
+    this._applyPerformancePresetVisuals();
     this._initOrbit();
     this._initRecordingOverlay();
     this._startAnimationLoop();
@@ -1164,6 +1173,62 @@ export class StyleManager extends ShellFacade {
       },
     });
     this._streetLevelControls.connect();
+  }
+
+  /**
+   * Compose the LIVE OPS region console: one click frames a region, turns on
+   * its cameras, live incidents and traffic, and loads its headlines. The
+   * flight goes through the shared navigation policy, so a Cockpit session
+   * refuses it and tracking is released like any other explicit flight.
+   */
+  _initLiveOpsPanel() {
+    this._liveOpsControls?.destroy();
+    this._liveOpsControls = null;
+    if (!this._liveOpsPanel) return;
+    const { flyToViewportBounds } = this.services;
+    const headlines = createLiveOpsHeadlineSource();
+    this._liveOpsControls = new LiveOpsControls({
+      root: this._liveOpsPanel,
+      actions: {
+        selectRegion: (region) => {
+          const [west, south, east, north] = region.bbox;
+          const flown = this.runImmediateNavigation('location', () =>
+            flyToViewportBounds(
+              this.viewer,
+              {
+                southwest: { lat: south, lng: west },
+                northeast: { lat: north, lng: east },
+              },
+              { duration: 2.4, navigationMode: 'city-overview' },
+            ),
+          );
+          if (flown === false) return false;
+          const manager = this._dataManager;
+          if (!manager) return true;
+          manager.setLayerParams?.(
+            'incidents',
+            { region: region.id },
+            {
+              origin: 'user',
+            },
+          );
+          return Promise.all(
+            LIVE_OPS_LAYERS.filter((id) => manager.layers?.has(id)).map((id) =>
+              manager.setEnabled(id, true, { origin: 'user' }),
+            ),
+          ).then(() => true);
+        },
+        getHeadlines: (regionId, options) =>
+          headlines.getHeadlines(regionId, options),
+        readIncidentStats: () =>
+          this._dataManager
+            ?.getAll?.()
+            ?.find((entry) => entry.id === 'incidents')?.stats ?? null,
+        subscribeLayers: (listener) =>
+          this._dataManager?.subscribe?.(listener) || null,
+      },
+    });
+    this._liveOpsControls.connect();
   }
 
   /** Compose camera panel controls from the existing camera port and application actions. */
@@ -1786,6 +1851,7 @@ export class StyleManager extends ShellFacade {
     this._cctvControls?.destroy();
     this.services?.streetLevelLayer?.attachNavigation?.(null);
     this._streetLevelControls?.destroy();
+    this._liveOpsControls?.destroy();
     this._radioControls?.destroy();
     this._localSdrControls?.destroy();
     this._cockpitCoordinator.stop();

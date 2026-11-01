@@ -8,9 +8,9 @@ export function createSceneDialog(title, onClose) {
   dialog.className = 'director-sharing-dialog';
   dialog.setAttribute('aria-label', title);
   Object.assign(dialog.style, {
-    background: '#08141e',
-    color: '#e3faff',
-    border: '1px solid #397080',
+    background: '#081e0e',
+    color: '#e3ffea',
+    border: '1px solid #39804b',
     borderRadius: '6px',
     padding: '20px',
     width: 'min(720px,calc(100vw - 32px))',
@@ -48,9 +48,9 @@ export function createSceneDialog(title, onClose) {
     b.type = 'button';
     b.textContent = label;
     Object.assign(b.style, {
-      background: '#10242e',
-      color: '#e3faff',
-      border: '1px solid #397080',
+      background: '#102e18',
+      color: '#e3ffea',
+      border: '1px solid #39804b',
       borderRadius: '3px',
       padding: '7px 11px',
       margin: '6px 6px 6px 0',
@@ -75,9 +75,9 @@ export function createSceneDialog(title, onClose) {
       width: '100%',
       padding: '7px',
       margin: '6px 0 14px',
-      color: '#e3faff',
-      background: '#10242e',
-      border: '1px solid #397080',
+      color: '#e3ffea',
+      background: '#102e18',
+      border: '1px solid #39804b',
       font: multiline ? '12px monospace' : 'inherit',
     });
     if (multiline) node.rows = 9;
@@ -113,16 +113,16 @@ export function createSceneDialog(title, onClose) {
       gap: '10px',
       margin: '6px 0 14px',
       padding: '7px',
-      background: '#10242e',
-      border: '1px solid #397080',
+      background: '#102e18',
+      border: '1px solid #39804b',
     });
     const chooser = document.createElement('span');
     chooser.textContent = t('Choose files');
     Object.assign(chooser.style, {
       padding: '3px 9px',
-      border: '1px solid #397080',
+      border: '1px solid #39804b',
       borderRadius: '3px',
-      background: '#08141e',
+      background: '#081e0e',
       cursor: 'pointer',
     });
     const chosen = document.createElement('span');
@@ -141,7 +141,7 @@ export function createSceneDialog(title, onClose) {
     wrapper.append(row);
     listen(node, 'change', showChosen);
     listen(node, 'focus', () => {
-      chooser.style.outline = '2px solid #e3faff';
+      chooser.style.outline = '2px solid #e3ffea';
     });
     listen(node, 'blur', () => {
       chooser.style.outline = '';

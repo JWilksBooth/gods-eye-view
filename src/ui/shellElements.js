@@ -58,6 +58,7 @@ export function readShellElements(document = globalThis.document) {
     _cleanViewExitBtn: document.getElementById('clean-view-exit'),
     _dataPanel: document.getElementById('data-panel'),
     _scenePanel: document.getElementById('scene-panel'),
+    _liveOpsPanel: document.getElementById('live-ops-panel'),
     _cctvPanel: document.getElementById('cctv-panel'),
     _streetLevelPanel: document.getElementById('street-level-panel'),
     _radioPanel: document.getElementById('radio-panel'),

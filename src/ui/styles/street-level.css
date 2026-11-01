@@ -40,7 +40,7 @@
     0 0 0 1px rgba(255, 255, 255, 0.03) inset,
     0 1px 0 rgba(255, 255, 255, 0.06) inset;
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 212, 255, 0.46) rgba(255, 255, 255, 0.06);
+  scrollbar-color: rgba(0, 255, 65, 0.46) rgba(255, 255, 255, 0.06);
 }
 
 /* Class-qualified, not id-qualified, so a theme's header rule still wins. */
@@ -79,7 +79,7 @@
 
 .sl-status.is-busy {
   color: var(--accent);
-  border-color: rgba(0, 212, 255, 0.55);
+  border-color: rgba(0, 255, 65, 0.55);
 }
 
 .sl-status.is-warn {
@@ -343,7 +343,7 @@ html:not([lang='en']) .sl-meta-row .sl-nearest-btn {
   justify-content: space-between;
   gap: 6px;
   padding: 5px 6px;
-  background: rgba(10, 10, 15, 0.85);
+  background: rgba(10, 15, 11, 0.85);
   border-bottom: 1px solid var(--glass-border);
 }
 
@@ -358,7 +358,7 @@ html:not([lang='en']) .sl-meta-row .sl-nearest-btn {
 .sl-viewer-tools .scene-btn {
   padding: 4px 8px;
   font-size: var(--sl-text);
-  background: rgba(10, 10, 15, 0.75);
+  background: rgba(10, 15, 11, 0.75);
   flex: none;
   min-width: 0;
   display: inline-flex;
@@ -371,7 +371,7 @@ html:not([lang='en']) .sl-meta-row .sl-nearest-btn {
 }
 
 .sl-viewer-tools .sl-seg {
-  background: rgba(10, 10, 15, 0.75);
+  background: rgba(10, 15, 11, 0.75);
 }
 
 @container (max-width: 380px) {
@@ -386,7 +386,7 @@ html:not([lang='en']) .sl-meta-row .sl-nearest-btn {
   height: 26px;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(10, 10, 15, 0.8);
+  background: rgba(10, 15, 11, 0.8);
   color: var(--text-primary);
   font-family: var(--font-mono);
   font-size: 1.1rem;
@@ -398,7 +398,7 @@ html:not([lang='en']) .sl-meta-row .sl-nearest-btn {
 }
 
 .sl-viewer-x:hover {
-  color: #0a0a0f;
+  color: #0a0f0b;
   background: #fff;
   border-color: #fff;
 }
@@ -561,7 +561,7 @@ html:not([lang='en']) .sl-meta-row .sl-nearest-btn {
   margin-top: -22px;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 8px;
-  background: rgba(10, 10, 15, 0.62);
+  background: rgba(10, 15, 11, 0.62);
   color: #fff;
   font-size: 1.5rem;
   line-height: 1;

@@ -57,10 +57,11 @@ function normalizeRssArticles(xml, limit = 5) {
   return articles;
 }
 
-async function fetchRegionalNews(place) {
-  const query = place?.locality || place?.region || place?.country;
-  if (!query)
-    return { status: 'unavailable', query: null, articles: [], source: null };
+/**
+ * Headlines for one search query: Google News RSS first, the GDELT index
+ * when that fails or is empty. `limit` is the most articles to keep.
+ */
+async function fetchNewsForQuery(query, { limit = 5, timespan = '48h' } = {}) {
   const rssParams = new URLSearchParams({
     q: String(query).replace(/["\\]/g, ' ').trim(),
     hl: 'en-US',
@@ -75,7 +76,7 @@ async function fetchRegionalNews(place) {
         timeoutMs: 12_000,
       },
     );
-    const articles = normalizeRssArticles(xml, 5);
+    const articles = normalizeRssArticles(xml, limit);
     if (articles.length)
       return { status: 'ready', query, articles, source: 'Google News RSS' };
   } catch {
@@ -85,9 +86,9 @@ async function fetchRegionalNews(place) {
     query: `"${String(query).replace(/["\\]/g, ' ').trim()}"`,
     mode: 'artlist',
     format: 'json',
-    maxrecords: '5',
+    maxrecords: String(Math.max(5, Math.min(25, limit))),
     sort: 'datedesc',
-    timespan: '48h',
+    timespan,
   });
   try {
     const payload = await fetchRegionalJson(
@@ -97,7 +98,7 @@ async function fetchRegionalNews(place) {
         timeoutMs: 12_000,
       },
     );
-    const articles = normalizeRegionalArticles(payload, 5);
+    const articles = normalizeRegionalArticles(payload, limit);
     return {
       status: articles.length ? 'ready' : 'empty',
       query,
@@ -109,4 +110,25 @@ async function fetchRegionalNews(place) {
   }
 }
 
-export { fetchRegionalNews };
+/** The cockpit's locality-matched headlines, from the reverse-geocoded place. */
+async function fetchRegionalNews(place) {
+  const query = place?.locality || place?.region || place?.country;
+  if (!query)
+    return { status: 'unavailable', query: null, articles: [], source: null };
+  return fetchNewsForQuery(query);
+}
+
+/**
+ * Region-scoped headlines for the LIVE OPS console: the registry's own
+ * search query for a region ("Los Angeles", "Sonoma County", "San Francisco
+ * Bay Area", "Las Vegas"), a longer list and a tighter window, since the
+ * console asks what is happening now rather than where a place is.
+ */
+async function fetchLiveOpsHeadlines(region, { limit = 8 } = {}) {
+  const query = String(region?.news || region?.name || '').trim();
+  if (!query)
+    return { status: 'unavailable', query: null, articles: [], source: null };
+  return fetchNewsForQuery(query, { limit, timespan: '24h' });
+}
+
+export { fetchRegionalNews, fetchLiveOpsHeadlines, fetchNewsForQuery };

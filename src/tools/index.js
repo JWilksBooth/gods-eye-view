@@ -29,6 +29,7 @@ import { getBhoteKoshiFlood } from './queries/events.js';
 import { getActiveFires, getEarthquakes } from './queries/hazards.js';
 import { getRecentImagery } from './queries/imagery.js';
 import { findInfrastructure } from './queries/infrastructure.js';
+import { getIncidents, liveOpsRegionTool } from './queries/liveOps.js';
 import {
   findVessel,
   getVesselTrack,
@@ -116,6 +117,8 @@ export const coreTools = Object.freeze([
   getRegionalBrief,
   getCyclones,
   getFirePerimeters,
+  getIncidents,
+  liveOpsRegionTool,
   getTerrainHeight,
   findMilitaryInstallations,
   getMapFeatures,

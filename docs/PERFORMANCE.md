@@ -6,6 +6,90 @@ specification and should not be used to predict performance on untested systems.
 The original capture artifacts are not included here, so this page records
 results rather than defining a runnable benchmark.
 
+## 2026-11-01: pick-render removal and Performance presets
+
+A second capture, taken while adding the Display → PERFORMANCE presets, in
+the headless Chromium this repository's QA scripts use. It is a
+software-rendered (SwiftShader) run, so its absolute numbers are far below any
+desktop GPU and must not be compared with the M5 tables below; read the ratios.
+Under SwiftShader the GPU work happens inside the frame bracket the harness
+measures (`preUpdate` → `postRender`), so "frame ms" is the whole-frame cost
+and the frame rate follows it. The capture is repeatable:
+`node scripts/qa-perf-presets.mjs` against a running dev server, with
+`--profile` to attribute a slow window and `--trace-readpixels` to name the
+code issuing GPU read-backs. Pass `--gpu` on a desktop to measure a real
+renderer with the same scenes.
+
+| Setting | Value |
+| --- | --- |
+| Renderer | ANGLE Vulkan on SwiftShader (software), headless Chromium 1243 |
+| Viewport | 1600 x 900 at device pixel ratio 1 |
+| Scene sample | 8 seconds of scripted motion (a slow pan with a heading sweep), then 8 seconds at rest |
+| Population | synthetic: 2,000 aircraft, 6,000 vessels, 4,000 cameras around San Francisco, Los Angeles and Las Vegas; OSM-style flat tiles |
+| Camera | 1,800 m over downtown San Francisco, heading 25°, pitch −38° |
+
+### What the profile showed
+
+With Flights, AIS vessels and CCTV on, a CPU profile of the layers scene put
+97% of the main thread's samples inside `readPixels`, reached through
+`drillPickFromRay`, that is `scene.sampleHeight`. The caller was the aircraft
+ground snap for grounded 3D-modeled planes (`src/services/groundSnap.js`):
+one sample per plane, four per 250 ms window, each a full offscreen pick
+render of the scene plus a synchronous read-back. 690 read-backs were issued in
+one 20-second window. On a desktop GPU the same call re-renders the scene and
+stalls the pipeline on every sample; SwiftShader only makes the cost visible.
+
+The ground snap, the mesh-floor cell sampler and the camera ground guard now
+read the rendered surface through `scene.getHeight`
+(`src/services/surfaceHeight.js`), a CPU ray test against loaded terrain and
+every tileset with `enableCollision`, which the photoreal globe has.
+
+| Scene (Flights + Vessels + CCTV) | Frame cost, motion / rest | GPU read-backs |
+| --- | ---: | ---: |
+| Before | 15,127 ms / 15,595 ms | 690 in 20 s |
+| After the surface-height change | 220 ms / 182 ms | 0 from the layers |
+
+### Presets
+
+| Preset | Scene | Frames in 8 s, motion / rest | Frame ms mean, motion / rest | Buffer, MSAA, FXAA |
+| --- | --- | ---: | ---: | --- |
+| Default build before the preset row | Idle globe, no layers | 7 / 6 | 172.8 / 449.25 | 1600x900, 2x, off |
+| Default build before the preset row | Flights + Vessels + CCTV | 7 / 7 | 64.01 / 213.91 | 1600x900, 2x, off |
+| Default build before the preset row | Tracked flight (cockpit entry gated, see below) | 8 / 7 | 198.84 / 228.13 | 1600x900, 2x, off |
+| Quality | Idle globe, no layers | 12 / 9 | 180.47 / 413.73 | 1600x900, 4x, off |
+| Quality | Flights + Vessels + CCTV | 8 / 7 | 47.17 / 210.14 | 1600x900, 4x, off |
+| Quality | Tracked flight (cockpit entry gated, see below) | 7 / 8 | 213.09 / 69.63 | 1600x900, 4x, off |
+| Balanced (default) | Idle globe, no layers | 11 / 12 | 141.85 / 158.15 | 1600x900, 2x, off |
+| Balanced (default) | Flights + Vessels + CCTV | 8 / 7 | 48.47 / 207.43 | 1600x900, 2x, off |
+| Balanced (default) | Tracked flight (cockpit entry gated, see below) | 8 / 8 | 68.33 / 200.5 | 1600x900, 2x, off |
+| Performance | Idle globe, no layers | 15 / 9 | 82.66 / 46.6 | 1200x675, 1x, on |
+| Performance | Flights + Vessels + CCTV | 9 / 9 | 44.92 / 148.2 | 1200x675, 1x, on |
+| Performance | Tracked flight (cockpit entry gated, see below) | 10 / 8 | 74.85 / 279.89 | 1200x675, 1x, on |
+
+The first block is the fixed build with no preset selected, so it is the
+reference for the three preset blocks beneath it. The cockpit rows are a
+tracked flight over the same layers: the harness could not pass the cockpit
+entry gate (Contacts context with Flights and Military on) in this capture, so
+they measure the tracked-entity follow camera, not the cockpit itself. The
+"Before" row for Flights + Vessels + CCTV in the table above this one is the
+unmodified tree.
+
+Quality is the previous behavior (full resolution, 4× MSAA, 60 fps, Dense @
+75). Balanced, the new default, is Quality at 2× MSAA. Performance renders
+at three-quarter resolution with FXAA instead of MSAA, caps the continuous
+loop at 30 fps, turns the sharpen pass off, solves Sparse @ 25, doubles the
+live layers' re-evaluation intervals, halves the traffic dot budget and
+raises the photoreal tileset's screen-space error to 24 with a 768 MiB cache.
+Idle mode is unchanged by the frame-rate cap: a parked scene renders on
+demand only, so the idle rows differ by noise.
+
+### Still to capture
+
+- The same three scenes on the RTX 3070 desktop this work targets
+  (`--gpu`), with the game running on the other screen and without it.
+- Street traffic: the road source was unreachable from the capture
+  environment, so the traffic dot budget change is unmeasured here.
+
 ## Test context
 
 The baseline was captured on 22 August 2026 with these conditions:
