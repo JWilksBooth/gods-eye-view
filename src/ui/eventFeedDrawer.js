@@ -1,4 +1,4 @@
-import { formatRelativeTime, t } from '../i18n/index.js';
+import { formatRelativeTime, msg, t } from '../i18n/index.js';
 import { getEventAdapter } from '../layers/events/adapters.js';
 import {
   describeFreshness,
@@ -374,8 +374,8 @@ export function createEventFeedDrawer({
       renderDetailFeed(container, event, {
         ...feed,
         lines: feed?.lines || [
-          { label: 'Latitude', value: event.lat.toFixed(4) },
-          { label: 'Longitude', value: event.lon.toFixed(4) },
+          { label: msg('Latitude'), value: event.lat.toFixed(4) },
+          { label: msg('Longitude'), value: event.lon.toFixed(4) },
         ],
       });
   }
