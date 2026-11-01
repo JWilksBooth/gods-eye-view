@@ -2913,5 +2913,12 @@
   "{feed} {count}": "{feed} {count}",
   "LIVE OPS": "LIVE OPS",
   "Las Vegas cameras and road events load keyless from nvroads.com; a free developer key switches them to the official API": "ラスベガスのカメラと道路イベントはキーなしで nvroads.com から読み込まれます。無料の開発者キーで公式APIに切り替わります",
-  "Optional app token that raises the DataSF dispatched-calls throttle; keyless works": "DataSF の出動コール取得制限を引き上げる任意のアプリトークン。キーなしでも動作します"
+  "Optional app token that raises the DataSF dispatched-calls throttle; keyless works": "DataSF の出動コール取得制限を引き上げる任意のアプリトークン。キーなしでも動作します",
+  "Performance": "パフォーマンス",
+  "Quality": "画質優先",
+  "Balanced": "バランス",
+  "Rendering performance preset": "描画パフォーマンスのプリセット",
+  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "フル解像度、4倍アンチエイリアス、60 fps、ラベル密度は最大",
+  "Full resolution with 2× anti-aliasing at 60 fps — the default": "フル解像度、2倍アンチエイリアス、60 fps（既定）",
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "解像度 3/4、マルチサンプリングなし、30 fps、ラベルは少なめ、レイヤー更新は低頻度"
 }

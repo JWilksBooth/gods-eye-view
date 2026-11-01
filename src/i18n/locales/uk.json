@@ -3123,5 +3123,12 @@
   "{feed} {count}": "{feed} {count}",
   "LIVE OPS": "LIVE OPS",
   "Las Vegas cameras and road events load keyless from nvroads.com; a free developer key switches them to the official API": "Камери та дорожні події Лас-Вегаса завантажуються без ключа з nvroads.com; безкоштовний ключ розробника перемикає на офіційний API",
-  "Optional app token that raises the DataSF dispatched-calls throttle; keyless works": "Необов'язковий токен застосунку, що підвищує ліміт для викликів DataSF; без ключа теж працює"
+  "Optional app token that raises the DataSF dispatched-calls throttle; keyless works": "Необов'язковий токен застосунку, що підвищує ліміт для викликів DataSF; без ключа теж працює",
+  "Performance": "Продуктивність",
+  "Quality": "Якість",
+  "Balanced": "Баланс",
+  "Rendering performance preset": "Передустановка продуктивності рендерингу",
+  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Повна роздільна здатність, згладжування 4×, 60 к/с і повна щільність підписів",
+  "Full resolution with 2× anti-aliasing at 60 fps — the default": "Повна роздільна здатність зі згладжуванням 2× при 60 к/с — типово",
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Роздільна здатність 3/4, без мультисемплінгу, 30 к/с, рідкі підписи та повільніше оновлення шарів"
 }

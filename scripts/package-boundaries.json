@@ -888,7 +888,8 @@
       "src/layers/incidents/model.js",
       "src/layers/incidents/records.js",
       "src/layers/incidents/source.js",
-      "src/sources/httpBody.js"
+      "src/sources/httpBody.js",
+      "src/performancePreset.js"
     ],
     "external": ["cesium"]
   },
@@ -1087,7 +1088,8 @@
       "src/i18n/locales/uk.json",
       "src/i18n/locales/zh-CN.json",
       "src/i18n/locales/zh-Hant.json",
-      "src/ui/unitLabels.js"
+      "src/ui/unitLabels.js",
+      "src/performancePreset.js"
     ],
     "external": ["cesium"]
   },
@@ -1210,7 +1212,8 @@
       "src/i18n/locales/ru.json",
       "src/i18n/locales/uk.json",
       "src/i18n/locales/zh-CN.json",
-      "src/i18n/locales/zh-Hant.json"
+      "src/i18n/locales/zh-Hant.json",
+      "src/performancePreset.js"
     ],
     "external": ["cesium"]
   },
@@ -1453,7 +1456,8 @@
       "src/i18n/locales/uk.json",
       "src/i18n/locales/zh-CN.json",
       "src/i18n/locales/zh-Hant.json",
-      "src/ui/unitLabels.js"
+      "src/ui/unitLabels.js",
+      "src/performancePreset.js"
     ],
     "external": ["cesium"]
   },
@@ -1509,7 +1513,8 @@
       "src/i18n/locales/ru.json",
       "src/i18n/locales/uk.json",
       "src/i18n/locales/zh-CN.json",
-      "src/i18n/locales/zh-Hant.json"
+      "src/i18n/locales/zh-Hant.json",
+      "src/performancePreset.js"
     ],
     "external": ["cesium", "pbf", "@mapbox/vector-tile"]
   },
@@ -1600,7 +1605,8 @@
       "src/i18n/locales/ru.json",
       "src/i18n/locales/uk.json",
       "src/i18n/locales/zh-CN.json",
-      "src/i18n/locales/zh-Hant.json"
+      "src/i18n/locales/zh-Hant.json",
+      "src/performancePreset.js"
     ],
     "external": ["hls.js", "cesium"]
   },
@@ -2833,7 +2839,9 @@
       "src/layers/incidents/source.js",
       "src/ui/liveOpsControls.js",
       "src/data/liveOpsRegions.js",
-      "src/sources/liveOpsHeadlines.js"
+      "src/sources/liveOpsHeadlines.js",
+      "src/services/surfaceHeight.js",
+      "src/performancePreset.js"
     ],
     "external": [
       "hls.js",
@@ -3422,7 +3430,9 @@
       "src/layers/incidents/index.js",
       "src/layers/incidents/model.js",
       "src/layers/incidents/records.js",
-      "src/layers/incidents/source.js"
+      "src/layers/incidents/source.js",
+      "src/services/surfaceHeight.js",
+      "src/performancePreset.js"
     ],
     "external": [
       "hls.js",
@@ -3492,7 +3502,8 @@
       "src/sources/featureSource.js",
       "src/sources/capability.js",
       "src/data/cameraArrival.js",
-      "src/data/cameraFraming.js"
+      "src/data/cameraFraming.js",
+      "src/services/surfaceHeight.js"
     ],
     "external": [
       "cesium",
@@ -3600,7 +3611,8 @@
       "src/i18n/locales/zh-Hant.json",
       "src/scopeMaskPolicy.js",
       "src/ui/displayControls.js",
-      "src/visualStylePolicy.js"
+      "src/visualStylePolicy.js",
+      "src/performancePreset.js"
     ],
     "external": ["cesium"]
   },
@@ -4133,7 +4145,8 @@
       "src/i18n/locales/ru.json",
       "src/i18n/locales/uk.json",
       "src/i18n/locales/zh-CN.json",
-      "src/i18n/locales/zh-Hant.json"
+      "src/i18n/locales/zh-Hant.json",
+      "src/services/surfaceHeight.js"
     ],
     "external": ["cesium", "egm96-universal", "pbf"]
   },

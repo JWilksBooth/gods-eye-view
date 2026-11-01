@@ -2983,5 +2983,12 @@
   "LIVE OPS": "LIVE OPS",
   "Region": "Region",
   "Las Vegas cameras and road events load keyless from nvroads.com; a free developer key switches them to the official API": "Las-Vegas-Kameras und Straßenereignisse laden ohne Schlüssel von nvroads.com; ein kostenloser Entwicklerschlüssel schaltet auf die offizielle API um",
-  "Optional app token that raises the DataSF dispatched-calls throttle; keyless works": "Optionales App-Token, das das Limit für DataSF-Einsatzmeldungen anhebt; ohne Schlüssel funktioniert es ebenfalls"
+  "Optional app token that raises the DataSF dispatched-calls throttle; keyless works": "Optionales App-Token, das das Limit für DataSF-Einsatzmeldungen anhebt; ohne Schlüssel funktioniert es ebenfalls",
+  "Performance": "Leistung",
+  "Quality": "Qualität",
+  "Balanced": "Ausgewogen",
+  "Rendering performance preset": "Voreinstellung für die Render-Leistung",
+  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Volle Auflösung, 4-faches Anti-Aliasing, 60 fps und volle Beschriftungsdichte",
+  "Full resolution with 2× anti-aliasing at 60 fps — the default": "Volle Auflösung mit 2-fachem Anti-Aliasing bei 60 fps – die Standardeinstellung",
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Dreiviertel-Auflösung, kein Multisampling, 30 fps, wenige Beschriftungen und langsamere Ebenen-Aktualisierungen"
 }

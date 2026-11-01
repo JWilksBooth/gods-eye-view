@@ -2913,5 +2913,12 @@
   "{feed} {count}": "{feed} {count}",
   "LIVE OPS": "LIVE OPS",
   "Las Vegas cameras and road events load keyless from nvroads.com; a free developer key switches them to the official API": "拉斯维加斯的摄像头和道路事件可从 nvroads.com 免密钥加载；免费的开发者密钥会切换到官方 API",
-  "Optional app token that raises the DataSF dispatched-calls throttle; keyless works": "可选的应用令牌，用于提高 DataSF 派遣呼叫的限流；无密钥也可用"
+  "Optional app token that raises the DataSF dispatched-calls throttle; keyless works": "可选的应用令牌，用于提高 DataSF 派遣呼叫的限流；无密钥也可用",
+  "Performance": "性能",
+  "Quality": "画质",
+  "Balanced": "均衡",
+  "Rendering performance preset": "渲染性能预设",
+  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "全分辨率、4 倍抗锯齿、60 fps，标签密度为最高",
+  "Full resolution with 2× anti-aliasing at 60 fps — the default": "全分辨率、2 倍抗锯齿、60 fps（默认）",
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "四分之三分辨率、无多重采样、30 fps、标签稀疏、图层更新较慢"
 }

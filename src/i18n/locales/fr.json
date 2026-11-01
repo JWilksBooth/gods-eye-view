@@ -3053,5 +3053,12 @@
   "{feed} {count}": "{feed} {count}",
   "LIVE OPS": "LIVE OPS",
   "Las Vegas cameras and road events load keyless from nvroads.com; a free developer key switches them to the official API": "Les caméras et événements routiers de Las Vegas se chargent sans clé depuis nvroads.com ; une clé développeur gratuite bascule sur l'API officielle",
-  "Optional app token that raises the DataSF dispatched-calls throttle; keyless works": "Jeton d'application facultatif qui relève la limite des appels dispatchés DataSF ; sans clé, cela fonctionne aussi"
+  "Optional app token that raises the DataSF dispatched-calls throttle; keyless works": "Jeton d'application facultatif qui relève la limite des appels dispatchés DataSF ; sans clé, cela fonctionne aussi",
+  "Performance": "Performance",
+  "Quality": "Qualité",
+  "Balanced": "Équilibré",
+  "Rendering performance preset": "Préréglage de performance du rendu",
+  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Résolution complète, anticrénelage 4×, 60 fps et densité d'étiquettes complète",
+  "Full resolution with 2× anti-aliasing at 60 fps — the default": "Résolution complète avec anticrénelage 2× à 60 fps – le réglage par défaut",
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Résolution aux trois quarts, sans multi-échantillonnage, 30 fps, étiquettes clairsemées et mises à jour des couches plus lentes"
 }

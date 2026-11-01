@@ -1,5 +1,9 @@
 import * as Cesium from 'cesium';
 import { approxDistanceKm } from '../data/approxDistance.js';
+import {
+  sampleRenderedSurfaceHeight,
+  surfaceHeightSupported,
+} from './surfaceHeight.js';
 
 /** Construct an instance-owned meshFloorSampler service with explicit dependencies. */
 export function createMeshFloorSampler({
@@ -101,7 +105,7 @@ export function createMeshFloorSampler({
     { excludeObjects = [], viewerLat, viewerLon } = {},
   ) {
     if (!meshFloorPreferred()) return;
-    if (!scene || typeof scene.sampleHeight !== 'function') return;
+    if (!surfaceHeightSupported(scene)) return;
     if (!Array.isArray(points) || !points.length) return;
     // Round-5 hardening (the CCTV projectionTilesReady lesson, ported late):
     // while tiles are MID-STREAM a probe returns coarse-LOD heights — real
@@ -137,7 +141,9 @@ export function createMeshFloorSampler({
           0,
           _scratchProbe,
         );
-        height = scene.sampleHeight(carto, excludeObjects);
+        height = sampleRenderedSurfaceHeight(scene, carto, {
+          excludeObjects,
+        });
         sampled += 1;
       } catch {
         continue; // scene mid-teardown — try again next poll
