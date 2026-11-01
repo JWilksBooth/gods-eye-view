@@ -24,15 +24,15 @@ try {
     `${base}/?welcome=0#lat=30.271&lon=-97.7431&alt=600&heading=0&pitch=-60`,
   );
   await page.waitForFunction(() =>
-    window.__godsEyeView?.dataManager?.layers.has('transit'),
+    window.__osiris?.dataManager?.layers.has('transit'),
   );
   await page.evaluate(async () => {
-    const app = window.__godsEyeView;
+    const app = window.__osiris;
     await app.dataManager.setEnabled('transit', true, { source: 'qa' });
   });
   await page.waitForFunction(
     () => {
-      const scene = window.__godsEyeView.viewer.scene;
+      const scene = window.__osiris.viewer.scene;
       return scene.globe.tilesLoaded && scene.globe.show;
     },
     { timeout: 60000 },
@@ -45,7 +45,7 @@ try {
     { timeout: 60000 },
   );
   await page.evaluate(() => {
-    const app = window.__godsEyeView,
+    const app = window.__osiris,
       camera = app.viewer.camera;
     const C = camera.positionCartographic.constructor,
       lat = 30.267 + 90 / 111320;
@@ -64,12 +64,12 @@ try {
   });
   await new Promise((resolve) => setTimeout(resolve, 2000));
   await page.waitForFunction(
-    () => window.__godsEyeView.viewer.scene.globe.tilesLoaded,
+    () => window.__osiris.viewer.scene.globe.tilesLoaded,
     { timeout: 60000 },
   );
   await new Promise((resolve) => setTimeout(resolve, 1500));
   const result = await page.evaluate(async () => {
-    const app = window.__godsEyeView,
+    const app = window.__osiris,
       scene = app.viewer.scene,
       camera = app.viewer.camera;
     const layer = app.dataManager.layers.get('transit').module;

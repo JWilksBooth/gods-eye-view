@@ -32,12 +32,12 @@ try {
     );
     await page.waitForFunction(
       () =>
-        window.__godsEyeView?.styleManager?._cctvControls &&
+        window.__osiris?.styleManager?._cctvControls &&
         document.getElementById('loading-screen')?.classList.contains('hidden'),
       { timeout: 60000 },
     );
     await page.evaluate(async () => {
-      const { dataManager, styleManager: manager } = window.__godsEyeView;
+      const { dataManager, styleManager: manager } = window.__osiris;
       await dataManager.setEnabled('wind', true);
       manager.setPanelCollapsed('weather-panel', false, {
         persist: false,
@@ -121,7 +121,7 @@ try {
 
     for (const state of ['loading', 'error', 'retained', 'ready', 'idle']) {
       const result = await page.evaluate((state) => {
-        const owner = window.__godsEyeView.styleManager._cctvControls;
+        const owner = window.__osiris.styleManager._cctvControls;
         owner._cctvFrame.dataset.loading = state === 'loading' ? 'true' : '';
         owner._cctvFrame.dataset.error = ['error', 'retained'].includes(state)
           ? 'true'
@@ -165,7 +165,7 @@ try {
     ]) {
       const result = await page.evaluate(
         ({ calBadge, dirty }) => {
-          const owner = window.__godsEyeView.styleManager._cctvControls;
+          const owner = window.__osiris.styleManager._cctvControls;
           document.getElementById('cctv-next-btn').focus();
           owner._renderCctvState({
             ...owner._cctvState,
@@ -194,14 +194,14 @@ try {
     }
     for (const theme of ['tactical', 'cyber']) {
       await page.evaluate(
-        (theme) => window.__godsEyeView.styleManager._setHudVariant(theme),
+        (theme) => window.__osiris.styleManager._setHudVariant(theme),
         theme,
       );
       for (const width of [1440, 620, 390]) {
         await page.setViewport({ width, height: 900 });
         for (const panelId of ['cctv-panel', 'weather-panel']) {
           await page.evaluate(async (panelId) => {
-            const manager = window.__godsEyeView.styleManager;
+            const manager = window.__osiris.styleManager;
             for (const other of ['cctv-panel', 'weather-panel']) {
               if (other !== panelId)
                 manager.setPanelCollapsed(other, true, {
@@ -259,7 +259,7 @@ try {
       }
     }
     const disposed = await page.evaluate(() => {
-      const owner = window.__godsEyeView.styleManager._cctvControls;
+      const owner = window.__osiris.styleManager._cctvControls;
       const badge = document.getElementById('cctv-quality-chip');
       const text = badge.textContent;
       owner.destroy();

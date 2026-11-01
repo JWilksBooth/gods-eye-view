@@ -4,7 +4,7 @@ import { PbfWriter } from 'pbf';
 import {
   mapillaryProxy,
   TILE_ROUTE_MAX_PER_MIN,
-} from 'gods-eye-view/server/providers/mapillary';
+} from 'osiris/server/providers/mapillary';
 import { stripTileLayers } from '../../server/providers/mapillary/trim.js';
 import {
   MAX_RETRY_AFTER_SEC,

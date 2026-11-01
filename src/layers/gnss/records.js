@@ -11,22 +11,22 @@
  * state.
  *
  * Three separately sourced parts make up the method (see `gnssProvenance`):
- * - Per-aircraft classifier, defined by GEV: aircraft-reported NIC < 7
+ * - Per-aircraft classifier, defined by Osiris: aircraft-reported NIC < 7
  *   (except unknown NIC 0 with NACp >= 10) or NACp < 8 (borrowed
  *   from the US 14 CFR 91.227(c) ADS-B Out performance minima, which are not
  *   a published interference classifier) or the readsb/tar1090 `gpsOkBefore`
  *   flag. gpsjam.org does not publish its per-aircraft threshold.
  * - Cell aggregation: gpsjam.org's published formula and 2% / 10% bands.
- * - Window: a GEV-defined rolling 30 minutes over the views the user visits.
+ * - Window: a Osiris-defined rolling 30 minutes over the views the user visits.
  */
 
 /** Position source can switch to MLAT after GPS loss; quality must remain aircraft-reported. */
 const QUALIFYING_TYPES = new Set(['adsb_icao', 'mlat']);
 /** Restrict to decoded DO-260A/B quality fields; readsb does not decode v3 quality as v3. */
 const QUALIFYING_VERSIONS = new Set([1, 2]);
-/** NIC below 7: containment radius of 0.2 NM or more (below the US 91.227 ADS-B Out minimum). GEV threshold. */
+/** NIC below 7: containment radius of 0.2 NM or more (below the US 91.227 ADS-B Out minimum). Osiris threshold. */
 export const GNSS_NIC_THRESHOLD = 7;
-/** NACp below 8: position uncertainty of 93 m or more (below the US 91.227 minimum). GEV threshold. */
+/** NACp below 8: position uncertainty of 93 m or more (below the US 91.227 minimum). Osiris threshold. */
 export const GNSS_NACP_THRESHOLD = 8;
 /** Positions older than this are not current evidence of the local sky. */
 const MAX_POSITION_AGE_S = 60;
@@ -46,12 +46,12 @@ export const GNSS_NOMINAL_STATE = 'nominal';
 /** Secondary, unvalidated reading of an anomaly cell. */
 export const GNSS_INTERPRETATION = 'suspected-gnss-interference';
 
-/** The per-aircraft rule; GEV-defined and not validated against known events. */
+/** The per-aircraft rule; Osiris-defined and not validated against known events. */
 export const GNSS_CLASSIFIER = Object.freeze({
   id: 'gev-nic-nacp-v2',
   rule: `gpsOkBefore set || aircraft-reported NACp < ${GNSS_NACP_THRESHOLD} || (aircraft-reported NIC < ${GNSS_NIC_THRESHOLD} && !(NIC === 0 && NACp >= 10))`,
   basis: '14 CFR 91.227(c) ADS-B Out performance minima (US regulation)',
-  definedBy: 'GEV',
+  definedBy: 'Osiris',
   validated: false,
 });
 
@@ -76,7 +76,7 @@ export function gnssProvenance({ windowMs = GNSS_WINDOW_MS } = {}) {
       scope: 'visited-view',
       cellDeg: GNSS_CELL_DEG,
       minAircraft: GNSS_MIN_AIRCRAFT,
-      definedBy: 'GEV',
+      definedBy: 'Osiris',
     }),
     state: Object.freeze({
       id: GNSS_ANOMALY_STATE,

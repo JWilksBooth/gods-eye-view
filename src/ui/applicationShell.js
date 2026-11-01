@@ -56,7 +56,7 @@ import {
 import { applyLocaleChoice, mountLocalePicker } from './localePicker.js';
 
 /**
- * Central UI orchestrator for the God's Eye View application.
+ * Central UI orchestrator for the Osiris application.
  *
  * Responsibilities:
  * - Visual controls and presets backed by the VisualEffects controller.

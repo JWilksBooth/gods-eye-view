@@ -33,7 +33,7 @@ export function createGeminiLiveConfig(
           ({ name, description, parameters }) => ({
             name,
             description,
-            // GEV's canonical schemas are JSON Schema, not Google's Schema.
+            // Osiris's canonical schemas are JSON Schema, not Google's Schema.
             parametersJsonSchema: structuredClone(parameters),
             // App actions must finish before the model confirms their result.
             behavior: 'BLOCKING',

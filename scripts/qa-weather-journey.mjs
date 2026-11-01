@@ -89,13 +89,13 @@ try {
   // The Data Layers panel remembers its collapsed state; start it open.
   await page.evaluateOnNewDocument(() => {
     try {
-      localStorage.setItem('godsEyeView.v6.panelCollapsed.data-panel', '0');
+      localStorage.setItem('osiris.v6.panelCollapsed.data-panel', '0');
     } catch {
       /* storage may be unavailable */
     }
   });
   await page.goto(url, { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => !!window.__godsEyeView?.viewer, {
+  await page.waitForFunction(() => !!window.__osiris?.viewer, {
     timeout: 120_000,
   });
   await sleep(12_000);
@@ -103,7 +103,7 @@ try {
   const diagnostics = () =>
     page.evaluate(
       ({ WEATHER }) => {
-        const gev = window.__godsEyeView;
+        const gev = window.__osiris;
         const dm = gev.dataManager;
         const out = {
           basemap: gev.tileset ? 'google-3d' : 'keyless-globe',
@@ -151,7 +151,7 @@ try {
     page.evaluate(
       (ms) =>
         new Promise((resolve) => {
-          const scene = window.__godsEyeView.viewer.scene;
+          const scene = window.__osiris.viewer.scene;
           let n = 0;
           const off = scene.postRender.addEventListener(() => {
             n += 1;
@@ -207,7 +207,7 @@ try {
     page
       .waitForFunction(
         (ids) => {
-          const dm = window.__godsEyeView.dataManager;
+          const dm = window.__osiris.dataManager;
           for (const id of ids) {
             const entry = dm.layers.get(id);
             if (!entry?.enabled) return false;
@@ -237,7 +237,7 @@ try {
   ) => {
     await page.evaluate(
       ({ lon, lat, height, pitch, heading, duration }) => {
-        const v = window.__godsEyeView.viewer;
+        const v = window.__osiris.viewer;
         const d2r = Math.PI / 180;
         v.camera.cancelFlight();
         v.camera.flyTo({
@@ -257,7 +257,7 @@ try {
 
   console.log(`\nqa-weather-journey · ${label} · ${url}`);
   await page.evaluate(async () => {
-    const gev = window.__godsEyeView;
+    const gev = window.__osiris;
     for (const [id, entry] of gev.dataManager.layers)
       if (entry.enabled)
         await gev.dataManager.setEnabled(id, false, { origin: 'user' });
@@ -332,9 +332,7 @@ try {
     if (await clickChip('weather-cyclones', 'focus')) {
       await sleep(6000);
       await shot('storm-view', `View storm: ${storm}`);
-      await page.evaluate(() =>
-        window.__godsEyeView.viewer.camera.zoomIn(400_000),
-      );
+      await page.evaluate(() => window.__osiris.viewer.camera.zoomIn(400_000));
       await sleep(4000);
       await shot('storm-closer', 'Zoomed toward the storm');
     }

@@ -1,5 +1,5 @@
 services:
-  gods-eye-view:
+  osiris:
     build: .
     # Everything the app writes (.env with your keys, .gev-cache, .gev-logs)
     # lands in the bind-mounted repo, so run as you, not root. UID/GID are

@@ -29,7 +29,7 @@ try {
     () => {
       const cover = document.getElementById('loading-screen');
       return (
-        window.__godsEyeView?.styleManager?._mapSourceControls &&
+        window.__osiris?.styleManager?._mapSourceControls &&
         cover?.classList.contains('hidden') &&
         Number(getComputedStyle(cover).opacity) === 0
       );
@@ -37,7 +37,7 @@ try {
     { timeout: 60_000 },
   );
   await page.evaluate(() => {
-    const manager = window.__godsEyeView.styleManager;
+    const manager = window.__osiris.styleManager;
     const controller = manager.mapStackController;
     const original = controller.setStack;
     window.__qaMapSelections = [];
@@ -53,8 +53,7 @@ try {
   await page.click('[data-stack-id="osm"]');
   await page.waitForFunction(
     () =>
-      window.__godsEyeView.styleManager.mapStackController.getActiveId() ===
-      'osm',
+      window.__osiris.styleManager.mapStackController.getActiveId() === 'osm',
   );
   check(
     'a native chip click requests OSM exactly once',
@@ -67,7 +66,7 @@ try {
   check(
     'active chip and status follow the displayed OSM source',
     await page.evaluate(() => {
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       return (
         manager._mapStackChips.querySelector('[aria-pressed="true"]')?.dataset
           .stackId === 'osm' &&
@@ -79,7 +78,7 @@ try {
   check(
     'the public map action uses the same component and truthful result',
     await page.evaluate(async () => {
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       const result = await manager.setMapStack('esri-imagery');
       const active = manager.mapStackController.getActiveId();
       return (
@@ -93,7 +92,7 @@ try {
   check(
     'refresh revokes retained old chips',
     await page.evaluate(() => {
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       const old = manager._mapStackChips.querySelector('[data-stack-id="osm"]');
       manager._mapSourceControls.refresh();
       const before = window.__qaMapSelections.length;
@@ -104,7 +103,7 @@ try {
   check(
     'refreshed chips still select once',
     await page.evaluate(async () => {
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       const before = window.__qaMapSelections.length;
       manager._mapStackChips.querySelector('[data-stack-id="osm"]').click();
       await Promise.resolve();
@@ -113,11 +112,10 @@ try {
   );
   await page.waitForFunction(
     () =>
-      window.__godsEyeView.styleManager.mapStackController.getActiveId() ===
-      'osm',
+      window.__osiris.styleManager.mapStackController.getActiveId() === 'osm',
   );
   await page.evaluate(async () => {
-    const manager = window.__godsEyeView.styleManager;
+    const manager = window.__osiris.styleManager;
     await manager.setMapStack('photoreal');
     manager.setPanelCollapsed('control-panel', false, {
       persist: false,
@@ -126,7 +124,7 @@ try {
     document.querySelector('.map-stack-chip.active')?.focus();
   });
   await page.evaluate(() => {
-    const viewer = window.__godsEyeView.viewer;
+    const viewer = window.__osiris.viewer;
     viewer.camera.cancelFlight?.();
     viewer.scene.tweens?.removeAll?.();
     viewer.camera.setView({
@@ -148,7 +146,7 @@ try {
   const settled = await page
     .waitForFunction(
       () => {
-        const primitives = window.__godsEyeView.viewer.scene.primitives;
+        const primitives = window.__osiris.viewer.scene.primitives;
         for (let i = 0; i < primitives.length; i++) {
           const primitive = primitives.get(i);
           if (
@@ -175,17 +173,16 @@ try {
       'mobile',
   );
   await page.evaluate(() =>
-    window.__godsEyeView.styleManager.setPanelCollapsed(
-      'control-panel',
-      false,
-      { persist: false, syncShare: false },
-    ),
+    window.__osiris.styleManager.setPanelCollapsed('control-panel', false, {
+      persist: false,
+      syncShare: false,
+    }),
   );
   await page.screenshot({ path: 'qa-shots/map-source-controls/narrow.png' });
   check(
     'destroyed controls cannot issue requests from retained chips',
     await page.evaluate(async () => {
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       const before = window.__qaMapSelections.length;
       manager._mapSourceControls.destroy();
       manager._mapStackChips.querySelector('[data-stack-id="osm"]').click();

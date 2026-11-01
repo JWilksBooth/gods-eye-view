@@ -19,7 +19,7 @@
 
 - Hosts can read share links on their server: the share-link codec and the
   `/share/<code>` address helpers are now package exports,
-  `@gods-eye-view/core/share/view-codec` and `@gods-eye-view/core/share/link-path`
+  `@osiris/core/share/view-codec` and `@osiris/core/share/link-path`
   (samehkhamis, #1419).
 
 - Share links are now short: the share button makes `/share/<code>` links
@@ -406,7 +406,7 @@
 - Add continuous globe rotation with direction and speed controls and a globe-fit
   check before starting (manjunath22466, #1225).
 
-- Open God's Eye View from Pinokio in the system browser using the supported
+- Open Osiris from Pinokio in the system browser using the supported
   `popout` menu option. The application's framing policy is unchanged
   (NukeThemAII, #1222).
 
@@ -620,7 +620,7 @@
   model context. Keep the enabled-only payload, disabled-layer count, source
   provenance, action result and view-state contract; read the layer roster once
   per packet; voice retains the speech/card envelope at its own boundary.
-  Credits: original GEV voice/layer contributors and #880 implementation.
+  Credits: original Osiris voice/layer contributors and #880 implementation.
 
 - Add optional Gemini Live voice to the standalone app, with a provider chooser,
   server-held API key, microphone streaming, shared map actions and captions.
@@ -720,7 +720,7 @@
   #452).
 
 - Ship a web app manifest and raster home-screen icons, so adding the app to a
-  phone home screen or installing it on desktop uses the God's Eye View mark
+  phone home screen or installing it on desktop uses the Osiris mark
   instead of a blank tile. The icons are generated from `public/logo.svg` by
   `node scripts/generate-icons.mjs` and committed, so a plain `vite build` needs
   no image toolchain. The existing SVG favicon still serves the browser tab.
@@ -1033,7 +1033,7 @@
 
 - Flights and Military Flights highlight emergency transponder broadcasts in
   fleet billboards, 3D models and Cockpit contacts. Colors update when a status
-  starts or clears. Emergency squawks outrank ADS-B priority statuses; GEV
+  starts or clears. Emergency squawks outrank ADS-B priority statuses; Osiris
   reports minimum fuel and lifeguard without red tint. Cockpit names the code
   or ADS-B status, and analyst/voice results retain broadcast provenance and
   the latest known contact time. One omitted ADS-B status poll during a source
@@ -1129,8 +1129,8 @@
   Lillestrøm (JCDecaux), about 760 stations in all. Every feed is keyless
   GBFS. `gbfs.urbansharing.com`, `api.entur.io` and `api.cyclocity.fr` join
   the proxy allowlist; the last two are kept to their GBFS paths. The proxy
-  now sends `Client-Identifier: gods-eye-view` on every request and
-  `ET-Client-Name: gods-eye-view-bikeshare` to Entur, as the operators ask,
+  now sends `Client-Identifier: osiris` on every request and
+  `ET-Client-Name: osiris-bikeshare` to Entur, as the operators ask,
   and accepts Entur's extensionless feed paths. Attributed under NLOD and
   Licence Ouverte. `get_bike_share` covers the six systems too.
 
@@ -1214,7 +1214,7 @@
   caveat for the screen. The model is asked to answer in one short phrase.
 - The weather and Recent Imagery panels can be opened by voice.
 
-## [0.2.1] — 2026-10-02 — God's Eye View through Your Agent (with security fixes and other features)
+## [0.2.1] — 2026-10-02 — Osiris through Your Agent (with security fixes and other features)
 
 - Ship each bundled data pack once. The region, marine, admin-boundary,
   county, military-name and neighborhood packs were emitted twice by the
@@ -1288,11 +1288,11 @@
 - Move the aligned Cyber side-panel rails upward on desktop so the left stack
   clears the lower coordinate card; keep Cockpit's independent visor layout.
 
-## [0.2.0] — 2026-10-02 — God's Eye View through Your Agent
+## [0.2.0] — 2026-10-02 — Osiris through Your Agent
 
-- Show God's Eye View inside AI conversations. Answers that can be shown
+- Show Osiris inside AI conversations. Answers that can be shown
   include a view (camera, layers, style, map, marks, something to follow),
-  and `show_in_gods_eye_view` displays it as the live globe in clients that
+  and `show_in_osiris` displays it as the live globe in clients that
   support MCP Apps, such as Claude Desktop and the Codex and ChatGPT desktop
   apps, and as a link everywhere else. The panel loads the app's panel build
   (`npm run build:panel`) and its data through the MCP server, so a local
@@ -1307,8 +1307,8 @@
   terrain, installation and map-feature queries, plus a situation brief, over
   stdio to clients such as Claude Code, reading
   from a running app. Tools are defined
-  once in `gods-eye-view/tools`, reuse the layers' source factories, and are
-  exposed through the protocol adapter in `gods-eye-view/tools/mcp`. The
+  once in `osiris/tools`, reuse the layers' source factories, and are
+  exposed through the protocol adapter in `osiris/tools/mcp`. The
   catalog also covers weather maps, wind, recent imagery, submarine cables,
   license plate reader cameras, datacenters and dams, the Bhote Koshi flood,
   military awareness and links that open the app over an area with layers on.
@@ -2291,7 +2291,7 @@ of current runtime behavior, see [`docs/CURRENT-STATE.md`](docs/CURRENT-STATE.md
 - Separate explicit browser build settings from standalone environment loading
   and local provider middleware. Preserve provider behavior and root named exports.
 - Rename standalone browser startup to `src/standalone/` and add a Node-only
-  `gods-eye-view/build/vite` export with checked package ownership.
+  `osiris/build/vite` export with checked package ownership.
 
 #### Development
 

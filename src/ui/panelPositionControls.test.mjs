@@ -17,10 +17,10 @@ function fakeStorage(entries) {
 test('the floating panels’ stored positions and hint flag are dropped; collapse state stays', (t) => {
   const saved = globalThis.localStorage;
   globalThis.localStorage = fakeStorage({
-    'godsEyeView.v8.panelPos.cctv-panel': '{"x":1}',
-    'godsEyeView.v8.panelFloatHintShown': '1',
-    'godsEyeView.v6.panelCollapsed.cctv-panel': '1',
-    'godsEyeView.v8.layoutResetNotified': '1',
+    'osiris.v8.panelPos.cctv-panel': '{"x":1}',
+    'osiris.v8.panelFloatHintShown': '1',
+    'osiris.v6.panelCollapsed.cctv-panel': '1',
+    'osiris.v8.layoutResetNotified': '1',
   });
   t.after(() => {
     globalThis.localStorage = saved;
@@ -28,7 +28,7 @@ test('the floating panels’ stored positions and hint flag are dropped; collaps
   const controls = new PanelPositionControls({ showToast() {} });
   controls._maybeNotifyLayoutReset();
   assert.deepEqual(Object.keys(globalThis.localStorage).sort(), [
-    'godsEyeView.v6.panelCollapsed.cctv-panel',
-    'godsEyeView.v8.layoutResetNotified',
+    'osiris.v6.panelCollapsed.cctv-panel',
+    'osiris.v8.layoutResetNotified',
   ]);
 });

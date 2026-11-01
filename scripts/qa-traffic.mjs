@@ -88,7 +88,7 @@ async function settleTraffic(page, view, { minCount = 1, timeoutS = 30 } = {}) {
   await page.bringToFront();
   await page.waitForFunction(() => document.visibilityState === 'visible');
   return page.evaluate(async (v, minC, tS) => {
-    const gev = window.__godsEyeView;
+    const gev = window.__osiris;
     const dm = gev.dataManager;
     await dm.setEnabled('traffic', true);
     const mod = dm.layers.get('traffic').module;
@@ -174,7 +174,7 @@ async function main() {
     console.log('Loading app...');
     await page.goto(APP_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForFunction(
-      () => window.__godsEyeView?.viewer && window.__godsEyeView?.dataManager,
+      () => window.__osiris?.viewer && window.__osiris?.dataManager,
       { timeout: 60000 },
     );
     await sleep(5000);
@@ -209,7 +209,7 @@ async function main() {
     console.log('\n(iv) uncoveredRoads param — hide vs sim...');
     if ((mumbai.flowBuckets?.sim || 0) > 0) {
       const hid = await page.evaluate(async () => {
-        const gev = window.__godsEyeView;
+        const gev = window.__osiris;
         const mod = gev.dataManager.layers.get('traffic').module;
         const before = mod.getStats().lastUpdate;
         mod.setParams({ uncoveredRoads: 'hide' });
@@ -289,7 +289,7 @@ async function main() {
     });
     await page.goto(APP_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForFunction(
-      () => window.__godsEyeView?.viewer && window.__godsEyeView?.dataManager,
+      () => window.__osiris?.viewer && window.__osiris?.dataManager,
       { timeout: 60000 },
     );
     await sleep(5000);

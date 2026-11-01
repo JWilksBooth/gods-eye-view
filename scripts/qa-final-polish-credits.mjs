@@ -27,16 +27,16 @@ try {
   await page.goto(`${url}/?welcome=0`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(
     () =>
-      window.__godsEyeView?.dataManager &&
+      window.__osiris?.dataManager &&
       document.getElementById('loading-screen')?.classList.contains('hidden'),
     { timeout: 120000 },
   );
   await page.evaluate(
-    () => window.__godsEyeView.styleManager.initialRestorePromise,
+    () => window.__osiris.styleManager.initialRestorePromise,
   );
   await page.keyboard.press('Escape');
   await page.evaluate(async () => {
-    const g = window.__godsEyeView;
+    const g = window.__osiris;
     for (const [id] of g.dataManager.layers)
       await g.dataManager.setEnabled(id, false);
     g.styleManager.setDetection({ enabled: false });
@@ -48,7 +48,7 @@ try {
   );
   const toggle = (id, value) =>
     page.evaluate(
-      (id, value) => window.__godsEyeView.dataManager.setEnabled(id, value),
+      (id, value) => window.__osiris.dataManager.setEnabled(id, value),
       id,
       value,
     );
@@ -142,11 +142,11 @@ try {
   }
   await page.setViewport({ width: 1440, height: 900 });
   await page.evaluate(() =>
-    window.__godsEyeView.styleManager.setCleanView(true),
+    window.__osiris.styleManager.setCleanView(true),
   );
   await shot('traffic-clean-ui', true, true);
   await page.evaluate(() =>
-    window.__godsEyeView.styleManager.setCleanView(false),
+    window.__osiris.styleManager.setCleanView(false),
   );
   await toggle('traffic', false);
   await shot('nothing-restored', false, false);

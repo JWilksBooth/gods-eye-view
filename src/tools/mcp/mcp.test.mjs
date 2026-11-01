@@ -313,3 +313,33 @@ test('a tool only an app may call says so, and answers it without JSON text', as
   assert.deepEqual(result.content, [{ type: 'text', text: 'loaded' }]);
   assert.deepEqual(result.structuredContent, { body: 'abc' });
 });
+
+test('a tool alias answers tools/call under its former name but is not listed', async () => {
+  const aliased = createMcpServer({
+    catalog,
+    name: 'test',
+    version: '1.0.0',
+    aliases: { count_things: 'count' },
+  });
+  const call = (name, id = 1) =>
+    aliased.handle({
+      jsonrpc: '2.0',
+      id,
+      method: 'tools/call',
+      params: { name, arguments: { n: 3 } },
+    });
+  const listed = await aliased.handle({
+    jsonrpc: '2.0',
+    id: 1,
+    method: 'tools/list',
+  });
+  assert.ok(
+    !listed.result.tools.some((entry) => entry.name === 'count_things'),
+  );
+  const viaAlias = await call('count_things');
+  assert.deepEqual(viaAlias.result.structuredContent, { n: 3 });
+  assert.equal(viaAlias.result.content[0].text, '3 things.');
+  const unknown = await call('count_everything');
+  assert.equal(unknown.error.code, -32602);
+  assert.match(unknown.error.message, /count_everything/);
+});

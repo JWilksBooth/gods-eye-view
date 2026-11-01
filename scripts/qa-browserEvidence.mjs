@@ -37,7 +37,7 @@ export function hookRenderErrors(page) {
   return page.evaluateOnNewDocument(() => {
     window.__qaRenderErrors = [];
     const hook = () => {
-      const scene = window.__godsEyeView?.viewer?.scene;
+      const scene = window.__osiris?.viewer?.scene;
       if (!scene?.renderError) return false;
       scene.renderError.addEventListener((_, error) =>
         window.__qaRenderErrors.push(
@@ -109,7 +109,7 @@ const withTimeout = (promise, ms, label) =>
 function streetLevelState(page) {
   return page.evaluate(() => {
     const module =
-      window.__godsEyeView?.dataManager?.layers?.get('street-level')?.module;
+      window.__osiris?.dataManager?.layers?.get('street-level')?.module;
     return module?.getUIState ? module.getUIState() : null;
   });
 }

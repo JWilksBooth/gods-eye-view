@@ -90,7 +90,7 @@ export async function runFleetBudgets({
   await cdp.send('HeapProfiler.enable');
   for (const count of [800, 3000]) {
     await page.evaluate(async (count) => {
-      const app = window.__godsEyeView;
+      const app = window.__osiris;
       await app.dataManager.setEnabled('transit', true, { source: 'qa' });
       const camera = app.viewer.camera,
         C = camera.positionCartographic.constructor;
@@ -110,8 +110,7 @@ export async function runFleetBudgets({
     // Camera proximity can finish a live poll during tile warm-up. Remove it
     // before the heap baseline, or its memory would discount the fixture fleet.
     await page.evaluate(() => {
-      const layer =
-        window.__godsEyeView.dataManager.layers.get('transit').module;
+      const layer = window.__osiris.dataManager.layers.get('transit').module;
       const state = layer._transitStateForTest(),
         parts = layer._transitPartsForTest();
       parts.ingestion.abortAllInFlight();
@@ -121,14 +120,14 @@ export async function runFleetBudgets({
       for (const key of state._vehicles.keys())
         parts.ingestion.removeVehicle(key);
       parts.rendering.syncRenderHold();
-      window.__godsEyeView.viewer.scene.requestRender();
+      window.__osiris.viewer.scene.requestRender();
     });
     await wait(500);
     await cdp.send('HeapProfiler.collectGarbage');
     const before = await cdp.send('Runtime.getHeapUsage');
     const loaded = await page.evaluate(
       (count) =>
-        window.__godsEyeView.dataManager.layers
+        window.__osiris.dataManager.layers
           .get('transit')
           .module._loadTransitFleetForTest(
             count,
@@ -147,12 +146,12 @@ export async function runFleetBudgets({
     const retained = await cdp.send('Runtime.getHeapUsage');
     // Timing/upload acceptance runs without the allocation profiler attached.
     const trace = await page.evaluate(() =>
-      window.__godsEyeView.dataManager.layers
+      window.__osiris.dataManager.layers
         .get('transit')
         .module._measureTransitFramesForTest(8000),
     );
     await page.evaluate(() =>
-      window.__godsEyeView.dataManager.layers
+      window.__osiris.dataManager.layers
         .get('transit')
         .module._resetTransitFixtureClockForTest(),
     );
@@ -167,7 +166,7 @@ export async function runFleetBudgets({
       `${count} budget visibility before allocation trace`,
     );
     const allocationTrace = await page.evaluate(() =>
-      window.__godsEyeView.dataManager.layers
+      window.__osiris.dataManager.layers
         .get('transit')
         .module._measureTransitFramesForTest(6000),
     );
@@ -226,8 +225,7 @@ export async function runFleetBudgets({
       quality: 85,
     });
     const settled = await page.evaluate(async () => {
-      const layer =
-        window.__godsEyeView.dataManager.layers.get('transit').module;
+      const layer = window.__osiris.dataManager.layers.get('transit').module;
       const state = layer._transitStateForTest();
       const { seek } = await import('/src/data/contactPlayback.js');
       const { updatePlayback } =
@@ -316,7 +314,7 @@ export async function runBostonMatrix({
     for (const candidate of group.candidates) {
       background = { ...candidate, name: group.name };
       await page.evaluate((b) => {
-        const camera = window.__godsEyeView.viewer.camera,
+        const camera = window.__osiris.viewer.camera,
           C = camera.positionCartographic.constructor;
         camera.setView({
           destination: C.toCartesian(C.fromDegrees(b.lon, b.lat, 600)),
@@ -327,7 +325,7 @@ export async function runBostonMatrix({
       await page.evaluate(
         ({ background, routes }) => {
           const layer =
-            window.__godsEyeView.dataManager.layers.get('transit').module;
+            window.__osiris.dataManager.layers.get('transit').module;
           layer._loadTransitFleetForTest(8, background, 45, routes);
           for (const entry of layer._transitStateForTest()._vehicles.values()) {
             entry.track.rate = 0;
@@ -359,8 +357,7 @@ export async function runBostonMatrix({
       );
       const pixels = await sampleRendered(page);
       const modes = await page.evaluate(() => {
-        const layer =
-          window.__godsEyeView.dataManager.layers.get('transit').module;
+        const layer = window.__osiris.dataManager.layers.get('transit').module;
         return [...layer._transitStateForTest()._vehicles.values()].map(
           (e) => ({
             key: e.key,
@@ -401,7 +398,7 @@ export async function runBostonMatrix({
       for (const target of modes) {
         await page.evaluate(
           (key) =>
-            window.__godsEyeView.dataManager.layers
+            window.__osiris.dataManager.layers
               .get('transit')
               .module._transitPartsForTest()
               .selection.selectVehicle(key),
@@ -415,7 +412,7 @@ export async function runBostonMatrix({
         });
         const restored = await page.evaluate((key) => {
           const layer =
-            window.__godsEyeView.dataManager.layers.get('transit').module;
+            window.__osiris.dataManager.layers.get('transit').module;
           layer._transitPartsForTest().selection.clearSelection();
           const e = layer._transitStateForTest()._vehicles.get(key);
           return {
@@ -465,7 +462,7 @@ export async function runBostonLive({
 }) {
   console.log('\n== Boston live oblique streets ==');
   await page.evaluate(async () => {
-    const app = window.__godsEyeView;
+    const app = window.__osiris;
     await app.dataManager.setEnabled('transit', false, { source: 'qa' });
     const camera = app.viewer.camera,
       C = camera.positionCartographic.constructor;
@@ -508,7 +505,7 @@ export async function runBostonLive({
     },
   ]) {
     await page.evaluate((view) => {
-      const app = window.__godsEyeView,
+      const app = window.__osiris,
         camera = app.viewer.camera,
         C = camera.positionCartographic.constructor;
       app.dataManager.layers
@@ -529,7 +526,7 @@ export async function runBostonLive({
     await selectStyle(page, view.style, view.params);
     await wait(8000);
     const fleet = await page.evaluate(() => {
-      const state = window.__godsEyeView.dataManager.layers
+      const state = window.__osiris.dataManager.layers
         .get('transit')
         .module._transitStateForTest();
       const entries = [...state._vehicles.values()];
@@ -564,7 +561,7 @@ export async function runBostonLive({
       await page.mouse.click(target.x, target.y);
       await wait(250);
       selection = await page.evaluate((key) => {
-        const state = window.__godsEyeView.dataManager.layers
+        const state = window.__osiris.dataManager.layers
           .get('transit')
           .module._transitStateForTest();
         return {
@@ -608,7 +605,7 @@ export async function runTrailVisibility({
   await selectStyle(page, 'normal');
   await page.evaluate(
     async ({ altitude, pitch }) => {
-      const app = window.__godsEyeView;
+      const app = window.__osiris;
       await app.dataManager.setEnabled('transit', true, { source: 'qa' });
       if (app.mapStackController.isStackAvailable('photoreal'))
         await app.mapStackController.setStack('photoreal');
@@ -630,7 +627,7 @@ export async function runTrailVisibility({
   await wait(8000);
   const setup = await page.evaluate(
     async ({ altitude, pitch, feed }) => {
-      const app = window.__godsEyeView,
+      const app = window.__osiris,
         scene = app.viewer.scene;
       const layer = app.dataManager.layers.get('transit').module;
       const state = layer._transitStateForTest(),
@@ -712,7 +709,7 @@ export async function runTrailVisibility({
     return;
   }
   const cost = await page.evaluate(async (key) => {
-    const app = window.__godsEyeView,
+    const app = window.__osiris,
       scene = app.viewer.scene;
     const layer = app.dataManager.layers.get('transit').module;
     const parts = layer._transitPartsForTest(),
@@ -798,7 +795,7 @@ export async function runTrailVisibility({
     }
   }, setup.key);
   const result = await page.evaluate(async (setup) => {
-    const app = window.__godsEyeView,
+    const app = window.__osiris,
       scene = app.viewer.scene;
     const layer = app.dataManager.layers.get('transit').module;
     const state = layer._transitStateForTest(),
@@ -1042,7 +1039,7 @@ export async function runTrailVisibility({
     JSON.stringify({ altitude, ...cost }),
   );
   await page.evaluate(() =>
-    window.__godsEyeView.dataManager.layers
+    window.__osiris.dataManager.layers
       .get('transit')
       .module._transitPartsForTest()
       .selection.clearSelection(),

@@ -25,12 +25,12 @@ try {
   );
   await page.waitForFunction(
     () =>
-      window.__godsEyeView?.styleManager?._dataManager &&
+      window.__osiris?.styleManager?._dataManager &&
       document.getElementById('loading-screen')?.classList.contains('hidden'),
     { timeout: 60000 },
   );
   const result = await page.evaluate(async () => {
-    const ui = window.__godsEyeView.styleManager;
+    const ui = window.__osiris.styleManager;
     const counts = {};
     document.dispatchEvent(
       new KeyboardEvent('keydown', {

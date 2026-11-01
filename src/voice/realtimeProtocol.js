@@ -122,7 +122,7 @@ export function responseInstructionForToolResult(result) {
     return 'Briefly confirm the completed Radio action, then say that Radio remains stopped as requested. Do not say the request was cancelled or that Radio is playing.';
   }
   if (result?.action === 'control_radio' && result.radioPlaybackRequested) {
-    return 'Briefly confirm any other completed GEV actions, then say “Turning on the radio.” Do not claim Radio is already playing.';
+    return 'Briefly confirm any other completed Osiris actions, then say “Turning on the radio.” Do not claim Radio is already playing.';
   }
   if (result?.schedule === 'silent') {
     return 'That was a lookup. Continue the request: call the next tool if one is needed, otherwise answer only what was asked, briefly. Do not read the state back.';
@@ -178,7 +178,7 @@ export function responseInstructionForToolResult(result) {
   ) {
     return 'Contacts activation and its window count do not fulfill a requested list or ranking. Continue any unfinished request with analyst_query: around the active subject use radius with the actual requested km and omit center; preserve explicit view, place, pointer and explicit center scopes. Use the returned items, never invent aircraft, counts or qualifications. Otherwise briefly confirm the completed action from its result.';
   }
-  return 'Briefly confirm the completed GEV action once. Do not repeat yourself.';
+  return 'Briefly confirm the completed Osiris action once. Do not repeat yourself.';
 }
 
 export function extractFunctionCalls(event) {

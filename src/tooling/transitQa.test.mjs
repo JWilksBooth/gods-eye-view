@@ -139,7 +139,7 @@ test('thermal controls wait for activation and use the real generated parameter 
       meta.default,
     ]),
   );
-  window.__godsEyeView = {
+  window.__osiris = {
     styleManager: {
       setPanelCollapsed() {},
       setStyle(name) {
@@ -259,7 +259,7 @@ test('reload picks a surviving primed vehicle and reports unavailable snapshots 
   const entry = { key: 'mbta:survivor', record: { lon: -71.06, lat: 42.36 } };
   const vehicles = new Map([[entry.key, entry]]);
   globalThis.window = {
-    __godsEyeView: {
+    __osiris: {
       viewer: {
         camera: {
           positionCartographic: {
@@ -301,7 +301,7 @@ test('reload picks a surviving primed vehicle and reports unavailable snapshots 
   });
   assert.equal(selected, entry.key);
   vehicles.clear();
-  const manager = window.__godsEyeView.dataManager;
+  const manager = window.__osiris.dataManager;
   const layer = manager.layers.get('transit').module;
   layer._transitStateForTest = () => ({
     _vehicles: vehicles,
@@ -391,7 +391,7 @@ test('sensor sampler waits for postRender and reads framebuffer pixels; stopped 
     }),
   };
   globalThis.window = {
-    __godsEyeView: {
+    __osiris: {
       viewer: { scene },
       dataManager: {
         layers: new Map([
@@ -423,8 +423,7 @@ test('sensor sampler waits for postRender and reads framebuffer pixels; stopped 
     },
   };
   const page = { evaluate: async (fn, ...args) => fn(...args) };
-  const sampledLayer =
-    window.__godsEyeView.dataManager.layers.get('transit').module;
+  const sampledLayer = window.__osiris.dataManager.layers.get('transit').module;
   const originalState = sampledLayer._transitStateForTest;
   sampledLayer._transitStateForTest = () => {
     const state = originalState();
@@ -500,7 +499,7 @@ test('sensor sampler waits for postRender and reads framebuffer pixels; stopped 
     'a clear centre cannot qualify a partially obscured core',
   );
   delete scene.pick;
-  const module = window.__godsEyeView.dataManager.layers.get('transit').module;
+  const module = window.__osiris.dataManager.layers.get('transit').module;
   const getState = module._transitStateForTest;
   module._transitStateForTest = () => {
     const state = getState();
@@ -531,7 +530,7 @@ test('sensor sampler waits for postRender and reads framebuffer pixels; stopped 
   });
   assert.equal((await sampleTransitPixels(page, {})).length, 0);
   document.getElementById = () => null;
-  window.__godsEyeView.styleManager = {
+  window.__osiris.styleManager = {
     getDetectionDiagnostics: () => ({
       calloutRects: [{ x: 205, y: 195, w: 10, h: 10, alpha: 1 }],
     }),
@@ -541,7 +540,7 @@ test('sensor sampler waits for postRender and reads framebuffer pixels; stopped 
     0,
     'plate over the edge excludes the whole sprite even with a clear centre',
   );
-  delete window.__godsEyeView.styleManager;
+  delete window.__osiris.styleManager;
   document.getElementById = () => ({
     width: 400,
     clientWidth: 400,
@@ -597,7 +596,7 @@ test('preset baseline clears a previous city selection before comparing fleet si
     _vehicles: new Map([[entry.key, entry]]),
   };
   globalThis.window = {
-    __godsEyeView: {
+    __osiris: {
       dataManager: {
         layers: new Map([
           [

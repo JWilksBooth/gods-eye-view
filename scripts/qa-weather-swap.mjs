@@ -59,13 +59,13 @@ try {
   await page.setViewport({ width: 1400, height: 920, deviceScaleFactor: 1 });
   page.on('pageerror', (e) => console.log('  [pageerror]', e.message));
   await page.goto(url, { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => !!window.__godsEyeView?.viewer, {
+  await page.waitForFunction(() => !!window.__osiris?.viewer, {
     timeout: 120_000,
   });
   await sleep(12_000);
   await page.evaluate(
     async ({ layerId, product }) => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const dm = gev.dataManager;
       for (const [id, e] of dm.layers)
         if (e.enabled) await dm.setEnabled(id, false, { origin: 'user' });
@@ -87,7 +87,7 @@ try {
   await page
     .waitForFunction(
       ({ layerId, product }) => {
-        const d = window.__godsEyeView.dataManager.layers
+        const d = window.__osiris.dataManager.layers
           .get(layerId)
           ?.module?.getDiagnostics?.();
         return d && !d.loading && d.time && (!product || d.product === product);
@@ -99,7 +99,7 @@ try {
   await sleep(3000);
   const diag = () =>
     page.evaluate((layerId) => {
-      const d = window.__godsEyeView.dataManager.layers
+      const d = window.__osiris.dataManager.layers
         .get(layerId)
         .module.getDiagnostics();
       return {
@@ -120,7 +120,7 @@ try {
   const step = (params) =>
     page.evaluate(
       ({ layerId, params }) =>
-        window.__godsEyeView.dataManager.setLayerParams(layerId, params, {
+        window.__osiris.dataManager.setLayerParams(layerId, params, {
           origin: 'user',
         }),
       { layerId, params },

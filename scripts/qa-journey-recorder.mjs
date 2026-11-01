@@ -49,7 +49,7 @@ export function frameStats(frames) {
 export async function installFrameProbe(page) {
   await page.evaluate(() => {
     if (window.__gevFrameProbe) return;
-    const { viewer } = window.__godsEyeView;
+    const { viewer } = window.__osiris;
     const probe = { frames: [], started: 0 };
     window.__gevFrameProbe = probe;
     let last = performance.now();
@@ -101,7 +101,7 @@ export async function moveCamera(page, view, seconds) {
   await page.evaluate(
     (v, duration) =>
       new Promise((resolve) => {
-        const { viewer } = window.__godsEyeView;
+        const { viewer } = window.__osiris;
         const C = viewer.camera;
         C.cancelFlight();
         C.flyTo({

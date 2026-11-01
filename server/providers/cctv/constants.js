@@ -163,7 +163,7 @@ export const FINTRAFFIC_STATIONS_URL =
  * frame proxy off-host. */
 export const FINTRAFFIC_IMAGE_ORIGIN = 'https://weathercam.digitraffic.fi/';
 /** Digitraffic asks every client to identify itself on API calls. */
-export const DIGITRAFFIC_USER = 'gods-eye-view';
+export const DIGITRAFFIC_USER = 'osiris';
 export const DEFAULT_FINTRAFFIC_MAX_SOURCES = 300;
 /** Ground-elevation prior, in metres, for stations that report no altitude.
  * 228 of 809 stations carry a real metre value (median 94 m); the rest report
@@ -411,7 +411,7 @@ export const KARTVERKET_MAX_RESPONSE_BYTES = 256 * 1024;
  * camera sits above ~1,500 m. Anything outside is treated as no height. */
 export const KARTVERKET_HEIGHT_RANGE_M = Object.freeze({ min: -20, max: 2500 });
 /** Same identity the other CCTV upstream requests send. */
-export const KARTVERKET_USER_AGENT = 'gods-eye-view-cctv-proxy/1.0';
+export const KARTVERKET_USER_AGENT = 'osiris-cctv-proxy/1.0';
 
 /** NYC DOT Traffic Management Center cameras: one keyless JSON list for the
  * five boroughs (~980 cameras). Frames are stills synthesized from each

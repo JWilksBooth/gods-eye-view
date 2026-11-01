@@ -179,7 +179,7 @@ const fmtMs = (v) => (v === null || v === undefined ? '—' : v >= 10_000 ? `${(
 const fmtPct = (v) => (v === null || v === undefined ? '—' : `${v}%`);
 
 /** Render summary.md from a summarize() result plus free-form notes. */
-export function renderMarkdown(summary, { title = 'GEV voice-routing benchmark', notes = [], payload = [] } = {}) {
+export function renderMarkdown(summary, { title = 'Osiris voice-routing benchmark', notes = [], payload = [] } = {}) {
   const out = [`# ${title}`, '', `Generated ${summary.generatedAt}. Cloud spend so far: **$${summary.cloudSpendUsd?.toFixed(2)}**.`, ''];
   out.push('> **What this measures.** Tool CHOICE for text turns sent over each provider\'s API with production\'s instructions and tools, with stubbed (always-successful) tool results — the same method as `qa-voice-routing.mjs` layer 1. It is **not** end-to-end spoken accuracy (no speech recognition, no audio, no screenshot/scene context) and **not** spoken latency: every latency below is "send text → event", before any audio would be synthesized or played.', '');
   out.push('## Routing accuracy', '');

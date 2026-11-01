@@ -1,4 +1,4 @@
-# Translating God's Eye View
+# Translating Osiris
 
 Shipped languages: **English** (source and fallback), **German** (`de`), **Spanish** (`es`), **French** (`fr`), **Italian** (`it`), **Japanese** (`ja`), **Brazilian Portuguese** (`pt`), **Russian** (`ru`), **Ukrainian** (`uk`), **Simplified Chinese** (`zh-CN`) and **Traditional Chinese** (`zh-Hant`).
 

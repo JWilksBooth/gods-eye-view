@@ -70,8 +70,12 @@ export function createMcpServer({
   descriptions,
   decorate,
   resources = [],
+  aliases = {},
 }) {
   const tools = () => toMcpTools(catalog, { descriptions, decorate });
+  // A former tool name a client may still call, as `{ old: current }`. Aliases
+  // are not listed, so new clients learn only the current names.
+  const toolName = (requested) => aliases[requested] ?? requested;
   const resourceByUri = new Map(
     resources.map((resource) => [resource.uri, resource]),
   );
@@ -107,16 +111,17 @@ export function createMcpServer({
     async 'tools/call'(params, { signal }) {
       if (typeof params?.name !== 'string')
         throw rpcError(INVALID_PARAMS, 'tools/call needs a tool name');
-      if (!catalog.get(params.name))
+      const name = toolName(params.name);
+      if (!catalog.get(name))
         throw rpcError(INVALID_PARAMS, `Unknown tool: ${params.name}`);
       try {
-        const result = await catalog.call(params.name, params.arguments ?? {}, {
+        const result = await catalog.call(name, params.arguments ?? {}, {
           signal,
         });
         // Only an app reads a tool the model cannot call, and apps read
         // structuredContent.
         const appOnly =
-          catalog.get(params.name).ui?.visibility?.includes('model') === false;
+          catalog.get(name).ui?.visibility?.includes('model') === false;
         return {
           // The data is repeated as JSON text for clients that do not read
           // structuredContent.

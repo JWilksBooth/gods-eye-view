@@ -81,13 +81,13 @@ try {
   const testUrl = new URL(APP_URL);
   testUrl.searchParams.set('welcome', '0');
   await page.goto(testUrl.href, { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => window.__godsEyeView?.styleManager
+  await page.waitForFunction(() => window.__osiris?.styleManager
     && document.getElementById('loading-screen')?.classList.contains('hidden'), { timeout: 90_000 });
   check('first-run chooser does not cover the test surface', await page.evaluate(() => (
     !document.querySelector('#first-run-launcher:not([hidden])')
   )));
   report('renderer', await page.evaluate(() => {
-    const gl = window.__godsEyeView.viewer.scene.context._gl;
+    const gl = window.__osiris.viewer.scene.context._gl;
     const debug = gl.getExtension('WEBGL_debug_renderer_info');
     return debug ? gl.getParameter(debug.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
   }));
@@ -95,7 +95,7 @@ try {
   // Park at a full-earth view and disable every layer so infra is measured
   // in isolation.
   await page.evaluate(async () => {
-    const gev = window.__godsEyeView;
+    const gev = window.__osiris;
     const v = gev.viewer;
     v.camera.cancelFlight();
     const ell = v.scene.globe.ellipsoid;
@@ -117,7 +117,7 @@ try {
   // measures the empty scene for attribution).
   if (!CONTROL) {
     const loaded = await page.evaluate(async (infraIds, cableId) => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const ids = [...infraIds, cableId];
       for (const id of ids) {
         try { await gev.dataManager.setEnabled(id, true, { origin: 'user' }); } catch { /* reported below */ }
@@ -147,13 +147,13 @@ try {
       check(`${id} loaded its bundled dataset`, (loaded[id]?.count || 0) > 0, loaded[id]);
     }
     // Nudge a render pass so the first post-enable LOD walk runs.
-    await page.evaluate(() => window.__godsEyeView?.viewer?.scene?.requestRender?.());
+    await page.evaluate(() => window.__osiris?.viewer?.scene?.requestRender?.());
     await new Promise((r) => setTimeout(r, 2_000));
   }
 
   // ── GATE a: full-earth budget engaged ─────────────────────────────────
   const readLod = (label) => page.evaluate((infraIds) => {
-    const gev = window.__godsEyeView;
+    const gev = window.__osiris;
     const out = {};
     for (const id of infraIds) {
       out[id] = gev.dataManager.layers.get(id)?.module?.getLodDiagnostics?.() || null;
@@ -187,7 +187,7 @@ try {
 
     // ── GATE b: zoom in widens the budget ───────────────────────────────
     await page.evaluate(() => {
-      const v = window.__godsEyeView.viewer;
+      const v = window.__osiris.viewer;
       const ell = v.scene.globe.ellipsoid;
       v.camera.cancelFlight();
       v.camera.setView({
@@ -215,7 +215,7 @@ try {
 
     // ── GATE c: no churn between camera moves ───────────────────────────
     const churn = await page.evaluate(async (infraIds) => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const snap = () => infraIds.map((id) => {
         const visibleIds = [];
         for (let i = 0; i < gev.viewer.dataSources.length; i++) {
@@ -239,7 +239,7 @@ try {
 
     // Back to full-earth for the frame-cost measurement.
     await page.evaluate(() => {
-      const v = window.__godsEyeView.viewer;
+      const v = window.__osiris.viewer;
       const ell = v.scene.globe.ellipsoid;
       v.camera.setView({
         destination: ell.cartographicToCartesian({
@@ -255,7 +255,7 @@ try {
 
   // Count actual rendered frames: scene.render() can return without drawing.
   const frameCost = await page.evaluate(() => new Promise((resolve) => {
-    const v = window.__godsEyeView.viewer;
+    const v = window.__osiris.viewer;
     const scene = v.scene;
     const durations = [];
     let frames = 0;
@@ -299,7 +299,7 @@ try {
   const idle = await page.evaluate(async () => {
     const { getRenderGovernorDiagnostics } = await import('/src/renderGovernor.js');
     return new Promise((resolve) => {
-      const scene = window.__godsEyeView.viewer.scene;
+      const scene = window.__osiris.viewer.scene;
       const startedAt = Date.now();
       const tilesLoadedBefore = scene.globe.tilesLoaded;
       let renders = 0;

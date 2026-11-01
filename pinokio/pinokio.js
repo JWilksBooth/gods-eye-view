@@ -1,6 +1,6 @@
 module.exports = {
   version: '3.6',
-  title: "God's Eye View",
+  title: 'Osiris',
   description: 'A live 3D intelligence console for planet Earth.',
   menu: async (kernel, info) => {
     const installed = await kernel.exists(__dirname, '.installed');
@@ -25,7 +25,7 @@ module.exports = {
         // Open in the system browser without changing the app's framing policy.
         // This also avoids relying on Pinokio's embedded browser behavior.
         return [
-          { default: true, icon: 'fa-solid fa-earth-americas', text: 'Open God\'s Eye View', href: local.url, popout: true },
+          { default: true, icon: 'fa-solid fa-earth-americas', text: 'Open Osiris', href: local.url, popout: true },
           { icon: 'fa-solid fa-terminal', text: 'Server', href: 'start.js' },
         ];
       }

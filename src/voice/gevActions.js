@@ -1333,7 +1333,7 @@ export function createGevActionRunner({
       return clearAnnotations(annotations);
     }
 
-    throw new Error(`Unknown GEV tool: ${name}`);
+    throw new Error(`Unknown Osiris tool: ${name}`);
   };
   // Lifetimes: the runner lives for the page; conversation state — the
   // analyst's follow-up memory and any write still in flight — lives for one
@@ -4066,7 +4066,7 @@ async function getBasemapContext(
     );
     return {
       source: 'Google Photorealistic 3D Tiles / Cesium basemap',
-      hasGoogle3DTiles: Boolean(window.__godsEyeView?.tileset),
+      hasGoogle3DTiles: Boolean(window.__osiris?.tileset),
       viewScale,
       viewportSamples: samples,
       viewportPlaces,
@@ -4131,7 +4131,7 @@ async function getBasemapContext(
   const nearbyPlaces = resolvedNearbyPlaces || [];
   return {
     source: 'Google Photorealistic 3D Tiles / Cesium basemap',
-    hasGoogle3DTiles: Boolean(window.__godsEyeView?.tileset),
+    hasGoogle3DTiles: Boolean(window.__osiris?.tileset),
     viewScale,
     viewportSamples: samples,
     viewportPlaces,
@@ -4620,7 +4620,7 @@ function logSlowContext(startedAt, scope) {
   const durationMs = Math.round(performance.now() - startedAt);
   if (durationMs >= 500) {
     console.info(
-      `[GEV Voice] ${scope} scene context completed in ${durationMs}ms`,
+      `[Osiris Voice] ${scope} scene context completed in ${durationMs}ms`,
     );
   }
 }

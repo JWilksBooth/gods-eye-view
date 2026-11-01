@@ -14,7 +14,7 @@ import {
 const GBFS_PROXY_TIMEOUT_MS = 12000;
 
 /** Value of the Client-Identifier header sent with every upstream request. */
-export const GBFS_CLIENT_IDENTIFIER = 'gods-eye-view';
+export const GBFS_CLIENT_IDENTIFIER = 'osiris';
 
 export const GBFS_MAX_BODY_BYTES = 5 * 1024 * 1024; // 5 MB
 
@@ -77,7 +77,7 @@ export async function fetchGbfsUpstream(
       method: 'GET',
       headers: {
         Accept: 'application/json',
-        'User-Agent': 'gods-eye-view-gbfs-proxy/1.0',
+        'User-Agent': 'osiris-gbfs-proxy/1.0',
         // Urban Sharing (the Norwegian city-bike feeds) asks every client to
         // name itself in this header; other operators ignore it.
         'Client-Identifier': GBFS_CLIENT_IDENTIFIER,

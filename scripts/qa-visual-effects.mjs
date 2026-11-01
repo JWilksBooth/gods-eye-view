@@ -27,12 +27,12 @@ try {
   await page.goto(url.href, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(
     () =>
-      window.__godsEyeView?.styleManager?._visualEffects &&
+      window.__osiris?.styleManager?._visualEffects &&
       document.getElementById('loading-screen')?.classList.contains('hidden'),
     { timeout: 60_000 },
   );
   await page.evaluate(() => {
-    const viewer = window.__godsEyeView.viewer;
+    const viewer = window.__osiris.viewer;
     viewer.camera.cancelFlight?.();
     viewer.scene.tweens?.removeAll?.();
     viewer.camera.setView({
@@ -54,7 +54,7 @@ try {
   const settled = await page
     .waitForFunction(
       () => {
-        const primitives = window.__godsEyeView.viewer.scene.primitives;
+        const primitives = window.__osiris.viewer.scene.primitives;
         for (let i = 0; i < primitives.length; i++) {
           const primitive = primitives.get(i);
           if (
@@ -83,15 +83,15 @@ try {
     'normal',
   ]) {
     await page.evaluate(
-      (name) => window.__godsEyeView.styleManager.setStyle(name),
+      (name) => window.__osiris.styleManager.setStyle(name),
       style,
     );
     await page.waitForFunction(
-      () => window.__godsEyeView.styleManager.transitions.size === 0,
+      () => window.__osiris.styleManager.transitions.size === 0,
       { timeout: 10_000 },
     );
     const state = await page.evaluate(() => {
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       const effects = manager._visualEffects;
       const visible = Object.entries(effects.stages)
         .filter(([, stage]) => stage.enabled)
@@ -122,25 +122,23 @@ try {
     if (['normal', 'surveillance', 'thermal'].includes(style)) {
       await page.screenshot({ path: `qa-shots/visual-effects/${style}.png` });
       if (style === 'surveillance')
-        await page.evaluate(() =>
-          window.__godsEyeView.viewer.camera.lookRight(0.2),
-        );
+        await page.evaluate(() => window.__osiris.viewer.camera.lookRight(0.2));
     }
   }
   await page.evaluate(() => {
-    const manager = window.__godsEyeView.styleManager;
+    const manager = window.__osiris.styleManager;
     manager.setStyle('noir');
     manager.setStyle('retro');
     manager.setStyle('normal');
   });
   await page.waitForFunction(
-    () => window.__godsEyeView.styleManager.transitions.size === 0,
+    () => window.__osiris.styleManager.transitions.size === 0,
     { timeout: 10_000 },
   );
   check(
     'rapid switches settle to Normal without an old style or clock',
     await page.evaluate(() => {
-      const effects = window.__godsEyeView.styleManager._visualEffects;
+      const effects = window.__osiris.styleManager._visualEffects;
       return (
         effects.frameId === null &&
         Object.values(effects.stages).every((stage) => !stage.enabled)
@@ -150,7 +148,7 @@ try {
   check(
     'bloom actions, effect state and saved snapshot agree',
     await page.evaluate(() => {
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       const states = [];
       const unsubscribe = manager.subscribeShareState((value) =>
         states.push(value),
@@ -176,7 +174,7 @@ try {
   check(
     'sharpen actions, effect state and saved snapshot agree',
     await page.evaluate(() => {
-      const manager = window.__godsEyeView.styleManager;
+      const manager = window.__osiris.styleManager;
       const result = manager.setSharpen({ enabled: true, intensityPct: 61 });
       return (
         result.ok &&
@@ -189,14 +187,14 @@ try {
   );
   await page.setViewport({ width: 620, height: 900 });
   await page.evaluate(() =>
-    window.__godsEyeView.styleManager.setPanelCollapsed('pp-toggles', false, {
+    window.__osiris.styleManager.setPanelCollapsed('pp-toggles', false, {
       persist: false,
       syncShare: false,
     }),
   );
   await page.screenshot({ path: 'qa-shots/visual-effects/narrow.png' });
   const teardown = await page.evaluate(async () => {
-    const manager = window.__godsEyeView.styleManager;
+    const manager = window.__osiris.styleManager;
     const effects = manager._visualEffects;
     manager.setStyle('retro');
     const owned = [...Object.values(effects.stages), effects.sharpenStage];

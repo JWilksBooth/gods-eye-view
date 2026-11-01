@@ -112,7 +112,7 @@ async function mountSettings(page, scenario) {
   });
   await page.evaluate(async ({ initial, flow }) => {
     localStorage.clear();
-    localStorage.setItem('godsEyeView.voice.cloudAuth', initial);
+    localStorage.setItem('osiris.voice.cloudAuth', initial);
     window.__focusTestCalls = [];
     let statusReads = 0;
     const fetchImpl = async (url) => {
@@ -217,7 +217,7 @@ for (const scenario of scenarios) {
         }
         await page.waitForFunction(
           (expected) =>
-            localStorage.getItem('godsEyeView.voice.cloudAuth') === expected &&
+            localStorage.getItem('osiris.voice.cloudAuth') === expected &&
             !document.querySelector('[data-cloud-voice-auth-toggle]')
               .disabled &&
             document
@@ -308,7 +308,7 @@ for (const available of [true, false]) {
             .getAttribute('aria-disabled') === 'false',
       );
       const observed = await page.evaluate(() => ({
-        mode: localStorage.getItem('godsEyeView.voice.cloudAuth'),
+        mode: localStorage.getItem('osiris.voice.cloudAuth'),
         focusOnSave: document.activeElement.matches('[data-key-setup-apply]'),
         draft: document.querySelector('input[data-env-var]').value,
         requests: window.__focusTestCalls,

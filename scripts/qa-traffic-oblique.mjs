@@ -61,16 +61,16 @@ try {
     await page.goto(url.href, { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(
       () =>
-        window.__godsEyeView?.dataManager &&
+        window.__osiris?.dataManager &&
         document.getElementById('loading-screen')?.classList.contains('hidden'),
       { timeout: 120000 },
     );
     await page.evaluate(
-      () => window.__godsEyeView.styleManager.initialRestorePromise,
+      () => window.__osiris.styleManager.initialRestorePromise,
     );
     await page.keyboard.press('Escape');
     await page.evaluate(async () => {
-      const g = window.__godsEyeView;
+      const g = window.__osiris;
       for (const [id] of g.dataManager.layers)
         await g.dataManager.setEnabled(id, false);
       g.styleManager.setDetection({ enabled: false });
@@ -78,7 +78,7 @@ try {
     });
     const snap = () =>
       page.evaluate(() => {
-        const { viewer, dataManager } = window.__godsEyeView;
+        const { viewer, dataManager } = window.__osiris;
         let upper = 0,
           lower = 0;
         dataManager.layers
@@ -102,7 +102,7 @@ try {
       await page
         .waitForFunction(
           () => {
-            const s = window.__godsEyeView.dataManager.layers
+            const s = window.__osiris.dataManager.layers
               .get('traffic')
               .module.getStats();
             return !s.loading;
@@ -121,7 +121,7 @@ try {
       const before = { ...counts };
       await moveCamera(page, { lat, lon, height: 3000, pitch: -45 }, 0);
       await page.evaluate(() =>
-        window.__godsEyeView.dataManager.setEnabled('traffic', true),
+        window.__osiris.dataManager.setEnabled('traffic', true),
       );
       await moveCamera(page, { lat, lon, height, pitch: -15 }, 1.4);
       const settled = await settle();
@@ -131,10 +131,10 @@ try {
       };
       await page.screenshot({ path: `${out}/${name}-${mode}.png` });
       await page.evaluate(() =>
-        window.__godsEyeView.dataManager.setEnabled('traffic', false),
+        window.__osiris.dataManager.setEnabled('traffic', false),
       );
       await page.evaluate(() =>
-        window.__godsEyeView.dataManager.setEnabled('traffic', true),
+        window.__osiris.dataManager.setEnabled('traffic', true),
       );
       const toggled = await settle();
       const oracle =
@@ -169,7 +169,7 @@ try {
       if (revisit.ofm || revisit.tomtom)
         result.failures.push(`${name}/${mode}: revisit requests`);
       await page.evaluate(() =>
-        window.__godsEyeView.dataManager.setEnabled('traffic', false),
+        window.__osiris.dataManager.setEnabled('traffic', false),
       );
     }
     const locationView = { lat: 24.973, lon: 55.037 };
@@ -179,14 +179,14 @@ try {
       0,
     );
     await page.evaluate(() =>
-      window.__godsEyeView.dataManager.setEnabled('traffic', true),
+      window.__osiris.dataManager.setEnabled('traffic', true),
     );
     const dir = `${out}/dubai-${mode}-journey`;
     const recording =
       mode === 'hybrid' ? await createScreencast(page, dir, { fps: 24 }) : null;
     await installFrameProbe(page);
     await page.evaluate(() => {
-      const { viewer, dataManager } = window.__godsEyeView;
+      const { viewer, dataManager } = window.__osiris;
       window.__obliqueFrames = [];
       window.__obliqueMoving = true;
       viewer.scene.postRender.addEventListener(() => {
@@ -226,7 +226,7 @@ try {
     await page.evaluate(async (v) => {
       const { flyToLandmark } = await import('/src/locations.js');
       await new Promise((resolve) =>
-        flyToLandmark(window.__godsEyeView.viewer, v.lat, v.lon, {
+        flyToLandmark(window.__osiris.viewer, v.lat, v.lon, {
           range: 1000,
           pitch: -15,
           heading: 0,
@@ -254,10 +254,10 @@ try {
     await sleep(1800);
     const frames = await page.evaluate(() => window.__obliqueFrames);
     await page.evaluate(() =>
-      window.__godsEyeView.dataManager.setEnabled('traffic', false),
+      window.__osiris.dataManager.setEnabled('traffic', false),
     );
     await page.evaluate(() =>
-      window.__godsEyeView.dataManager.setEnabled('traffic', true),
+      window.__osiris.dataManager.setEnabled('traffic', true),
     );
     const fresh = await settle();
     const oracle =

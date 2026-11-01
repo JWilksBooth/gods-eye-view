@@ -121,8 +121,7 @@ async function open(mode = 'normal') {
   );
   await page.goto(appUrl, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(
-    () =>
-      window.__godsEyeView?.dataManager && window.__godsEyeView?.voiceCommands,
+    () => window.__osiris?.dataManager && window.__osiris?.voiceCommands,
     { timeout: 60000 },
   );
   await page.waitForFunction(
@@ -134,7 +133,7 @@ async function open(mode = 'normal') {
     { timeout: 60000 },
   );
   await page.evaluate(async () => {
-    const { dataManager, viewer } = window.__godsEyeView;
+    const { dataManager, viewer } = window.__osiris;
     for (const [id, layer] of dataManager.layers) {
       if (layer.enabled)
         await dataManager.setEnabled(id, false, { origin: 'user' });
@@ -146,7 +145,7 @@ async function open(mode = 'normal') {
       orientation: { heading: 0, pitch: -Math.PI / 2, roll: 0 },
     });
     await dataManager.setEnabled('bikeshare', true, { origin: 'user' });
-    window.__godsEyeView.requestRender('gbfs-name-qa');
+    window.__osiris.requestRender('gbfs-name-qa');
   });
   return { page, errors };
 }
@@ -154,12 +153,12 @@ try {
   const { page, errors } = await open();
   await page.waitForFunction(
     () =>
-      window.__godsEyeView.dataManager.layers.get('bikeshare').module.getStats()
+      window.__osiris.dataManager.layers.get('bikeshare').module.getStats()
         .count === 5,
     { timeout: 15000 },
   );
   const records = await page.evaluate(() =>
-    window.__godsEyeView.dataManager.layers
+    window.__osiris.dataManager.layers
       .get('bikeshare')
       .module.getAnalystRecords(),
   );
@@ -175,7 +174,7 @@ try {
     ],
   );
   const tool = await page.evaluate(() =>
-    window.__godsEyeView.voiceCommands.runner('get_bike_share', {
+    window.__osiris.voiceCommands.runner('get_bike_share', {
       area: { lat: 30.2701, lon: -97.7449, radius_km: 2 },
     }),
   );
@@ -200,7 +199,7 @@ try {
   );
   const clickPoint = await page.evaluate(() => {
     window.__qaPainted = [];
-    const { viewer } = window.__godsEyeView;
+    const { viewer } = window.__osiris;
     const Cartesian3 = viewer.camera.position.constructor;
     const point = viewer.scene.cartesianToCanvasCoordinates(
       Cartesian3.fromDegrees(-97.7469, 30.2681),
@@ -226,7 +225,7 @@ try {
   ]) {
     await page.evaluate((id) => {
       window.__qaPainted = [];
-      const app = window.__godsEyeView;
+      const app = window.__osiris;
       app.dataManager.layers
         .get('bikeshare')
         .module._selectBikeshareStationForTest(`austin-capmetro:${id}`);
@@ -245,7 +244,7 @@ try {
     await page.screenshot({ path: path.join(shots, `${id}.png`) });
     await page.keyboard.press('Escape');
     await page.waitForFunction(() =>
-      window.__godsEyeView.dataManager.layers
+      window.__osiris.dataManager.layers
         .get('bikeshare')
         .module.getDetectableObjects()
         .every((record) => !record.skipLabel),
@@ -254,7 +253,7 @@ try {
       `Escape clears the ${id} card`,
       await page.evaluate(
         () =>
-          window.__godsEyeView.dataManager.layers
+          window.__osiris.dataManager.layers
             .get('bikeshare')
             .module.getDetectableObjects()
             .filter((record) => record.skipLabel).length,
@@ -265,7 +264,7 @@ try {
   await page.setViewport({ width: 390, height: 844 });
   await page.evaluate(() => {
     window.__qaPainted = [];
-    const app = window.__godsEyeView;
+    const app = window.__osiris;
     // Use the supported clean view to inspect the mobile card clear of panels.
     app.styleManager.toggleCleanView(true);
     const Cartesian3 = app.viewer.camera.position.constructor;
@@ -290,17 +289,17 @@ try {
   );
   await page.screenshot({ path: path.join(shots, 'mobile.png') });
   await page.evaluate(() =>
-    window.__godsEyeView.dataManager.setEnabled('bikeshare', false, {
+    window.__osiris.dataManager.setEnabled('bikeshare', false, {
       origin: 'user',
     }),
   );
   check(
     'disabling clears selected cards and analyst records',
     await page.evaluate(() => ({
-      count: window.__godsEyeView.dataManager.layers
+      count: window.__osiris.dataManager.layers
         .get('bikeshare')
         .module.getAnalystRecords().length,
-      selected: window.__godsEyeView.dataManager.layers
+      selected: window.__osiris.dataManager.layers
         .get('bikeshare')
         .module.getDetectableObjects()
         .filter((record) => record.skipLabel).length,
@@ -313,17 +312,15 @@ try {
     const { page, errors } = await open(mode);
     await page.waitForFunction(
       () =>
-        !window.__godsEyeView.dataManager.layers
-          .get('bikeshare')
-          .module.getStats().loading,
+        !window.__osiris.dataManager.layers.get('bikeshare').module.getStats()
+          .loading,
     );
     check(
       `${mode} leaves no rendered stations`,
       await page.evaluate(
         () =>
-          window.__godsEyeView.dataManager.layers
-            .get('bikeshare')
-            .module.getStats().count,
+          window.__osiris.dataManager.layers.get('bikeshare').module.getStats()
+            .count,
       ),
       0,
     );

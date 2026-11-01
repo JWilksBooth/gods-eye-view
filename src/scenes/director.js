@@ -66,8 +66,8 @@ import {
 import { sceneSaveFailureReason } from './sceneSaveError.js';
 
 /** @constant {string} localStorage key for the serialized project */
-const STORAGE_KEY = 'godsEyeView.sceneProject.v2';
-const STORAGE_CHECKPOINT_KEY = 'godsEyeView.sceneProject.checkpoint.v1';
+const STORAGE_KEY = 'osiris.sceneProject.v2';
+const STORAGE_CHECKPOINT_KEY = 'osiris.sceneProject.checkpoint.v1';
 /**
  * Orchestrates deterministic cinematic scene playback.
  *

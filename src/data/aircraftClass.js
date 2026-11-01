@@ -270,7 +270,7 @@ const LIGHT = new Set([
   'BL8',
   'CH7',
 ]);
-// GEV addition (2026-08-15 Hangar fleet): business jets — distinct class so the
+// Osiris addition (2026-08-15 Hangar fleet): business jets — distinct class so the
 // Citation II GLB + a slimmer glyph read apart from airliners.
 const BIZJET = new Set([
   'C500',
@@ -338,7 +338,7 @@ const BIZJET = new Set([
   'WW24',
   'SF50', // Cirrus Vision Jet — a JET (was mis-set in LIGHT before the bizjet class existed)
 ]);
-// GEV addition (2026-08-15 Hangar fleet): large UAVs — ICAO designators seen on
+// Osiris addition (2026-08-15 Hangar fleet): large UAVs — ICAO designators seen on
 // ADS-B/adsb.lol for Predator/Reaper/Global Hawk-class airframes.
 const UAV = new Set([
   'Q1',
@@ -352,7 +352,7 @@ const UAV = new Set([
   'SHDW',
   'HERN',
 ]);
-// GEV addition: fast jets, for the military layer's adsb.lol `t` codes.
+// Osiris addition: fast jets, for the military layer's adsb.lol `t` codes.
 const FASTJET = new Set([
   'F16',
   'F15',

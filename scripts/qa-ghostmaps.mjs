@@ -69,7 +69,7 @@ async function boot(page) {
     timeout: TIMEOUT_MS,
   });
   await page.waitForFunction(
-    () => window.__godsEyeView?.viewer && window.__godsEyeView?.dataManager,
+    () => window.__osiris?.viewer && window.__osiris?.dataManager,
     { timeout: TIMEOUT_MS },
   );
   await sleep(5000);
@@ -78,7 +78,7 @@ async function boot(page) {
 
 /** GhostMaps data sources on the viewer: name → entity count. */
 function ghostSources(prefix) {
-  const { dataSources } = window.__godsEyeView.viewer;
+  const { dataSources } = window.__osiris.viewer;
   const out = [];
   for (let i = 0; i < dataSources.length; i++) {
     const ds = dataSources.get(i);
@@ -104,11 +104,11 @@ async function enableAndSettle(page) {
     const panel = document.getElementById('data-panel');
     if (panel?.classList.contains('collapsed'))
       panel.querySelector('[data-collapse-target="data-panel"]')?.click();
-    return window.__godsEyeView.dataManager.setEnabled(id, true);
+    return window.__osiris.dataManager.setEnabled(id, true);
   }, LAYER_ID);
   await page.waitForFunction(
     (id) => {
-      const stats = window.__godsEyeView.dataManager.layers
+      const stats = window.__osiris.dataManager.layers
         .get(id)
         .module.getStats();
       return !stats.loading && stats.count > 0;
@@ -120,7 +120,7 @@ async function enableAndSettle(page) {
 
 const stats = (page) =>
   page.evaluate(
-    (id) => window.__godsEyeView.dataManager.layers.get(id).module.getStats(),
+    (id) => window.__osiris.dataManager.layers.get(id).module.getStats(),
     LAYER_ID,
   );
 const sources = (page) =>
@@ -212,7 +212,7 @@ async function main() {
     const stream = await page
       .waitForFunction(
         (id) =>
-          window.__godsEyeView.dataManager.layers.get(id).module.getStats()
+          window.__osiris.dataManager.layers.get(id).module.getStats()
             .stream === 'open',
         { timeout: 15000, polling: 250 },
         LAYER_ID,
@@ -226,7 +226,7 @@ async function main() {
 
     // ---- (ii) PICK ----------------------------------------------------------
     const target = await page.evaluate((id) => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const ds = [...Array(gev.viewer.dataSources.length).keys()]
         .map((i) => gev.viewer.dataSources.get(i))
         .find((item) => item.name === `${id}:cip`);
@@ -251,16 +251,15 @@ async function main() {
       return entity.id;
     }, LAYER_ID);
     await page
-      .waitForFunction(
-        () => window.__godsEyeView.viewer.scene.globe.tilesLoaded,
-        { timeout: 30000 },
-      )
+      .waitForFunction(() => window.__osiris.viewer.scene.globe.tilesLoaded, {
+        timeout: 30000,
+      })
       .catch(() => {});
     // The horizon cull reveals the pin on the frame after the camera moves.
     await page
       .waitForFunction(
         () => {
-          const v = window.__godsEyeView.viewer;
+          const v = window.__osiris.viewer;
           v.scene.requestRender?.();
           const c = v.scene.canvas;
           return v.scene
@@ -273,7 +272,7 @@ async function main() {
       )
       .catch(() => {});
     const probe = await page.evaluate(() => {
-      const v = window.__godsEyeView.viewer;
+      const v = window.__osiris.viewer;
       const c = v.scene.canvas;
       const box = c.getBoundingClientRect();
       const centre = { x: c.clientWidth / 2, y: c.clientHeight / 2 };
@@ -367,7 +366,7 @@ async function main() {
     const horizonCounts = (lon, lat) =>
       page.evaluate(
         async (id, lo, la) => {
-          const gev = window.__godsEyeView;
+          const gev = window.__osiris;
           const d2r = Math.PI / 180;
           try {
             gev.viewer.camera.cancelFlight();
@@ -450,7 +449,7 @@ async function main() {
     await clickChip('kinetic-30d');
     await page.waitForFunction(
       (id) =>
-        !window.__godsEyeView.dataManager.layers
+        !window.__osiris.dataManager.layers
           .get(id)
           .module.getStats()
           .products.includes('kinetic-30d'),
@@ -464,7 +463,7 @@ async function main() {
       without.map((s) => s.name).join(', '),
     );
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => window.__godsEyeView?.dataManager, {
+    await page.waitForFunction(() => window.__osiris?.dataManager, {
       timeout: TIMEOUT_MS,
     });
     await sleep(3000);
@@ -479,7 +478,7 @@ async function main() {
     await clickChip('kinetic-30d');
     await page.waitForFunction(
       (id) =>
-        window.__godsEyeView.dataManager.layers
+        window.__osiris.dataManager.layers
           .get(id)
           .module.getStats()
           .products.includes('kinetic-30d'),
@@ -493,7 +492,7 @@ async function main() {
 
     // ---- (v) DISABLE ------------------------------------------------------
     await page.evaluate(
-      (id) => window.__godsEyeView.dataManager.setEnabled(id, false),
+      (id) => window.__osiris.dataManager.setEnabled(id, false),
       LAYER_ID,
     );
     await sleep(500);
@@ -534,7 +533,7 @@ async function main() {
     await enableAndSettle(push);
     const identity = () =>
       push.evaluate((id) => {
-        const { dataSources } = window.__godsEyeView.viewer;
+        const { dataSources } = window.__osiris.viewer;
         window.__qaIds ||= new WeakMap();
         window.__qaNext ||= 1;
         const out = {};
@@ -562,7 +561,7 @@ async function main() {
     }, LAYER_ID);
     await push.waitForFunction(
       (id) => {
-        const layer = window.__godsEyeView.dataManager.layers.get(id).module;
+        const layer = window.__osiris.dataManager.layers.get(id).module;
         return (
           !layer.getStats().loading &&
           layer.getRowControls().info.includes('QA push')

@@ -1,6 +1,6 @@
 # Tools and the MCP server
 
-Tools answer questions from God's Eye View data for language-model clients.
+Tools answer questions from Osiris data for language-model clients.
 They are defined once and exposed through adapters: the Model Context Protocol
 (MCP) and function calling, which voice uses.
 
@@ -18,8 +18,8 @@ To use them from Claude or Codex, see [MCP setup](MCP_SETUP.md).
 | `server/mcp/`        | Node composition: points the sources at a running app's `/api` routes; serves stdio and `/mcp`  |
 | `server/standalone/voiceTools.js`, `src/standalone/toolCatalog.js` | Standalone voice composition: the session's tool list and the browser catalog |
 
-Dependencies point downward only. `gods-eye-view/tools` and
-`gods-eye-view/tools/mcp` are portable exports: they reach no application,
+Dependencies point downward only. `osiris/tools` and
+`osiris/tools/mcp` are portable exports: they reach no application,
 rendering, Node, Cesium or browser-global code, which
 `npm run check:boundaries` enforces. In the application, only voice reaches
 them: `withToolCatalog` in `src/voice/gevRealtime.js` imports the
@@ -70,14 +70,14 @@ reported to clients without details.
 
 ## Services
 
-`gods-eye-view/tools/services` builds the default set with
+`osiris/tools/services` builds the default set with
 `createToolServices({ fetchImpl, appUrl })`. Services are the portable source factories the layers already use, such as
 `createUsgsEarthquakeSource`, `createFirmsSource` and `createLaunchSource`,
 plus a `places` service with `resolve(name, { signal })`. Sources request
 relative `/api/...` paths through an injected `fetchImpl`, so the same tool
 code runs wherever an application routes those paths.
 The `weather`, `regional`, `terrain`, `summary` and `features` services are the
-application request services from `gods-eye-view/application/requests`.
+application request services from `osiris/application/requests`.
 `situation_brief` and `military_awareness` run each section whose services are supplied and mark the
 others unavailable. `live_ops_region` does the same for one region of the LIVE OPS
 console: its cameras (`find_cctv_cameras` over the region's box), live
@@ -94,7 +94,7 @@ is configured; `createRouteService` plans routes through `/api/route`.
 
 ## Views
 
-`gods-eye-view/view` (`src/view/index.js`) describes what the app shows,
+`osiris/view` (`src/view/index.js`) describes what the app shows,
 independent of how it is shown: a camera (lat, lon, altitude, heading,
 pitch), data layers, visual style, map imagery, and an aircraft, military
 aircraft or satellite to follow. `createView` builds and bounds one,
@@ -116,10 +116,10 @@ tilted camera over an area looks at its center from behind; camera fields
 given with an area override its framing. `resolveViewArguments` turns them
 into a view.
 
-### The God's Eye View panel
+### The Osiris panel
 
-`show_in_gods_eye_view` names an MCP Apps view (`io.modelcontextprotocol/ui`):
-`_meta.ui.resourceUri` is `ui://gods-eye-view/globe`, a `text/html;profile=mcp-app`
+`show_in_osiris` names an MCP Apps view (`io.modelcontextprotocol/ui`):
+`_meta.ui.resourceUri` is `ui://osiris/globe`, a `text/html;profile=mcp-app`
 resource from `createGlobePanelResource({ runtime })` in
 `src/tools/globePanel.js`, with the panel's script from
 `src/app/globePanelRuntime.js`. Clients that display apps render it inside
@@ -128,8 +128,14 @@ the conversation. The panel completes the MCP Apps handshake
 `ui/notifications/size-changed`), and for each
 `ui/notifications/tool-result` carrying a view it loads the app in inline
 embed mode the first time and posts later views to that same app, so the
-globe changes without reloading. Its "Open in God's Eye View" button asks
+globe changes without reloading. Its "Open in Osiris" button asks
 the host to open the link (`ui/open-link`).
+
+The local MCP server (`server/mcp/server.js`) also answers the tool's former
+name, `show_in_gods_eye_view`, as a hidden alias: it is not listed by
+`tools/list`, but a `tools/call` with that name runs `show_in_osiris`. The
+alias stays for one release so clients configured before the rename keep
+working.
 
 Hosts serve panels from their own sites and may refuse other addresses;
 Codex, for one, refuses any address on the user's machine. So the panel
@@ -242,7 +248,7 @@ Start the app (`npm run dev` or `npm run preview`), then register the stdio
 server with an MCP client, for example Claude Code:
 
 ```bash
-claude mcp add gods-eye-view -- npm --prefix /path/to/gods-eye-view run --silent mcp
+claude mcp add osiris -- npm --prefix /path/to/osiris run --silent mcp
 ```
 
 `npm run mcp -- --api-base http://localhost:4173` selects another server.
@@ -251,7 +257,7 @@ The development and preview servers also serve the same tools over HTTP at
 `/mcp`, for clients that connect by URL:
 
 ```bash
-claude mcp add --transport http gods-eye-view http://localhost:4173/mcp
+claude mcp add --transport http osiris http://localhost:4173/mcp
 ```
 
 The route accepts only requests from this machine that name a loopback host
@@ -312,5 +318,5 @@ and the development server's internal routes. See SECURITY.md.
 | `situation_brief` | `weather` | Weather, earthquakes, fires, aircraft, ships and cyclones for an area, by section |
 | `military_awareness` | `military` | Military and other aircraft, ships and military installations within 250 km of a point, by section |
 | `get_hud_caption` | `weather`, `summary` | The app's heads-up display caption for an area |
-| `show_in_gods_eye_view` | `app` | A view in God's Eye View: the live panel in clients with MCP Apps, and a link everywhere; takes another answer's view or an area or camera, layers, style, map, marks and something to follow |
-| `panel_request` | `app` | Panel only: loads a path from the app's server for the God's Eye View panel |
+| `show_in_osiris` | `app` | A view in Osiris: the live panel in clients with MCP Apps, and a link everywhere; takes another answer's view or an area or camera, layers, style, map, marks and something to follow |
+| `panel_request` | `app` | Panel only: loads a path from the app's server for the Osiris panel |

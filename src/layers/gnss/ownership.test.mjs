@@ -256,7 +256,7 @@ test('the visible layer leads with low navigation accuracy and exposes its prove
   assert.match(blurb, /not the raw share/);
   assert.match(blurb, /not a detection/);
   assert.equal(layer.provenance.classifier.id, 'gev-nic-nacp-v2');
-  assert.equal(layer.provenance.classifier.definedBy, 'GEV');
+  assert.equal(layer.provenance.classifier.definedBy, 'Osiris');
   assert.equal(layer.provenance.classifier.validated, false);
   assert.equal(layer.provenance.aggregation.source, 'https://gpsjam.org/faq');
   assert.deepEqual(layer.provenance.window, {
@@ -264,7 +264,7 @@ test('the visible layer leads with low navigation accuracy and exposes its prove
     scope: 'visited-view',
     cellDeg: 0.5,
     minAircraft: 3,
-    definedBy: 'GEV',
+    definedBy: 'Osiris',
   });
   assert.equal(layer.provenance.interpretation.validated, false);
   assert.equal(layer.getStats().provenance, layer.provenance);

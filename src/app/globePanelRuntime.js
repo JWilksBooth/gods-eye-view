@@ -1,5 +1,5 @@
 /**
- * The God's Eye View panel's script, run inside the panel page a host shows.
+ * The Osiris panel's script, run inside the panel page a host shows.
  * It is sent as source text (see src/tools/globePanel.js), so it must not use
  * imports or anything outside the function.
  *
@@ -459,7 +459,7 @@ export function panelRuntime(config) {
   }
 
   /**
-   * Load God's Eye View into this page from the app's panel build, in
+   * Load Osiris into this page from the app's panel build, in
    * inline embed mode, starting at the first view as its link would.
    */
   async function startApp(url, view) {
@@ -542,9 +542,9 @@ export function panelRuntime(config) {
         notice.id = 'status';
         notice.textContent =
           // i18n-ignore: host-panel script, no app catalogs
-          "This panel lost its 3D graphics, likely because other God's Eye " +
-          "View panels in this conversation hold them. Use Open in God's " +
-          'Eye View above, or show it in a new conversation.';
+          'This panel lost its 3D graphics, likely because other Osiris ' +
+          'panels in this conversation hold them. Use Open in Osiris above, ' +
+          'or show it in a new conversation.';
         document.body.appendChild(notice);
       },
       { capture: true, once: true },
@@ -570,18 +570,18 @@ export function panelRuntime(config) {
     if (started) return;
     started = true;
     // i18n-ignore: host-panel script, no app catalogs
-    say("Loading God's Eye View…");
+    say('Loading Osiris…');
     startApp(url, view).catch((error) =>
       // i18n-ignore: host-panel script, no app catalogs
-      say(`God's Eye View could not load here: ${error?.message || error}.`),
+      say(`Osiris could not load here: ${error?.message || error}.`),
     );
     setTimeout(() => {
       if (!ready)
         say(
           // i18n-ignore: see above
-          "God's Eye View did not load here" +
+          'Osiris did not load here' +
             (blocked ? ` (${blocked})` : '') +
-            ". Use Open in God's Eye View above.",
+            '. Use Open in Osiris above.',
         );
     }, config.loadTimeoutMs);
   }
@@ -644,9 +644,9 @@ export function panelRuntime(config) {
   request('ui/initialize', {
     appCapabilities: { availableDisplayModes: ['inline', 'fullscreen'] },
     appInfo: {
-      name: 'gods-eye-view',
+      name: 'osiris',
       // i18n-ignore: product name sent to the MCP host
-      title: "God's Eye View",
+      title: 'Osiris',
       version: '1.0.0',
     },
     protocolVersion: config.protocolVersion,
@@ -662,7 +662,7 @@ export function panelRuntime(config) {
     (error) =>
       say(
         // i18n-ignore: host-panel script, no app catalogs
-        "This client did not accept the God's Eye View panel" +
+        'This client did not accept the Osiris panel' +
           (error?.message ? `: ${error.message}` : '.'),
       ),
   );

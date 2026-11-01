@@ -15,8 +15,9 @@ const mcpOff = Object.freeze({ mcp: false });
 
 export const TOOL_SURFACES = Object.freeze({
   // Voice runs inside the app, so a link to it adds nothing.
-  show_in_gods_eye_view: voiceOff,
-  // Only the God's Eye View panel calls this, to load the app.
+  // The MCP server also answers this tool's former name (server/mcp/server.js).
+  show_in_osiris: voiceOff,
+  // Only the Osiris panel calls this, to load the app.
   panel_request: voiceOff,
   // Voice has an app action of the same name.
   next_satellite_pass: voiceOff,

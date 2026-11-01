@@ -25,7 +25,7 @@ export const PICK_PREFIX = Object.freeze({
   image: 'mly:img:',
 });
 
-/** Mapillary green for lines and cones; GEV cyan for the selection. */
+/** Mapillary green for lines and cones; Osiris cyan for the selection. */
 export const COLORS = Object.freeze({
   coverage: PROVIDER_COLORS.mapillary,
   selected: SHARED_COLORS.selected,

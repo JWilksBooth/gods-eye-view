@@ -169,12 +169,12 @@ test('the primary state is a navigation-integrity anomaly; interference is only 
     assert.doesNotMatch(key, /interference|jamming|spoof/i);
 });
 
-test('provenance separates the GEV classifier from the gpsjam aggregation and the GEV window', () => {
+test('provenance separates the Osiris classifier from the gpsjam aggregation and the Osiris window', () => {
   assert.deepEqual(GNSS_PROVENANCE.classifier, {
     id: 'gev-nic-nacp-v2',
     rule: 'gpsOkBefore set || aircraft-reported NACp < 8 || (aircraft-reported NIC < 7 && !(NIC === 0 && NACp >= 10))',
     basis: '14 CFR 91.227(c) ADS-B Out performance minima (US regulation)',
-    definedBy: 'GEV',
+    definedBy: 'Osiris',
     validated: false,
   });
   assert.equal(GNSS_PROVENANCE.classifier, GNSS_CLASSIFIER);
@@ -190,7 +190,7 @@ test('provenance separates the GEV classifier from the gpsjam aggregation and th
     scope: 'visited-view',
     cellDeg: 0.5,
     minAircraft: 3,
-    definedBy: 'GEV',
+    definedBy: 'Osiris',
   });
   assert.equal(GNSS_PROVENANCE.state.id, 'navigation-integrity-anomaly');
   assert.equal(

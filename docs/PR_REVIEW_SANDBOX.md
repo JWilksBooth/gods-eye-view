@@ -228,7 +228,7 @@ options makes Bubblewrap mandatory for Mac maintainers.
 - Run the workflow's unit/build/tracking checks inside the restricted environment.
   Stop the dev server, launch `npm run preview` on the recorded port, and repeat
   relevant UX checks on the built candidate. Retarget MCP to that server.
-- For performance changes, measure representative GEV scenes on base and candidate
+- For performance changes, measure representative Osiris scenes on base and candidate
   separately, with matching browser, viewport, camera, layers, fixtures, warmup,
   and display refresh rate. Record FPS and frame-time distribution with MCP
   screenshots, screencasting, and intrusive tracing idle during the measurement.

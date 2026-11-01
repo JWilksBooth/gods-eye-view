@@ -75,7 +75,7 @@ export function celestrakProxy() {
       // descriptive User-Agent with a contact point.
       headers: {
         'User-Agent':
-          'gods-eye-view-celestrak-proxy/1.0 (+https://github.com/bilawalsidhu/gods-eye-view)',
+          'osiris-celestrak-proxy/1.0 (+https://github.com/JWilksBooth/gods-eye-view)',
       },
     });
     if (!res.ok) {

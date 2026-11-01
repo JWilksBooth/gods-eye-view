@@ -72,7 +72,7 @@ async function fetchNewsForQuery(query, { limit = 5, timespan = '48h' } = {}) {
     const xml = await fetchRegionalText(
       `https://news.google.com/rss/search?${rssParams}`,
       {
-        headers: { 'User-Agent': 'GodsEyeView/0.1' },
+        headers: { 'User-Agent': 'Osiris/0.1' },
         timeoutMs: 12_000,
       },
     );
@@ -94,7 +94,7 @@ async function fetchNewsForQuery(query, { limit = 5, timespan = '48h' } = {}) {
     const payload = await fetchRegionalJson(
       `https://api.gdeltproject.org/api/v2/doc/doc?${params}`,
       {
-        headers: { 'User-Agent': 'GodsEyeView/0.1' },
+        headers: { 'User-Agent': 'Osiris/0.1' },
         timeoutMs: 12_000,
       },
     );

@@ -119,7 +119,7 @@ export function buildVesselCardManifest({
     screenshot,
     dataMode,
     provenance: provenanceSlug,
-    source: dataMode === 'live' ? 'AISStream live feed' : 'GEV synthetic AIS fixture',
+    source: dataMode === 'live' ? 'AISStream live feed' : 'Osiris synthetic AIS fixture',
     liveAisStreamAvailabilityAsserted: dataMode === 'live',
     launchMode: headful ? 'headful' : 'headless',
     renderer,
@@ -260,12 +260,12 @@ async function main() {
       page.on('pageerror', (err) => console.error(`    [page-error] ${err.message}`));
 
       await page.goto(APP_URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
-      await page.waitForFunction(() => !!window.__godsEyeView?.viewer, { timeout: 60000 });
+      await page.waitForFunction(() => !!window.__osiris?.viewer, { timeout: 60000 });
 
       // Frame the port (kill the intro flight first) and enable the layer.
       const syntheticRows = DATA_MODE === 'synthetic' ? syntheticVesselRows(key, port) : [];
       const dataEvidence = await page.evaluate(async ({ p, dataMode, fixtureRows }) => {
-        const gev = window.__godsEyeView;
+        const gev = window.__osiris;
         const v = gev.viewer;
         v.camera.cancelFlight?.();
         v.scene.tweens?.removeAll?.();
@@ -297,7 +297,7 @@ async function main() {
       // Wait for the photoreal tileset and at least one vessel refresh.
       await page
         .waitForFunction(() => {
-          const gev = window.__godsEyeView;
+          const gev = window.__osiris;
           const t = gev.tileset;
           const ais = gev.dataManager.getAll().find((l) => l.id === 'ais-live-vessels');
           const count = ais?.stats?.count ?? 0;
@@ -310,7 +310,7 @@ async function main() {
       // intro flight can start AFTER the first cancelFlight and land mid-wait,
       // dragging the camera back to the boot city before the screenshot.
       await page.evaluate((p) => {
-        const v = window.__godsEyeView.viewer;
+        const v = window.__osiris.viewer;
         v.camera.cancelFlight?.();
         v.scene.tweens?.removeAll?.();
         const carto = {
@@ -328,7 +328,7 @@ async function main() {
       await new Promise((resolve) => setTimeout(resolve, 1500));
       const resettled = await page
         .waitForFunction(() => {
-          const gev = window.__godsEyeView;
+          const gev = window.__osiris;
           const ais = gev.dataManager.getAll().find((l) => l.id === 'ais-live-vessels');
           return gev.tileset?.tilesLoaded && (ais?.stats?.count ?? 0) > 0;
         }, { timeout: 60000, polling: 500 })
@@ -340,9 +340,9 @@ async function main() {
       const expectedFixtureIds = syntheticRows.map((row) => row.mmsi);
       const overlayEvidence = await page.evaluate((fixtureIds) => {
         const diagnostics = window.__gevWorldOverlay?.getDiagnostics?.();
-        const gl = window.__godsEyeView?.viewer?.scene?.context?._gl;
+        const gl = window.__osiris?.viewer?.scene?.context?._gl;
         const debugInfo = gl?.getExtension?.('WEBGL_debug_renderer_info');
-        const seam = window.__godsEyeView?.dataManager?.layers
+        const seam = window.__osiris?.dataManager?.layers
           ?.get('ais-live-vessels')?.module?.__focusEvidence;
         const snapshotIds = new Set((seam?.snapshot?.() || []).map((record) => String(record.id)));
         return {

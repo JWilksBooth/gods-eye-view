@@ -318,7 +318,7 @@ export function createCodexOAuthLogin({
             finish(attempt, {
               code: 'CODEX_OAUTH_STORAGE_UNAVAILABLE',
               error:
-                'Codex sign-in finished, but its configured auth.json has no usable ChatGPT token. Check CODEX_HOME and Codex credential storage. GEV can read file storage only.',
+                'Codex sign-in finished, but its configured auth.json has no usable ChatGPT token. Check CODEX_HOME and Codex credential storage. Osiris can read file storage only.',
             });
           } else finish(attempt, null);
         },

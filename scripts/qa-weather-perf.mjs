@@ -152,18 +152,18 @@ try {
     failures.clear();
   };
   await page.goto(url, { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => !!window.__godsEyeView?.viewer, {
+  await page.waitForFunction(() => !!window.__osiris?.viewer, {
     timeout: 120_000,
   });
   await sleep(15_000);
 
   if (scale !== 1)
     await page.evaluate((scale) => {
-      window.__godsEyeView.viewer.resolutionScale = scale;
-      window.__godsEyeView.viewer.scene.requestRender();
+      window.__osiris.viewer.resolutionScale = scale;
+      window.__osiris.viewer.scene.requestRender();
     }, scale);
   const env = await page.evaluate(() => {
-    const gev = window.__godsEyeView;
+    const gev = window.__osiris;
     const scene = gev.viewer.scene;
     return {
       basemap: gev.tileset ? 'google-3d' : 'keyless-globe',
@@ -181,7 +181,7 @@ try {
 
   // Park deterministically, disable every layer, and instrument once.
   await page.evaluate(async () => {
-    const gev = window.__godsEyeView;
+    const gev = window.__osiris;
     const v = gev.viewer;
     v.camera.cancelFlight();
     for (const [id, entry] of gev.dataManager.layers)
@@ -227,7 +227,7 @@ try {
     page.evaluate(
       ({ which, AUSTIN }) => {
         const C = window.Cesium || null;
-        const v = window.__godsEyeView.viewer;
+        const v = window.__osiris.viewer;
         v.camera.cancelFlight();
         v.camera.lookAtTransform?.(
           (C || v.camera.constructor).Matrix4?.IDENTITY ??
@@ -260,7 +260,7 @@ try {
   const fly = (which) =>
     page.evaluate(
       ({ which, AUSTIN }) => {
-        const v = window.__godsEyeView.viewer;
+        const v = window.__osiris.viewer;
         const ell = v.scene.ellipsoid || v.scene.globe.ellipsoid;
         const d2r = Math.PI / 180;
         v.camera.flyTo({
@@ -283,7 +283,7 @@ try {
   const orbit = () =>
     page.evaluate(
       ({ AUSTIN }) => {
-        const v = window.__godsEyeView.viewer;
+        const v = window.__osiris.viewer;
         const camera = v.camera;
         const ell = v.scene.ellipsoid || v.scene.globe.ellipsoid;
         const d2r = Math.PI / 180;
@@ -317,7 +317,7 @@ try {
     page.evaluate(
       ({ ms, hold }) =>
         new Promise((resolve) => {
-          const gev = window.__godsEyeView;
+          const gev = window.__osiris;
           const scene = gev.viewer.scene;
           const P = window.__gevWeatherPerf;
           const canvas = scene.canvas;
@@ -384,7 +384,7 @@ try {
   const diagnostics = () =>
     page.evaluate(
       ({ WEATHER }) => {
-        const dm = window.__godsEyeView.dataManager;
+        const dm = window.__osiris.dataManager;
         const out = {};
         for (const id of ['wind', ...WEATHER]) {
           const entry = dm.layers.get(id);
@@ -427,7 +427,7 @@ try {
     const started = Date.now();
     await page.evaluate(
       async ({ wantWind, wantHistory, WEATHER }) => {
-        const dm = window.__godsEyeView.dataManager;
+        const dm = window.__osiris.dataManager;
         const set = async (id, on) => {
           const entry = dm.layers.get(id);
           if (!entry || Boolean(entry.enabled) === on) return;
@@ -444,7 +444,7 @@ try {
     await page
       .waitForFunction(
         ({ wantWind, wantHistory, WEATHER }) => {
-          const dm = window.__godsEyeView.dataManager;
+          const dm = window.__osiris.dataManager;
           if (wantWind) {
             const d = dm.layers.get('wind')?.module?.getDiagnostics?.();
             if (!d) return false;
@@ -467,7 +467,7 @@ try {
     const readyMs = Date.now() - started;
     await page.evaluate(
       ({ wantPlaying, WEATHER }) => {
-        const dm = window.__godsEyeView.dataManager;
+        const dm = window.__osiris.dataManager;
         for (const id of WEATHER) {
           const module = dm.layers.get(id)?.module;
           if (!module || !dm.layers.get(id)?.enabled) continue;

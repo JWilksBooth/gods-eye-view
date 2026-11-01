@@ -25,12 +25,12 @@ try {
   );
   await page.waitForFunction(
     () =>
-      window.__godsEyeView?.sceneDirector &&
+      window.__osiris?.sceneDirector &&
       document.getElementById('loading-screen')?.classList.contains('hidden'),
     { timeout: 60000 },
   );
   const result = await page.evaluate(async () => {
-    const director = window.__godsEyeView.sceneDirector;
+    const director = window.__osiris.sceneDirector;
     const camera = director.styleManager.getCameraState();
     const visual = director.styleManager.getVisualState();
     const scene = {
@@ -91,7 +91,7 @@ try {
   const visibilityRestored = await page.evaluate(async () => {
     // QA layer registration exists only in Vite dev builds.
     if (typeof window.__gevQaRegisterLayer !== 'function') return 'skipped';
-    const { sceneDirector: director, dataManager } = window.__godsEyeView;
+    const { sceneDirector: director, dataManager } = window.__osiris;
     const layerId = 'director-seek-visibility-qa';
     window.__gevQaRegisterLayer(dataManager, {
       id: layerId,
@@ -153,7 +153,7 @@ try {
     );
   }
   const content = await page.evaluate(async () => {
-    const d = window.__godsEyeView.sceneDirector;
+    const d = window.__osiris.sceneDirector;
     const scene = d._project.scenes.find(({ title }) =>
       /Nepal Flood Incident/i.test(title),
     );
@@ -175,7 +175,7 @@ try {
   await new Promise((resolve) => setTimeout(resolve, 2500));
   await page.screenshot({ path: path.join(shots, 'nepal-regional.png') });
   await page.evaluate(() => {
-    const g = window.__godsEyeView;
+    const g = window.__osiris;
     g.sceneDirector.stopScene();
     const pose = g.styleManager.getCameraState();
     g.sceneDirector._setCameraView({
@@ -190,8 +190,8 @@ try {
     'no pending clocks after Stop',
     await page.evaluate(
       () =>
-        window.__godsEyeView.sceneDirector.getPlaybackTimingState()
-          .activeTimers === 0,
+        window.__osiris.sceneDirector.getPlaybackTimingState().activeTimers ===
+        0,
     ),
   );
   check('no browser exceptions', errors.length === 0);

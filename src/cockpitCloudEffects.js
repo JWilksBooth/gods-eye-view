@@ -11,7 +11,7 @@ const CLOUD_FRAME_MS = 1000 / 12;
 const MAX_RENDER_WIDTH = 520;
 const MAX_RENDER_HEIGHT = 320;
 const WEATHER_MOVE_REFRESH_M = 25_000;
-const WEATHER_ENABLED_STORAGE_KEY = 'godsEyeView.cockpitWeatherEffects.enabled';
+const WEATHER_ENABLED_STORAGE_KEY = 'osiris.cockpitWeatherEffects.enabled';
 
 const VERTEX_SHADER = `
   attribute vec2 position;

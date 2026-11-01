@@ -89,7 +89,7 @@ test('the marker is clamped to the ground and turned to the bearing', () => {
   assert.equal(billboard.rotation, -Cesium.Math.toRadians(90));
 });
 
-test('a Street View photo gets a blue view cone; a Mapillary photo GEV\u2019s pin', () => {
+test('a Street View photo gets a blue view cone; a Mapillary photo Osiris\u2019s pin', () => {
   const { state, marker } = setup();
   const removed = [];
   state.marker.collection.remove = (billboard) => removed.push(billboard);

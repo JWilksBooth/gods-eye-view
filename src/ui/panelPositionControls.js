@@ -10,8 +10,8 @@ const PANEL_LAYOUT_STORAGE_VERSION = 'v6';
 const PANEL_POSITION_STORAGE_VERSION = 'v8';
 /** Floating panels' stored positions and hint flag: nothing reads them now. */
 const RETIRED_PANEL_KEY_PREFIXES = [
-  `godsEyeView.${PANEL_POSITION_STORAGE_VERSION}.panelPos.`,
-  `godsEyeView.${PANEL_POSITION_STORAGE_VERSION}.panelFloatHintShown`,
+  `osiris.${PANEL_POSITION_STORAGE_VERSION}.panelPos.`,
+  `osiris.${PANEL_POSITION_STORAGE_VERSION}.panelFloatHintShown`,
 ];
 export class PanelPositionControls {
   constructor({ syncPanelCollapseButton, showToast }) {
@@ -22,11 +22,11 @@ export class PanelPositionControls {
   _maybeNotifyLayoutReset() {
     this._dropRetiredPanelKeys();
     try {
-      const marker = `godsEyeView.${PANEL_POSITION_STORAGE_VERSION}.layoutResetNotified`;
+      const marker = `osiris.${PANEL_POSITION_STORAGE_VERSION}.layoutResetNotified`;
       if (localStorage.getItem(marker)) return;
       localStorage.setItem(marker, '1');
       const hadOldPositions = Object.keys(localStorage).some((key) =>
-        key.startsWith('godsEyeView.v6.panelPos.'),
+        key.startsWith('osiris.v6.panelPos.'),
       );
       if (hadOldPositions) {
         this._showToast(
@@ -49,7 +49,7 @@ export class PanelPositionControls {
   }
 
   _panelCollapseStorageKey(panelId) {
-    return `godsEyeView.${PANEL_LAYOUT_STORAGE_VERSION}.panelCollapsed.${panelId}`;
+    return `osiris.${PANEL_LAYOUT_STORAGE_VERSION}.panelCollapsed.${panelId}`;
   }
 
   _restorePanelCollapsedState(panelId, { allowStored = true } = {}) {

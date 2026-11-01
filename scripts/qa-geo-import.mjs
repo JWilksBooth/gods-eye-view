@@ -207,7 +207,7 @@ const CLIP = { x: 380, y: 240, width: 480, height: 320 };
 
 /** Pixels in the clip close to the first import color (#39d0ff). */
 async function cyanPixels() {
-  await page.evaluate(() => window.__godsEyeView.viewer.scene.requestRender());
+  await page.evaluate(() => window.__osiris.viewer.scene.requestRender());
   await wait(600);
   const base64 = await page.screenshot({
     clip: CLIP,
@@ -233,7 +233,7 @@ async function cyanPixels() {
 const state = () =>
   page.evaluate(() => ({
     files: window.__gevGeoImport.list(),
-    dataSources: window.__godsEyeView.viewer.dataSources.length,
+    dataSources: window.__osiris.viewer.dataSources.length,
     rows: document.querySelectorAll('#geo-import-list .geo-import-row').length,
     hint: document.getElementById('geo-import-hint')?.textContent || '',
   }));
@@ -244,14 +244,14 @@ try {
   await page.waitForFunction(
     () =>
       window.__gevGeoImport &&
-      window.__godsEyeView?.viewer &&
+      window.__osiris?.viewer &&
       document.getElementById('loading-screen')?.classList.contains('hidden'),
     { timeout: 90_000 },
   );
   await page.evaluate(async (view) => {
-    const viewer = window.__godsEyeView.viewer;
-    for (const id of window.__godsEyeView.dataManager.layers.keys())
-      await window.__godsEyeView.dataManager.setEnabled(id, false);
+    const viewer = window.__osiris.viewer;
+    for (const id of window.__osiris.dataManager.layers.keys())
+      await window.__osiris.dataManager.setEnabled(id, false);
     viewer.imageryLayers.removeAll();
     viewer.terrainProvider = new window.__CESIUM__.EllipsoidTerrainProvider();
     viewer.scene.globe.baseColor = window.__CESIUM__.Color.BLACK;
@@ -293,11 +293,11 @@ try {
   );
   const cyanBefore = await cyanPixels();
   await page.evaluate(() => {
-    window.__godsEyeView.viewer.clock.shouldAnimate = false;
+    window.__osiris.viewer.clock.shouldAnimate = false;
   });
   const clock = () =>
     page.evaluate(() => {
-      const c = window.__godsEyeView.viewer.clock;
+      const c = window.__osiris.viewer.clock;
       const iso = (t) => window.__CESIUM__.JulianDate.toIso8601(t, 0);
       return {
         start: iso(c.startTime),
@@ -354,13 +354,12 @@ try {
     JSON.stringify(clockAfter) === JSON.stringify(clockBefore) &&
       (await page.evaluate(
         () =>
-          window.__godsEyeView.viewer.clockTrackedDataSource?.clock ===
-          undefined,
+          window.__osiris.viewer.clockTrackedDataSource?.clock === undefined,
       )),
     `${JSON.stringify(clockBefore)} → ${JSON.stringify(clockAfter)}`,
   );
   const inside = await page.evaluate((from) => {
-    const viewer = window.__godsEyeView.viewer;
+    const viewer = window.__osiris.viewer;
     const now = viewer.clock.currentTime;
     const sources = [];
     for (let i = from; i < viewer.dataSources.length; i++)
@@ -453,12 +452,12 @@ try {
     inside.xyzPolygon && inside.groundedLines,
   );
   await page.evaluate((from) => {
-    for (const entity of window.__godsEyeView.viewer.dataSources.get(from)
-      .entities.values)
+    for (const entity of window.__osiris.viewer.dataSources.get(from).entities
+      .values)
       if (entity.billboard) entity.show = false;
   }, sourcesBefore);
   await page.evaluate((view) => {
-    const viewer = window.__godsEyeView.viewer;
+    const viewer = window.__osiris.viewer;
     viewer.camera.cancelFlight?.();
     viewer.camera.setView({
       destination: window.__CESIUM__.Cartesian3.fromDegrees(
@@ -518,7 +517,7 @@ try {
 
   // Dropped onto the globe, as a person drags from their file manager.
   await page.evaluate((text) => {
-    const container = window.__godsEyeView.viewer.container;
+    const container = window.__osiris.viewer.container;
     const transfer = new DataTransfer();
     transfer.items.add(
       new File([text], 'dropped.geojson', { type: 'application/geo+json' }),
@@ -548,7 +547,7 @@ try {
     transfer.items.add(
       new File(['just some notes'], 'notes.txt', { type: 'text/plain' }),
     );
-    window.__godsEyeView.viewer.container.dispatchEvent(
+    window.__osiris.viewer.container.dispatchEvent(
       new DragEvent('drop', {
         dataTransfer: transfer,
         bubbles: true,

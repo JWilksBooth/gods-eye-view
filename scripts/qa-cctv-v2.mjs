@@ -197,13 +197,13 @@ async function waitForPredicate(
 // few frames so the real press/drag still exercises Cesium's input + pick path.
 async function positionPointerForGizmoDrag(page, point, frameCount = 3) {
   await page.evaluate(() => {
-    window.__godsEyeView.dataManager.layers
+    window.__osiris.dataManager.layers
       .get('cctv')
       .module.setParams({ calibrationMode: false });
   });
   await page.mouse.move(point.x, point.y);
   return page.evaluate(async (count) => {
-    const gev = window.__godsEyeView;
+    const gev = window.__osiris;
     gev.dataManager.layers
       .get('cctv')
       .module.setParams({ calibrationMode: true });
@@ -241,7 +241,7 @@ function installRenderFramesHelper(page) {
   return page.evaluate(() => {
     window.__qaRenderFrames = (count, capMs) =>
       new Promise((resolve) => {
-        const scene = window.__godsEyeView.viewer.scene;
+        const scene = window.__osiris.viewer.scene;
         let frames = 0;
         const finish = () => {
           clearTimeout(timer);
@@ -269,7 +269,7 @@ function installRenderFramesHelper(page) {
 // and the viewer's own clock.currentTime is a valid live instance of one).
 const SERIALIZE_GEOM_SRC = `
   function serializeGeom(camId) {
-    const viewer = window.__godsEyeView.viewer;
+    const viewer = window.__osiris.viewer;
     const time = viewer.clock.currentTime;
     const roles = ['ray-tl', 'ray-tr', 'ray-br', 'ray-bl', 'cap'];
     const poly = {};
@@ -364,7 +364,7 @@ function waitForTilesLoaded(page, timeoutMs = 15000) {
   return waitForPredicate(
     page,
     () => {
-      const scene = window.__godsEyeView.viewer.scene;
+      const scene = window.__osiris.viewer.scene;
       const prims = scene.primitives;
       for (let i = 0; i < prims.length; i++) {
         const p = prims.get(i);
@@ -484,9 +484,9 @@ async function main() {
       page,
       () =>
         Boolean(
-          window.__godsEyeView &&
-          window.__godsEyeView.viewer &&
-          window.__godsEyeView.dataManager,
+          window.__osiris &&
+          window.__osiris.viewer &&
+          window.__osiris.dataManager,
         ),
       { timeoutMs: 60000 },
     );
@@ -504,7 +504,7 @@ async function main() {
     // from unrelated subsystems cancels out by construction.
     // -----------------------------------------------------------------------
     const wrapInstalled = await page.evaluate(() => {
-      const scene = window.__godsEyeView?.viewer?.scene;
+      const scene = window.__osiris?.viewer?.scene;
       if (
         !scene ||
         typeof scene.pickFromRay !== 'function' ||
@@ -538,7 +538,7 @@ async function main() {
     console.log('Enabling CCTV layer...');
     const c0 = await readCounters();
     await page.evaluate(async () => {
-      const dm = window.__godsEyeView.dataManager;
+      const dm = window.__osiris.dataManager;
       const entry = dm.layers.get('cctv');
       if (!entry.enabled) await dm.toggle('cctv');
     });
@@ -551,7 +551,7 @@ async function main() {
     // times out spuriously at the 250-camera default (2026-07-04).
     const camCount = await page.evaluate(
       () =>
-        window.__godsEyeView.dataManager.layers.get('cctv').module.getUIState()
+        window.__osiris.dataManager.layers.get('cctv').module.getUIState()
           .count,
     );
     // ~800ms per real ground sample measured under SwiftShader (each
@@ -566,7 +566,7 @@ async function main() {
     const drained = await waitForPredicate(
       page,
       () => {
-        const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+        const mod = window.__osiris.dataManager.layers.get('cctv').module;
         const ui = mod.getUIState();
         return Boolean(ui.loading) && ui.loading.active === false;
       },
@@ -601,19 +601,19 @@ async function main() {
     console.log('Activating a camera (focusNearest)...');
     const activeIdBeforeActivation = await page.evaluate(
       () =>
-        window.__godsEyeView.dataManager.layers.get('cctv').module.getUIState()
+        window.__osiris.dataManager.layers.get('cctv').module.getUIState()
           .activeCameraId,
     );
     const cBeforeActivate = await readCounters();
     await page.evaluate(() => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       mod.focusNearest({ durationSec: 0.1 });
     });
     await sleep(500); // let the activation's synchronous work (probe + geometry rewrite) land
     const cAfterActivate = await readCounters();
     const activeId = await page.evaluate(
       () =>
-        window.__godsEyeView.dataManager.layers.get('cctv').module.getUIState()
+        window.__osiris.dataManager.layers.get('cctv').module.getUIState()
           .activeCameraId,
     );
 
@@ -634,7 +634,7 @@ async function main() {
       return JSON.stringify(serializeGeom(${JSON.stringify(activeId)}));
     })()`);
     await page.evaluate((id) => {
-      window.__godsEyeView.dataManager.layers
+      window.__osiris.dataManager.layers
         .get('cctv')
         .module.setParams({ selectedCameraId: id });
     }, activeId);
@@ -661,7 +661,7 @@ async function main() {
     // latency of the completion pass (update interval is 10s).
     // -----------------------------------------------------------------------
     const globeMode = await page.evaluate(
-      () => window.__godsEyeView.viewer.scene.globe?.show !== false,
+      () => window.__osiris.viewer.scene.globe?.show !== false,
     );
     if (globeMode) {
       // Globe stacks intentionally perform no scene.sampleHeight query.
@@ -671,7 +671,7 @@ async function main() {
         'Checking terrain-globe completion against live DEM heights...',
       );
       const terrain = await page.evaluate(async () => {
-        const camera = window.__godsEyeView.dataManager.layers
+        const camera = window.__osiris.dataManager.layers
           .get('cctv')
           .module.getUIState().activeCamera;
         const exact = `${camera.lon.toFixed(5)},${camera.lat.toFixed(5)}`;
@@ -691,7 +691,7 @@ async function main() {
         (await waitForPredicate(
           page,
           (expected, base) => {
-            const { viewer, dataManager } = window.__godsEyeView;
+            const { viewer, dataManager } = window.__osiris;
             const camera = dataManager.layers
               .get('cctv')
               .module.getUIState().activeCamera;
@@ -806,7 +806,7 @@ async function main() {
     console.log('Applying a calibration patch (heading +30°)...');
     const cBeforeCal = await readCounters();
     await page.evaluate((camId) => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       mod.setParams({
         calibration: { cameraId: camId, patch: { headingDeg: 30 } },
       });
@@ -831,7 +831,7 @@ async function main() {
     // Undo that patch before the geometry-contract assertions below so they
     // observe the record's steady, unpatched frustum.
     await page.evaluate((camId) => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       mod.setParams({ calibration: { cameraId: camId, reset: true } });
     }, activeId);
     await sleep(300);
@@ -843,7 +843,7 @@ async function main() {
     const geomInfo = await page.evaluate(`(function(camId){
       ${SERIALIZE_GEOM_SRC}
       const g = serializeGeom(camId);
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       // Overlay unification: the plane label is no longer a native entity —
       // it publishes as a protected host entry under the cctv-projection
       // source. Assert the migrated surface via the host diagnostics.
@@ -883,7 +883,7 @@ async function main() {
     // clear the clamp with margin, run the coincidence check against THAT
     // pose, then reset back to the base pose before the byte-stability check.
     const activeCameraForPatch = await page.evaluate((camId) => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       return mod.getUIState().cameras.find((c) => c.id === camId);
     }, activeId);
     const basePose = activeCameraForPatch.basePose;
@@ -920,7 +920,7 @@ async function main() {
         await page.evaluate(
           ({ camId, patch }) => {
             const mod =
-              window.__godsEyeView.dataManager.layers.get('cctv').module;
+              window.__osiris.dataManager.layers.get('cctv').module;
             mod.setParams({ calibration: { cameraId: camId, patch } });
           },
           { camId: activeId, patch: safePatch },
@@ -1019,7 +1019,7 @@ async function main() {
     // synthetic clamp-clearing test pose.
     if (safePatch) {
       await page.evaluate((camId) => {
-        const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+        const mod = window.__osiris.dataManager.layers.get('cctv').module;
         mod.setParams({ calibration: { cameraId: camId, reset: true } });
       }, activeId);
       await sleep(300);
@@ -1056,12 +1056,12 @@ async function main() {
     console.log('Checking calibration round-trip (patch -> save -> reset)...');
     const baseGeom = await serializeGeom(activeId);
     const baseBadge = await page.evaluate((camId) => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       const ui = mod.getUIState();
       return ui.cameras.find((c) => c.id === camId)?.calBadge;
     }, activeId);
     const baseStoreEmpty = await page.evaluate((camId) => {
-      const raw = localStorage.getItem('godsEyeView.cctv.calibration.v2');
+      const raw = localStorage.getItem('osiris.cctv.calibration.v2');
       const map = raw ? JSON.parse(raw) : {};
       return !(camId in map);
     }, activeId);
@@ -1077,7 +1077,7 @@ async function main() {
     );
 
     await page.evaluate((camId) => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       mod.setParams({
         calibration: { cameraId: camId, patch: { headingDeg: 30 } },
       });
@@ -1088,9 +1088,9 @@ async function main() {
     // only — the store must stay untouched and the camera must read as
     // dirty/EDITED until the explicit save action below.
     const afterPatch = await page.evaluate((camId) => {
-      const raw = localStorage.getItem('godsEyeView.cctv.calibration.v2');
+      const raw = localStorage.getItem('osiris.cctv.calibration.v2');
       const map = raw ? JSON.parse(raw) : {};
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       const cam = mod.getUIState().cameras.find((c) => c.id === camId);
       return {
         stored: camId in map,
@@ -1117,13 +1117,13 @@ async function main() {
     );
 
     await page.evaluate((camId) => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       mod.setParams({ calibration: { cameraId: camId, save: true } });
     }, activeId);
     await sleep(200);
 
     const storeEntry = await page.evaluate((camId) => {
-      const raw = localStorage.getItem('godsEyeView.cctv.calibration.v2');
+      const raw = localStorage.getItem('osiris.cctv.calibration.v2');
       const map = raw ? JSON.parse(raw) : {};
       return map[camId] || null;
     }, activeId);
@@ -1140,7 +1140,7 @@ async function main() {
     );
 
     const afterSave = await page.evaluate((camId) => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       const cam = mod.getUIState().cameras.find((c) => c.id === camId);
       return { calBadge: cam?.calBadge, calDirty: cam?.calDirty };
     }, activeId);
@@ -1167,13 +1167,13 @@ async function main() {
 
     // Reset: entry removed, base geometry restored, badge back to raw-prior.
     await page.evaluate((camId) => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       mod.setParams({ calibration: { cameraId: camId, reset: true } });
     }, activeId);
     await sleep(300);
 
     const storeAfterReset = await page.evaluate((camId) => {
-      const raw = localStorage.getItem('godsEyeView.cctv.calibration.v2');
+      const raw = localStorage.getItem('osiris.cctv.calibration.v2');
       const map = raw ? JSON.parse(raw) : {};
       return camId in map;
     }, activeId);
@@ -1184,7 +1184,7 @@ async function main() {
     );
 
     const badgeAfterReset = await page.evaluate((camId) => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       return mod.getUIState().cameras.find((c) => c.id === camId)?.calBadge;
     }, activeId);
     record(
@@ -1218,7 +1218,7 @@ async function main() {
     // never null/undefined once the runtime exists, i.e. there's no gap where
     // the plane shows nothing.
     const materialInfo = await page.evaluate((camId) => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       const time = viewer.clock.currentTime;
       const planeEnt = viewer.entities.getById('cctv-' + camId + '-plane');
       const mat = planeEnt?.plane?.material;
@@ -1245,7 +1245,7 @@ async function main() {
     // (upstream / streetview / synthetic fallback all count as "the frame
     // loop is healthy" — a hard 5xx/network failure would not).
     const frameFetch = await page.evaluate(async (camId) => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       const cam = mod.getUIState().cameras.find((c) => c.id === camId);
       const res = await fetch(cam.frameUrl);
       return {
@@ -1283,7 +1283,7 @@ async function main() {
       'Checking installed canvas click ownership and empty-space deselection...',
     );
     const emptyClickPoint = await page.evaluate(async () => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const viewer = gev.viewer;
       const scene = viewer.scene;
       const canvas = scene.canvas;
@@ -1332,7 +1332,7 @@ async function main() {
     );
 
     const clickEvidenceSetup = await page.evaluate(() => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const viewer = gev.viewer;
       const mod = gev.dataManager.layers.get('cctv').module;
       const snapshotPose = () => ({
@@ -1423,7 +1423,7 @@ async function main() {
 
     if (emptyClickPoint) {
       await page.evaluate(() => {
-        window.__godsEyeView.dataManager.layers
+        window.__osiris.dataManager.layers
           .get('cctv')
           .module.setParams({ calibrationMode: true });
       });
@@ -1431,7 +1431,7 @@ async function main() {
       await sleep(250);
       const adjustClick = await page.evaluate(() => {
         const evidence = window.__qaCctvClickEvidence;
-        const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+        const mod = window.__osiris.dataManager.layers.get('cctv').module;
         mod.setParams({ calibrationMode: false });
         evidence.siblingBaselineTransitions = evidence.activeTransitions.length;
         return {
@@ -1461,7 +1461,7 @@ async function main() {
 
     const siblingTarget = await page.evaluate(async (emptyPoint) => {
       if (!emptyPoint) return null;
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const viewer = gev.viewer;
       const scene = viewer.scene;
       const Cesium = await import('/node_modules/cesium/Build/Cesium/index.js');
@@ -1548,7 +1548,7 @@ async function main() {
     }
     const siblingClick = await page.evaluate(() => {
       const evidence = window.__qaCctvClickEvidence;
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const mod = gev.dataManager.layers.get('cctv').module;
       if (window.__qaCctvSiblingOwner) {
         gev.viewer.entities.remove(window.__qaCctvSiblingOwner);
@@ -1582,7 +1582,7 @@ async function main() {
     }
     const firstEmptyClick = await page.evaluate(() => {
       const evidence = window.__qaCctvClickEvidence;
-      const state = window.__godsEyeView.dataManager.layers
+      const state = window.__osiris.dataManager.layers
         .get('cctv')
         .module.getUIState();
       return {
@@ -1623,7 +1623,7 @@ async function main() {
     }
     const repeatEmptyClick = await page.evaluate(() => {
       const evidence = window.__qaCctvClickEvidence;
-      const state = window.__godsEyeView.dataManager.layers
+      const state = window.__osiris.dataManager.layers
         .get('cctv')
         .module.getUIState();
       evidence.dispose();
@@ -1648,7 +1648,7 @@ async function main() {
     // Explicit navigation from null must remain available for the remaining
     // coverage and gizmo groups. NEXT is the product route pinned by N4.
     const resumedId = await page.evaluate(() => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       mod.cycleCamera(1);
       return mod.getUIState().activeCameraId;
     });
@@ -1666,7 +1666,7 @@ async function main() {
     );
     const countVolumes = () =>
       page.evaluate(() => {
-        const prims = window.__godsEyeView.viewer.scene.primitives;
+        const prims = window.__osiris.viewer.scene.primitives;
         let n = 0;
         for (let i = 0; i < prims.length; i++) {
           if (prims.get(i) && prims.get(i)._gevViewshed) n += 1;
@@ -1676,7 +1676,7 @@ async function main() {
 
     const cBeforeViewshed = await readCounters();
     const modeAfterSet = await page.evaluate(() => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       mod.setParams({ coverageMode: 'viewshed' });
       return mod.getUIState().coverageMode;
     });
@@ -1697,7 +1697,7 @@ async function main() {
     // Boolean back-compat shim: showCoverage=false → 'off' (0 volumes),
     // showCoverage=true → 'on' (wireframes, still 0 volumes).
     const compat = await page.evaluate(() => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       mod.setParams({ showCoverage: false });
       const off = mod.getUIState().coverageMode;
       mod.setParams({ showCoverage: true });
@@ -1721,12 +1721,12 @@ async function main() {
     // rebuild sites are pose edits and style refreshes only). Object identity
     // over 8s proves nothing recreated them.
     await page.evaluate(() => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       mod.setParams({ coverageMode: 'viewshed' });
     });
     await sleep(400);
     await page.evaluate(() => {
-      const prims = window.__godsEyeView.viewer.scene.primitives;
+      const prims = window.__osiris.viewer.scene.primitives;
       window.__qaViewshedRefs = [];
       for (let i = 0; i < prims.length; i++) {
         if (prims.get(i) && prims.get(i)._gevViewshed)
@@ -1735,7 +1735,7 @@ async function main() {
     });
     await sleep(8000);
     const viewshedIdle = await page.evaluate(() => {
-      const prims = window.__godsEyeView.viewer.scene.primitives;
+      const prims = window.__osiris.viewer.scene.primitives;
       const now = [];
       for (let i = 0; i < prims.length; i++) {
         if (prims.get(i) && prims.get(i)._gevViewshed) now.push(prims.get(i));
@@ -1783,9 +1783,9 @@ async function main() {
       'handle-fov-r',
     ];
     const gizmoStates = await page.evaluate((parts) => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       mod.setParams({ calibrationMode: true });
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       return parts.map((p) => {
         const e = viewer.entities.getById('cctv-gizmo-' + p);
         return e ? (e.show ? 'shown' : 'hidden') : 'missing';
@@ -1801,7 +1801,7 @@ async function main() {
     // regression. Sample effective elevation after every mouse move: it must
     // stay frozen until release, with no transient sampleHeight calls.
     const eastDrag = await page.evaluate(() => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       const e = viewer.entities.getById('cctv-gizmo-move-east');
       if (!e) return null;
       const pts = e.polyline.positions.getValue(viewer.clock.currentTime);
@@ -1836,7 +1836,7 @@ async function main() {
     });
 
     const calBeforeDrag = await page.evaluate(() => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       const cam = mod.getUIState().activeCamera;
       return cam
         ? {
@@ -1859,7 +1859,7 @@ async function main() {
         const pickBufferReady = await positionPointerForGizmoDrag(page, grab);
         if (!pickBufferReady) continue;
         const ownsPick = await page.evaluate((point) => {
-          const scene = window.__godsEyeView.viewer.scene;
+          const scene = window.__osiris.viewer.scene;
           const partFrom = (picked) => {
             const id = picked?.id?.id ?? picked?.id;
             return typeof id === 'string' && id.startsWith('cctv-gizmo-')
@@ -1884,7 +1884,7 @@ async function main() {
           transientDragStates.push(
             await page.evaluate(() => {
               const mod =
-                window.__godsEyeView.dataManager.layers.get('cctv').module;
+                window.__osiris.dataManager.layers.get('cctv').module;
               const cam = mod.getUIState().activeCamera;
               return cam
                 ? {
@@ -1902,7 +1902,7 @@ async function main() {
         await sleep(400);
         const candidateEast = await page.evaluate(() => {
           const mod =
-            window.__godsEyeView.dataManager.layers.get('cctv').module;
+            window.__osiris.dataManager.layers.get('cctv').module;
           return (
             mod.getUIState().activeCamera?.calibration?.offsetEastM ?? null
           );
@@ -1920,10 +1920,10 @@ async function main() {
     }
 
     const dragOutcome = await page.evaluate((pt) => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
-      const viewer = window.__godsEyeView.viewer;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
+      const viewer = window.__osiris.viewer;
       const cam = mod.getUIState().activeCamera;
-      const raw = localStorage.getItem('godsEyeView.cctv.calibration.v2');
+      const raw = localStorage.getItem('osiris.cctv.calibration.v2');
       const map = raw ? JSON.parse(raw) : {};
       let pickable = null;
       let ownsPick = null;
@@ -2079,10 +2079,10 @@ async function main() {
 
     // ADJUST off: parts hidden; leave a clean calibration for the next group.
     const gizmoOff = await page.evaluate((parts) => {
-      const mod = window.__godsEyeView.dataManager.layers.get('cctv').module;
+      const mod = window.__osiris.dataManager.layers.get('cctv').module;
       mod.setParams({ calibrationMode: false });
       mod.setParams({ calibration: { reset: true } });
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       return parts.map((p) => {
         const e = viewer.entities.getById('cctv-gizmo-' + p);
         return e ? (e.show ? 'shown' : 'hidden') : 'missing';

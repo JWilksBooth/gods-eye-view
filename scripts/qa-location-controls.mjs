@@ -27,7 +27,7 @@ try {
   );
   await page.waitForFunction(
     () =>
-      window.__godsEyeView?.styleManager?._locationControls &&
+      window.__osiris?.styleManager?._locationControls &&
       document.getElementById('loading-screen')?.classList.contains('hidden'),
     { timeout: 60000 },
   );
@@ -45,7 +45,7 @@ try {
     'native city selection highlights and expands its POIs',
     await page.evaluate(
       (id) =>
-        window.__godsEyeView.styleManager._activeLocationId === id &&
+        window.__osiris.styleManager._activeLocationId === id &&
         document.querySelector('.location-pill.active')?.dataset.locationId ===
           id,
       cityId,
@@ -56,14 +56,14 @@ try {
     'POI keyboard action selects the second landmark',
     await page.evaluate(
       () =>
-        window.__godsEyeView.styleManager._activePoiIndex === 1 &&
+        window.__osiris.styleManager._activePoiIndex === 1 &&
         document.querySelector('.poi-pill.active')?.dataset.poiIndex === '1',
     ),
   );
   check(
     'orbit controls and indicator agree',
     await page.evaluate(() => {
-      const ui = window.__godsEyeView.styleManager;
+      const ui = window.__osiris.styleManager;
       ui.setOrbit(true);
       const active =
         ui.orbitController.active &&
@@ -81,7 +81,7 @@ try {
   check(
     'typing in search leaves POI selection unchanged',
     await page.evaluate(
-      () => window.__godsEyeView.styleManager._activePoiIndex === 1,
+      () => window.__osiris.styleManager._activePoiIndex === 1,
     ),
   );
   const geocoderRequests = [];
@@ -102,8 +102,7 @@ try {
   await page.keyboard.press('Enter');
   await page.waitForFunction(
     () => {
-      const state =
-        window.__godsEyeView.styleManager._locationLookup.getState();
+      const state = window.__osiris.styleManager._locationLookup.getState();
       return (
         state.query === 'geo:39.7392,-104.9903' && state.status === 'found'
       );
@@ -111,13 +110,13 @@ try {
     { timeout: 30000 },
   );
   await page.waitForFunction(
-    () => !window.__godsEyeView.viewer.camera._currentFlight,
+    () => !window.__osiris.viewer.camera._currentFlight,
     { timeout: 10000 },
   );
   check(
     'native geo URI search shows the decimal coordinate readout',
     await page.evaluate(() => {
-      const ui = window.__godsEyeView.styleManager;
+      const ui = window.__osiris.styleManager;
       return (
         ui._searchedLocationLabel === '39.7392° N, 104.9903° W' &&
         ui._locationMiniCity.textContent.includes('39.7392° N') &&
@@ -128,7 +127,7 @@ try {
   check(
     'geo URI navigation settles near the requested coordinate',
     await page.evaluate(() => {
-      const position = window.__godsEyeView.viewer.camera.positionCartographic;
+      const position = window.__osiris.viewer.camera.positionCartographic;
       const degrees = 180 / Math.PI;
       return (
         Math.abs(position.latitude * degrees - 39.7392) < 0.05 &&
@@ -142,10 +141,10 @@ try {
   );
   page.off('request', recordGeocoderRequest);
   await page.evaluate(() => {
-    const lookup = window.__godsEyeView.styleManager._locationLookup;
+    const lookup = window.__osiris.styleManager._locationLookup;
     window.__qaSearchRequests = [];
     window.__qaLocationState = [];
-    window.__godsEyeView.styleManager.subscribeLocationSearch((notification) =>
+    window.__osiris.styleManager.subscribeLocationSearch((notification) =>
       window.__qaLocationState.push(notification),
     );
     lookup.search = (query, options) =>
@@ -180,7 +179,7 @@ try {
   );
   await page.waitForFunction(
     () =>
-      window.__godsEyeView.styleManager._searchedLocationLabel ===
+      window.__osiris.styleManager._searchedLocationLabel ===
       'Second landmark, Test city',
   );
   await page.evaluate(() =>
@@ -191,7 +190,7 @@ try {
   check(
     'late result cannot overwrite the current location readout or style',
     await page.evaluate(() => {
-      const ui = window.__godsEyeView.styleManager;
+      const ui = window.__osiris.styleManager;
       return (
         ui._searchedLocationLabel === 'Second landmark, Test city' &&
         ui._locationMiniCity.textContent.includes('Second landmark') &&
@@ -220,7 +219,7 @@ try {
   check(
     'cancelled POI expansion stays closed after a frame',
     await page.evaluate(async (id) => {
-      const ui = window.__godsEyeView.styleManager;
+      const ui = window.__osiris.styleManager;
       ui._expandPOIRow(id);
       ui._collapsePOIRow();
       await new Promise((resolve) =>
@@ -233,7 +232,7 @@ try {
     }, cityId),
   );
   await page.evaluate(
-    (id) => window.__godsEyeView.styleManager._onCityPillClick(id),
+    (id) => window.__osiris.styleManager._onCityPillClick(id),
     cityId,
   );
   await page.waitForFunction(() =>
@@ -241,7 +240,7 @@ try {
   );
   // Finish the camera's existing city flight before inspecting both layouts.
   await page.waitForFunction(
-    () => !window.__godsEyeView.viewer.camera._currentFlight,
+    () => !window.__osiris.viewer.camera._currentFlight,
     { timeout: 10000 },
   );
   await page.evaluate(
@@ -253,7 +252,7 @@ try {
   const settled = await page
     .waitForFunction(
       () => {
-        const scene = window.__godsEyeView.viewer.scene;
+        const scene = window.__osiris.viewer.scene;
         for (let index = 0; index < scene.primitives.length; index++) {
           const primitive = scene.primitives.get(index);
           if (
@@ -283,20 +282,20 @@ try {
   check(
     'native reset returns through the existing camera handoff',
     await page.evaluate(async () => {
-      const ui = window.__godsEyeView.styleManager;
+      const ui = window.__osiris.styleManager;
       ui._resetGlobeBtn.click();
       const pending = ui._globeResetPromise;
       if (!pending) return false;
       await pending;
       return (
-        !ui.orbitController.active && !window.__godsEyeView.viewer.trackedEntity
+        !ui.orbitController.active && !window.__osiris.viewer.trackedEntity
       );
     }),
   );
   check(
     'destroyed controls cannot navigate or submit another lookup',
     await page.evaluate(() => {
-      const ui = window.__godsEyeView.styleManager;
+      const ui = window.__osiris.styleManager;
       const count = window.__qaSearchRequests.length;
       ui._locationControls.destroy();
       ui._locationLookup.destroy();

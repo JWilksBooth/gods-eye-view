@@ -68,7 +68,7 @@ test('GBFS upstream fetch names the app in the Client-Identifier header', async 
       },
     },
   );
-  assert.equal(GBFS_CLIENT_IDENTIFIER, 'gods-eye-view');
+  assert.equal(GBFS_CLIENT_IDENTIFIER, 'osiris');
   assert.equal(observedHeaders['Client-Identifier'], GBFS_CLIENT_IDENTIFIER);
 });
 
@@ -86,7 +86,7 @@ test('GBFS upstream fetch adds ET-Client-Name for Entur and only for Entur', asy
   const entur = await headersFor(
     'https://api.entur.io/mobility/v2/gbfs/v2/kolumbusbysykkel/station_status',
   );
-  assert.equal(entur['ET-Client-Name'], 'gods-eye-view-bikeshare');
+  assert.equal(entur['ET-Client-Name'], 'osiris-bikeshare');
   assert.equal(entur['Client-Identifier'], GBFS_CLIENT_IDENTIFIER);
   const lyft = await headersFor(STATION_URL);
   assert.equal(lyft['ET-Client-Name'], undefined);

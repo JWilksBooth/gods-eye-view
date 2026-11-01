@@ -38,12 +38,12 @@ try {
     localStorage.setItem('gev:first-run-mission:v1', 'suppressed'),
   );
   await page.goto(URL_, { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => window.__godsEyeView?.viewer?.scene, {
+  await page.waitForFunction(() => window.__osiris?.viewer?.scene, {
     timeout: 120000,
   });
   await page.waitForFunction(
     () => {
-      const sky = window.__godsEyeView.viewer.scene.skyBox;
+      const sky = window.__osiris.viewer.scene.skyBox;
       return (
         sky?._milkyWayCubeMap &&
         sky?._starCommand &&
@@ -62,7 +62,7 @@ try {
         'run against the Vite dev server (needs .vite/deps/cesium.js)',
       );
     const C = await import(entry),
-      g = window.__godsEyeView,
+      g = window.__osiris,
       v = g.viewer,
       s = v.scene;
     g.styleManager.setStyle('normal', { userInitiated: true });
@@ -127,7 +127,7 @@ try {
     let animeOn = false;
     for (let i = 0; i < s.postProcessStages.length; i++) {
       const stage = s.postProcessStages.get(i);
-      if (stage.name === 'godsEyeView_anime')
+      if (stage.name === 'osiris_anime')
         animeOn = stage.enabled && stage.uniforms.intensity > 0.99;
     }
     return {

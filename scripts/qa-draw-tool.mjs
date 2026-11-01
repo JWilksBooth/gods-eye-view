@@ -157,7 +157,7 @@ try {
     { timeout: 90_000 },
   );
   await page.evaluate((view) => {
-    const viewer = window.__godsEyeView.viewer;
+    const viewer = window.__osiris.viewer;
     viewer.camera.cancelFlight?.();
     viewer.scene.tweens?.removeAll?.();
     viewer.camera.setView({
@@ -177,7 +177,7 @@ try {
   const settled = await page
     .waitForFunction(
       () => {
-        const primitives = window.__godsEyeView.viewer.scene.primitives;
+        const primitives = window.__osiris.viewer.scene.primitives;
         for (let index = 0; index < primitives.length; index++) {
           const primitive = primitives.get(index);
           if (
@@ -224,7 +224,7 @@ try {
   // must be absent while drawing and back — as the SAME functions — after.
   await page.evaluate(() => {
     const Cesium = window.__CESIUM__;
-    const stock = window.__godsEyeView.viewer.screenSpaceEventHandler;
+    const stock = window.__osiris.viewer.screenSpaceEventHandler;
     window.__qaStock = {
       click:
         stock.getInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK) || null,
@@ -236,7 +236,7 @@ try {
   const stockActions = () =>
     page.evaluate(() => {
       const Cesium = window.__CESIUM__;
-      const stock = window.__godsEyeView.viewer.screenSpaceEventHandler;
+      const stock = window.__osiris.viewer.screenSpaceEventHandler;
       const live = {
         click:
           stock.getInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK) || null,
@@ -432,21 +432,21 @@ try {
   if (target) {
     await clickWorld(target.x, target.y, { settle: 900 });
     const selectedNormally = await page.evaluate(() =>
-      Boolean(window.__godsEyeView.viewer.selectedEntity),
+      Boolean(window.__osiris.viewer.selectedEntity),
     );
     check(
       `clicking a ${target.layer} selects it when nothing owns the pointer`,
       selectedNormally,
     );
     await page.evaluate(() => {
-      window.__godsEyeView.viewer.selectedEntity = undefined;
+      window.__osiris.viewer.selectedEntity = undefined;
     });
     await page.click('#draw-toggle');
     await page.click('.pp-mode-btn[data-shape="area"]');
     await clickWorld(target.x, target.y, { settle: 900 });
     const whileDrawing = await drawState();
     const selectedWhileDrawing = await page.evaluate(() =>
-      Boolean(window.__godsEyeView.viewer.selectedEntity),
+      Boolean(window.__osiris.viewer.selectedEntity),
     );
     check(
       `clicking the same ${target.layer} while drawing adds a vertex and selects nothing`,
@@ -495,7 +495,7 @@ try {
   // actions so the identity comparisons below still mean something.
   await page.evaluate(() => {
     const Cesium = window.__CESIUM__;
-    const stock = window.__godsEyeView.viewer.screenSpaceEventHandler;
+    const stock = window.__osiris.viewer.screenSpaceEventHandler;
     window.__qaStock = {
       click:
         stock.getInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK) || null,
@@ -505,7 +505,7 @@ try {
     };
   });
   await page.evaluate((view) => {
-    const viewer = window.__godsEyeView.viewer;
+    const viewer = window.__osiris.viewer;
     viewer.camera.cancelFlight?.();
     viewer.camera.setView({
       destination: viewer.scene.globe.ellipsoid.cartographicToCartesian({
@@ -593,7 +593,7 @@ try {
 
   // ── a shape drawn across the antimeridian lands where it was drawn ──────
   await page.evaluate(() => {
-    const viewer = window.__godsEyeView.viewer;
+    const viewer = window.__osiris.viewer;
     viewer.camera.cancelFlight?.();
     viewer.camera.setView({
       destination: viewer.scene.globe.ellipsoid.cartographicToCartesian({
@@ -645,7 +645,7 @@ try {
   );
   // ── destroy(): the shell disposing the tool leaves nothing behind ───────
   const beforeDestroy = await page.evaluate(
-    () => window.__godsEyeView.viewer.dataSources.length,
+    () => window.__osiris.viewer.dataSources.length,
   );
   await page.click('#draw-toggle'); // destroy from an ACTIVE session: the harder case
   await wait(200);
@@ -655,7 +655,7 @@ try {
     await tool.destroy();
     await new Promise((resolve) => setTimeout(resolve, 50));
     const Cesium = window.__CESIUM__;
-    const viewer = window.__godsEyeView.viewer;
+    const viewer = window.__osiris.viewer;
     const stock = viewer.screenSpaceEventHandler;
     let previews = 0;
     for (let i = 0; i < viewer.dataSources.length; i += 1)
@@ -719,7 +719,7 @@ async function findClickableTarget() {
   // tracking click gesture that flights and military use too.
   const camera = await page
     .evaluate(async () => {
-      const manager = window.__godsEyeView.dataManager;
+      const manager = window.__osiris.dataManager;
       await manager.setEnabled('cctv', true, { origin: 'user' });
       const module = manager.layers.get('cctv')?.module;
       if (!module?.getUIState) return null;
@@ -744,7 +744,7 @@ async function findClickableTarget() {
 
   if (camera) {
     await page.evaluate((spot) => {
-      const viewer = window.__godsEyeView.viewer;
+      const viewer = window.__osiris.viewer;
       viewer.camera.cancelFlight?.();
       viewer.camera.setView({
         destination: viewer.scene.globe.ellipsoid.cartographicToCartesian({
@@ -767,14 +767,10 @@ async function findClickableTarget() {
   // the same shared claim, and always present without a key.
   const site = await page
     .evaluate(async () => {
-      const viewer = window.__godsEyeView.viewer;
-      await window.__godsEyeView.dataManager.setEnabled(
-        'local-datacenters',
-        true,
-        {
-          origin: 'user',
-        },
-      );
+      const viewer = window.__osiris.viewer;
+      await window.__osiris.dataManager.setEnabled('local-datacenters', true, {
+        origin: 'user',
+      });
       const centreOf = (entity) => {
         const time = viewer.clock.currentTime;
         const point = entity.position?.getValue?.(time);
@@ -807,7 +803,7 @@ async function findClickableTarget() {
     .catch(() => null);
   if (!site) return null;
   await page.evaluate((spot) => {
-    const viewer = window.__godsEyeView.viewer;
+    const viewer = window.__osiris.viewer;
     viewer.camera.cancelFlight?.();
     viewer.camera.setView({
       destination: viewer.scene.globe.ellipsoid.cartographicToCartesian({
@@ -837,7 +833,7 @@ async function onScreen(belongs, timeout = 20_000) {
       (belongsSource) => {
         // eslint-disable-next-line no-new-func
         const belongsTo = new Function(`return (${belongsSource})`)();
-        const viewer = window.__godsEyeView.viewer;
+        const viewer = window.__osiris.viewer;
         const scene = viewer.scene;
         const collections = [viewer.entities];
         for (let i = 0; i < viewer.dataSources.length; i += 1) {
