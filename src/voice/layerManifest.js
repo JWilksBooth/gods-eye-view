@@ -243,6 +243,12 @@ const layers = [
     },
   },
   {
+    id: 'events',
+    aliases: ['event map', 'events'],
+    context: false,
+    noQuery: 'icons of other layers; query those layers',
+  },
+  {
     id: 'alerts',
     aliases: ['alerts', 'official alerts', 'warnings', 'advisories'],
     context: false,

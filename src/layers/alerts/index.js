@@ -673,6 +673,11 @@ export function createAlertsLayer({
     },
 
     /** Snapshot alerts as JSON-safe records for the analyst query engine. */
+    /** The alerts now drawn (after the kind and region filters), worst first. */
+    getAlerts() {
+      return _enabled ? visible() : [];
+    },
+
     getAnalystRecords(maxCount = 2000) {
       if (!_enabled || !_alerts.length) return [];
       const limit = Number.isFinite(maxCount)

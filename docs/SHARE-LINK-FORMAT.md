@@ -133,7 +133,8 @@ style also extends the pinned style-defaults table.
 layout and restores it as `tactical`. The code stays reserved.
 
 Flag bits (field 9): 0 `bloom`, 1 `sharpen`, 2 `hudVisible`, 3
-`celestialRing` (each defaulting by style), 4 `scopeEnabled` (default on).
+`celestialRing` (each defaulting by style), 4 `scopeEnabled` (default on), 5
+`gridView` (default off; the long form writes `gv=1` only while it is on).
 
 ### Style defaults
 

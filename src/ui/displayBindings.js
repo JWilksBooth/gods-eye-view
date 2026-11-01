@@ -93,6 +93,7 @@ export class DisplayBindings {
           this._syncShareState();
         },
         toggleCctv: () => this._toggleCctvEnabled(),
+        toggleGridView: () => this.toggleGridView(),
       },
     });
 
@@ -126,6 +127,7 @@ export class DisplayBindings {
         allocationButtons: this._detectionAllocationBtns,
         fadeSliders: [this._detectionFadeSlider, this._detectionOpacitySlider],
         celestialButton: this._celestialBtn,
+        gridViewButton: this._gridViewBtn,
         modelsButton: this._models3dBtn,
         modelModeButtons: this._models3dBtn ? this._models3dModeBtns : [],
         performanceButtons: this._performancePresetBtns,
@@ -205,6 +207,7 @@ export class DisplayBindings {
           this._updateHudButtonState();
           this._syncShareState();
         },
+        toggleGridView: () => this.toggleGridView(),
         toggleSonar: () => this._setCyberSonarEnabled(),
         setSonarRings: (value) => this._setCyberSonarSetting('rings', value),
         setSonarRange: (value) => this._setCyberSonarSetting('range', value),

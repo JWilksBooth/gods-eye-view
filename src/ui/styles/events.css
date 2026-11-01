@@ -1,0 +1,375 @@
+/* ── Event map: icons, hover card, feed drawer, grid view ─────────────
+   Icon colours are tokens so a palette change retunes every kind at once.
+   The defaults derive from the foundation palette where a kind has a
+   natural match (cameras and streams follow the accent); the rest are the
+   only hues this feature adds. The icon builder reads these at runtime. */
+:root {
+  --event-camera: var(--accent);
+  --event-stream: #7cf5d2;
+  --event-fire: #ff7a3d;
+  --event-quake: #ffc857;
+  --event-aircraft: var(--text-primary);
+  --event-vessel: #5cc8ff;
+  --event-incident: #ff5c6e;
+  --event-alert: #ffe066;
+  --event-icon-glyph: var(--bg-dark);
+  --event-icon-ring: var(--text-primary);
+  --event-icon-outline: var(--bg-dark);
+  --event-icon-text: var(--bg-dark);
+  --event-grid-line: var(--accent);
+  --event-grid-label: var(--text-primary);
+  --event-grid-backdrop: var(--bg-dark);
+  --event-drawer-width: 360px;
+}
+
+/* ── Hover card ─────────────────────────────── */
+.event-hover-card {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 180;
+  display: grid;
+  gap: 2px;
+  max-width: 280px;
+  padding: 10px 12px;
+  color: var(--text-primary);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border-hover);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--btn-radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(16px) saturate(1.3);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 1.35;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.event-hover-card[hidden] {
+  display: none;
+}
+
+.event-hover-card[data-kind='camera'] {
+  border-left-color: var(--event-camera);
+}
+.event-hover-card[data-kind='stream'] {
+  border-left-color: var(--event-stream);
+}
+.event-hover-card[data-kind='fire'] {
+  border-left-color: var(--event-fire);
+}
+.event-hover-card[data-kind='quake'] {
+  border-left-color: var(--event-quake);
+}
+.event-hover-card[data-kind='aircraft'] {
+  border-left-color: var(--event-aircraft);
+}
+.event-hover-card[data-kind='vessel'] {
+  border-left-color: var(--event-vessel);
+}
+.event-hover-card[data-kind='incident'] {
+  border-left-color: var(--event-incident);
+}
+.event-hover-card[data-kind='alert'] {
+  border-left-color: var(--event-alert);
+}
+
+.event-hover-kind {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.event-hover-title {
+  font-size: 12px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-hover-time {
+  color: var(--accent);
+}
+
+.event-hover-description,
+.event-hover-source {
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-hover-source {
+  font-size: 10px;
+}
+
+/* ── Feed drawer ────────────────────────────── */
+.event-feed-drawer {
+  position: fixed;
+  top: var(--left-stack-top);
+  right: var(--right-rail-x);
+  left: auto;
+  bottom: auto;
+  z-index: 140;
+  width: var(--event-drawer-width);
+  max-width: calc(100vw - 2 * var(--right-rail-x));
+  max-height: calc(100vh - var(--left-stack-top) - 48px);
+  margin: 0;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  color: var(--text-primary);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--panel-radius);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  font-family: var(--font-mono);
+  overflow: visible;
+  animation: event-feed-slide-in var(--transition-smooth);
+}
+
+.event-feed-drawer[open] {
+  display: flex;
+}
+
+@keyframes event-feed-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .event-feed-drawer {
+    animation: none;
+  }
+}
+
+body.ui-clean-view .event-feed-drawer,
+body.recording-mode .event-feed-drawer {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.event-feed-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.event-feed-kind {
+  flex: 0 0 auto;
+  padding: 2px 7px;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bg-dark);
+  background: var(--accent);
+  border-radius: 999px;
+}
+
+.event-feed-kind[data-kind='camera'] {
+  background: var(--event-camera);
+}
+.event-feed-kind[data-kind='stream'] {
+  background: var(--event-stream);
+}
+.event-feed-kind[data-kind='fire'] {
+  background: var(--event-fire);
+}
+.event-feed-kind[data-kind='quake'] {
+  background: var(--event-quake);
+}
+.event-feed-kind[data-kind='aircraft'] {
+  background: var(--event-aircraft);
+}
+.event-feed-kind[data-kind='vessel'] {
+  background: var(--event-vessel);
+}
+.event-feed-kind[data-kind='incident'] {
+  background: var(--event-incident);
+}
+.event-feed-kind[data-kind='alert'] {
+  background: var(--event-alert);
+}
+
+.event-feed-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-feed-close {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.event-feed-meta {
+  margin: 0;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.event-feed-body {
+  display: grid;
+  gap: 10px;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.event-feed-frame {
+  position: relative;
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.event-feed-image,
+.event-feed-player,
+.event-feed-video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--btn-radius);
+  background: var(--bg-dark);
+}
+
+.event-feed-frame--video .event-feed-image {
+  display: none;
+}
+
+.event-feed-caption,
+.event-feed-note {
+  margin: 0;
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.event-feed-lines {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 0;
+  font-size: 11px;
+}
+
+.event-feed-lines--plain {
+  grid-template-columns: 1fr;
+}
+
+.event-feed-label {
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 9px;
+  align-self: center;
+}
+
+.event-feed-value,
+.event-feed-line {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.event-feed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.event-feed-action {
+  padding: 6px 10px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.event-feed-subtitle {
+  margin: 0 0 6px;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.event-feed-list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.event-feed-list .event-feed-action {
+  width: 100%;
+  text-align: left;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ── Grid view ──────────────────────────────── */
+#event-grid-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: none;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+body.grid-view #event-grid-overlay {
+  display: block;
+}
+
+#grid-view-toggle.active {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+#grid-view-toggle.active .pp-label {
+  color: var(--accent);
+}
+
+@media (max-width: 720px) {
+  .event-feed-drawer {
+    top: auto;
+    right: 8px;
+    left: 8px;
+    bottom: 96px;
+    width: auto;
+    max-width: none;
+    max-height: 60vh;
+  }
+}

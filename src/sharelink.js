@@ -103,6 +103,9 @@ export class ShareLinkManager {
     // null = the altitude-adaptive terminus (the default). A number pins the
     // outside-fill opacity as a percent, 94..100. (`sce`, 2026-08-17)
     this._scopeTerminusPct = null;
+    // Grid view (`gv`): written only while on, so links made before it
+    // existed and links made with it off read the same.
+    this._gridView = false;
     this._mapStack = 'photoreal';
     this._layerStateProvider = null;
     this._panelStateProvider = null;
@@ -260,6 +263,7 @@ export class ShareLinkManager {
       scopeTerminusPct: params.has('sce')
         ? clampScopeTerminusPct(params.get('sce'))
         : null,
+      gridView: params.get('gv') === '1',
       mapStack: params.get('map') || 'photoreal',
       layerState: decodedLayerState,
       layerStateInvalid:
@@ -421,6 +425,7 @@ export class ShareLinkManager {
         scopeEnabled: visualCurrent ? state.scopeEnabled : undefined,
         scopeFeatherPct: visualCurrent ? state.scopeFeatherPct : undefined,
         scopeTerminusPct: visualCurrent ? state.scopeTerminusPct : undefined,
+        gridView: visualCurrent ? state.gridView : undefined,
         mapStack: mapCurrent ? state.mapStack : undefined,
         panelState,
         styleParams: visualCurrent ? state.styleParams : undefined,
@@ -576,6 +581,7 @@ export class ShareLinkManager {
     else if (typeof extras.scopeTerminusPct === 'number') {
       this._scopeTerminusPct = clampScopeTerminusPct(extras.scopeTerminusPct);
     }
+    if (typeof extras.gridView === 'boolean') this._gridView = extras.gridView;
     if (typeof extras.mapStack === 'string') this._mapStack = extras.mapStack;
     this._scheduleUpdate();
   }
@@ -689,6 +695,7 @@ export class ShareLinkManager {
     // unsupported terminus even if the field was set from somewhere else.
     const terminusPct = clampScopeTerminusPct(this._scopeTerminusPct);
     if (terminusPct != null) params.set('sce', String(terminusPct));
+    if (this._gridView) params.set('gv', '1');
     params.set('map', this._mapStack);
     const layerState = this._layerStateProvider?.();
     if (layerState) encodeLayerStateParams(params, layerState);
