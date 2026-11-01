@@ -100,6 +100,7 @@ const SOURCES = [
     status: 'ok',
     count: 1,
     partial: true,
+    regions: ['los-angeles', 'sonoma-county', 'sf-bay-area'],
   },
   {
     id: 'faa',
@@ -121,6 +122,7 @@ const SOURCES = [
     stale: true,
     count: 0,
     error: 'http_404',
+    regions: ['los-angeles'],
   },
 ];
 
@@ -401,6 +403,13 @@ test('kind chips and the region param narrow what is drawn and asked', async () 
     ['alert-point:0'],
   );
   assert.equal(h.layer.findByQuery('alert-point:0').name, 'LAS · Delays');
+  const scoped = h.layer.getRowControls();
+  assert.equal(
+    scoped.info,
+    '1 of 2 feeds live',
+    'only the feeds that cover the region',
+  );
+  assert.doesNotMatch(scoped.infoTitle, /Caltrans|LAFD/);
   h.layer.setParams({ region: 'atlantis' });
   assert.equal(h.layer.getParams().region, null);
 });

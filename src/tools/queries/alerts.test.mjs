@@ -93,6 +93,7 @@ function service({ alerts = ALERTS, sources, airports } = {}) {
               status: 'unavailable',
               count: 0,
               error: 'http_404',
+              regions: ['los-angeles'],
             },
             {
               id: 'airnow',
@@ -183,7 +184,7 @@ test('get_alerts lists every region worst first with feed states', async () => {
   const all = await catalog.call('get_alerts', {});
   assert.equal(
     all.summary,
-    '4 alerts across Los Angeles, Sonoma County, San Francisco Bay Area, Las Vegas (2 severe, 1 moderate); most by kind: weather (2), road (1), transit (1); no answer from LAFD alerts; AirNow air quality needs a key.',
+    '4 alerts across Los Angeles, Sonoma County, San Francisco Bay Area, Las Vegas (2 severe, 1 moderate); most by kind: weather (2), road (1), transit (1); no answer from LAFD alerts; 1 feed waiting for a key (AIRNOW_API_KEY).',
   );
   // Worst first; equal severity and time fall back to the id.
   assert.deepEqual(
@@ -219,7 +220,21 @@ test('get_alerts narrows by region, area, kind and severity', async () => {
     bay.data.rows.map((row) => row.id),
     ['bart:1'],
   );
-  assert.match(bay.summary, /^1 alert in San Francisco Bay Area \(1 severe\)/);
+  assert.equal(
+    bay.summary,
+    '1 alert in San Francisco Bay Area (1 severe); most by kind: transit (1); 1 feed waiting for a key (AIRNOW_API_KEY).',
+    'a Los Angeles feed that is down is not mentioned for the Bay Area',
+  );
+  assert.deepEqual(
+    bay.data.sources.map((entry) => entry.id),
+    ['nws', 'caltrans', 'airnow'],
+  );
+  const la = await catalog.call('get_alerts', { region: 'los-angeles' });
+  assert.match(la.summary, /no answer from LAFD alerts/);
+  assert.deepEqual(
+    la.data.sources.find((entry) => entry.id === 'lafd').regions,
+    ['los-angeles'],
+  );
   const boxed = await catalog.call('get_alerts', {
     area: { bbox: [-122.45, 37.75, -122.35, 37.85] },
     kind: 'weather',
@@ -337,4 +352,24 @@ test('get_airport_status says when the FAA feed is unavailable or stale', async 
   });
   assert.match(answer.summary, /\(FAA status may be stale\)\.$/);
   assert.equal(answer.data.stale, true);
+  for (const [status, code] of [
+    [502, 'unavailable'],
+    [429, 'retry_later'],
+  ]) {
+    const failing = composeCatalog({
+      tools: coreTools,
+      services: {
+        alerts: {
+          getSnapshot: async () => ({ alerts: [], sources: [] }),
+          getAirports: async () => {
+            throw Object.assign(new Error(`HTTP ${status}`), { status });
+          },
+        },
+      },
+    });
+    await assert.rejects(
+      failing.call('get_airport_status', { airports: ['SFO'] }),
+      (error) => error.code === code,
+    );
+  }
 });

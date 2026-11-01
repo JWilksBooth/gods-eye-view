@@ -617,7 +617,14 @@ export function createAlertsLayer({
     getRowControls() {
       const shown = visible();
       const counts = countBySeverity(shown);
-      const asked = _sources.filter((entry) => entry.status !== 'key-required');
+      // With a region chosen, only the feeds that speak for it are counted.
+      const covering = _sources.filter(
+        (entry) =>
+          !_region ||
+          !Array.isArray(entry.regions) ||
+          entry.regions.includes(_region),
+      );
+      const asked = covering.filter((entry) => entry.status !== 'key-required');
       const live = asked.filter((entry) => entry.status === 'ok').length;
       const statusWord = (status) => {
         if (status === 'ok') return t('live', { context: 'feed status' });
@@ -655,7 +662,7 @@ export function createAlertsLayer({
         info: asked.length
           ? t('{live} of {total} feeds live', { live, total: asked.length })
           : '',
-        infoTitle: _sources
+        infoTitle: covering
           .map((entry) => `${entry.label}: ${statusWord(entry.status)}`)
           .join('\n'),
       };

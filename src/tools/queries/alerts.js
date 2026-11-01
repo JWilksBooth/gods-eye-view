@@ -30,7 +30,7 @@ import {
   severityRank,
   validateAlertGeometry,
 } from '../../layers/alerts/model.js';
-import { alertRegion } from '../../layers/alerts/regions.js';
+import { ALERT_REGIONS, alertRegion } from '../../layers/alerts/regions.js';
 
 const REGION_SCHEMA = Object.freeze({
   type: 'string',
@@ -56,6 +56,22 @@ const SEVERITY_SCHEMA = Object.freeze({
 });
 
 const BODY_CHARS = 400;
+
+/** The region ids an area's box overlaps. */
+function regionsInArea(area) {
+  return ALERT_REGIONS.filter(({ bbox: [west, south, east, north] }) => {
+    if (north < area.south || south > area.north) return false;
+    return area.west <= area.east
+      ? !(east < area.west || west > area.east)
+      : east >= area.west || west <= area.east;
+  }).map((region) => region.id);
+}
+
+/** Whether a feed speaks for any of these regions (all, without a list). */
+const covers = (source, regionIds) =>
+  !regionIds ||
+  !Array.isArray(source?.regions) ||
+  source.regions.some((id) => regionIds.includes(id));
 const regionNames = () =>
   LIVE_OPS_REGIONS.map((entry) => entry.name).join(', ');
 
@@ -120,6 +136,7 @@ const sourceRow = (source) => ({
     ? Math.round(source.refreshMs / 1000)
     : null,
   fetched_at: source.fetchedAt ?? null,
+  regions: Array.isArray(source.regions) ? [...source.regions] : null,
   key: source.status === 'key-required' ? (source.envVar ?? null) : null,
   error: source.error ?? null,
 });
@@ -176,12 +193,17 @@ export const getAlerts = defineTool({
     const kinds = breakdown(rows, 'kind');
     const severities = countBySeverity(rows);
     const where = area ? ` in ${area.label}` : ` across ${regionNames()}`;
-    const failing = snapshot.sources.filter(
+    const asked = region ? [region.id] : area ? regionsInArea(area) : null;
+    const relevant = snapshot.sources.filter((source) => covers(source, asked));
+    const failing = relevant.filter(
       (source) => source.status === 'unavailable',
     );
-    const keyless = snapshot.sources.filter(
+    const keyless = relevant.filter(
       (source) => source.status === 'key-required',
     );
+    const keys = [
+      ...new Set(keyless.map((source) => source.envVar).filter(Boolean)),
+    ];
     const worst = ALERT_SEVERITY_IDS.filter((id) => severities[id] > 0)
       .slice(0, 2)
       .map((id) => `${severities[id]} ${id}`);
@@ -192,7 +214,7 @@ export const getAlerts = defineTool({
         : []),
       ...(keyless.length
         ? [
-            `${keyless.map((source) => source.label).join(', ')} ${keyless.length === 1 ? 'needs' : 'need'} a key`,
+            `${countNoun(keyless.length, 'feed')} waiting for a key${keys.length ? ` (${keys.join(', ')})` : ''}`,
           ]
         : []),
     ];
@@ -216,7 +238,7 @@ export const getAlerts = defineTool({
         region: region?.id ?? null,
         stale: snapshot.stale === true,
         fetched_at: snapshot.fetchedAt ?? null,
-        sources: snapshot.sources.map(sourceRow),
+        sources: relevant.map(sourceRow),
         by_kind: kinds,
         by_severity: severities,
         ...result,
@@ -300,7 +322,21 @@ export const getAirportStatus = defineTool({
   },
   requires: ['alerts'],
   async run(args, { services, signal }) {
-    const payload = await services.alerts.getAirports({ signal });
+    let payload;
+    try {
+      payload = await services.alerts.getAirports({ signal });
+    } catch (error) {
+      if (error?.status === 429)
+        throw new ToolError('retry_later', 'FAA airport status is busy', {
+          retryAfterSeconds: 60,
+        });
+      if (error?.status >= 500)
+        throw new ToolError(
+          'unavailable',
+          'FAA airport status is unavailable right now',
+        );
+      throw error;
+    }
     if (payload.status === 'unavailable')
       throw new ToolError(
         'unavailable',

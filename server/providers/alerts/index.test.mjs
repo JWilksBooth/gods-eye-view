@@ -150,6 +150,12 @@ test('assembly merges feeds worst first, once each, with feed states as codes', 
   assert.equal(states['json-broken'].error, 'invalid_payload');
   assert.equal(states.keyed.status, 'key-required');
   assert.equal(states.keyed.envVar, 'FIXTURE_KEY');
+  assert.deepEqual(states.nws.regions, [
+    'los-angeles',
+    'sonoma-county',
+    'sf-bay-area',
+    'las-vegas',
+  ]);
   assert.equal(payload.stale, true, 'a failed feed marks the payload stale');
   assert.doesNotMatch(
     JSON.stringify(payload),
@@ -370,6 +376,14 @@ test('every feed is constructed with a governor and its key state', () => {
       'lafd',
     ],
   );
+  const coverage = Object.fromEntries(
+    sources.map((entry) => [entry.id, entry.regions.join(',')]),
+  );
+  assert.equal(coverage.caltrans, 'los-angeles,sonoma-county,sf-bay-area');
+  assert.equal(coverage.sf511, 'sf-bay-area,sonoma-county');
+  assert.equal(coverage.rtc, 'las-vegas');
+  assert.equal(coverage.lafd, 'los-angeles');
+  assert.equal(coverage.faa, 'los-angeles,sonoma-county,sf-bay-area,las-vegas');
   for (const entry of sources) {
     assert.equal(typeof entry.governor.acquire, 'function', entry.id);
     assert.ok(entry.budgetPerHour > 0 && entry.refreshMs > 0, entry.id);

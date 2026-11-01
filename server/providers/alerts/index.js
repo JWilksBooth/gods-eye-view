@@ -29,6 +29,7 @@ import {
 import {
   ALERT_AIRPORTS,
   ALERT_REGIONS,
+  ALERT_REGION_IDS,
   alertRegion,
   regionsForAirport,
 } from '../../../src/layers/alerts/regions.js';
@@ -148,6 +149,7 @@ export async function assembleAlerts(sources, { now = () => Date.now() } = {}) {
         licence: source.licence,
         refreshMs: source.refreshMs,
         envVar: source.envVar || null,
+        regions: [...(source.regions || ALERT_REGION_IDS)],
         status,
         stale: Boolean(stale),
         fetchedAt: iso(fetchedAt),

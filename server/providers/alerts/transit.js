@@ -61,14 +61,12 @@ export const TRANSIT_ALERT_FEEDS = Object.freeze([
   Object.freeze({
     ...ALERT_FEEDS.bart,
     agency: 'BART',
-    regions: Object.freeze(['sf-bay-area']),
     url: () => 'https://api.bart.gov/gtfsrt/alerts.aspx',
     format: 'protobuf',
   }),
   Object.freeze({
     ...ALERT_FEEDS.sf511,
     agency: '511 SF Bay',
-    regions: Object.freeze(['sf-bay-area']),
     url: (key) =>
       `https://api.511.org/transit/servicealerts?${new URLSearchParams({
         api_key: key,
@@ -80,7 +78,6 @@ export const TRANSIT_ALERT_FEEDS = Object.freeze([
   Object.freeze({
     ...ALERT_FEEDS['lametro-bus'],
     agency: 'LA Metro',
-    regions: Object.freeze(['los-angeles']),
     url: () => 'https://api.goswift.ly/real-time/lametro/gtfs-rt-alerts',
     format: 'protobuf',
     keyHeader: 'Authorization',
@@ -88,7 +85,6 @@ export const TRANSIT_ALERT_FEEDS = Object.freeze([
   Object.freeze({
     ...ALERT_FEEDS['lametro-rail'],
     agency: 'LA Metro Rail',
-    regions: Object.freeze(['los-angeles']),
     url: () => 'https://api.goswift.ly/real-time/lametro-rail/gtfs-rt-alerts',
     format: 'protobuf',
     keyHeader: 'Authorization',
@@ -96,7 +92,6 @@ export const TRANSIT_ALERT_FEEDS = Object.freeze([
   Object.freeze({
     ...ALERT_FEEDS.rtc,
     agency: 'RTC Southern Nevada',
-    regions: Object.freeze(['las-vegas']),
     url: () => 'https://api.goswift.ly/real-time/rtcsnv/gtfs-rt-alerts',
     format: 'protobuf',
     keyHeader: 'Authorization',

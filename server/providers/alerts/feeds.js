@@ -10,11 +10,23 @@
  * agency's RSS address privately, and its terms forbid automated copying and
  * republishing of alert content. Utility outage maps (PG&E, NV Energy) have
  * no documented public API. See DATA_SOURCES.md for the full table.
+ *
+ * `regions` are the LIVE OPS regions a feed can speak for, so a question
+ * about one region names only the feeds that cover it.
  */
+import {
+  ALERT_REGION_IDS,
+  regionsForState,
+} from '../../../src/layers/alerts/regions.js';
+
+const EVERY_REGION = ALERT_REGION_IDS;
+const CALIFORNIA = Object.freeze(regionsForState('CA'));
+const only = (...ids) => Object.freeze(ids);
 
 export const ALERT_FEEDS = Object.freeze({
   nws: Object.freeze({
     id: 'nws',
+    regions: EVERY_REGION,
     label: 'NWS alerts',
     home: 'https://www.weather.gov/alerts',
     licence: 'US Government work, public domain; User-Agent required',
@@ -24,6 +36,7 @@ export const ALERT_FEEDS = Object.freeze({
   }),
   calfire: Object.freeze({
     id: 'calfire',
+    regions: CALIFORNIA,
     label: 'CAL FIRE incidents',
     home: 'https://www.fire.ca.gov/incidents',
     licence: 'California public incident information (no licence text)',
@@ -33,6 +46,7 @@ export const ALERT_FEEDS = Object.freeze({
   }),
   caltrans: Object.freeze({
     id: 'caltrans',
+    regions: CALIFORNIA,
     label: 'Caltrans lane closures',
     home: 'https://lcswebreports.dot.ca.gov/',
     licence: 'Caltrans CWWP2 public data feed (no licence text)',
@@ -42,6 +56,7 @@ export const ALERT_FEEDS = Object.freeze({
   }),
   faa: Object.freeze({
     id: 'faa',
+    regions: EVERY_REGION,
     label: 'FAA airport status',
     home: 'https://nasstatus.faa.gov/',
     licence: 'US Government work, public domain',
@@ -51,6 +66,7 @@ export const ALERT_FEEDS = Object.freeze({
   }),
   airnow: Object.freeze({
     id: 'airnow',
+    regions: EVERY_REGION,
     label: 'AirNow air quality',
     home: 'https://www.airnow.gov/',
     licence: 'US EPA AirNow, public; preliminary data, attribution requested',
@@ -61,6 +77,7 @@ export const ALERT_FEEDS = Object.freeze({
   }),
   bart: Object.freeze({
     id: 'bart',
+    regions: only('sf-bay-area'),
     label: 'BART service advisories',
     home: 'https://www.bart.gov/schedules/advisories',
     licence: 'BART developer license agreement (attribution)',
@@ -70,6 +87,7 @@ export const ALERT_FEEDS = Object.freeze({
   }),
   sf511: Object.freeze({
     id: 'sf511',
+    regions: only('sf-bay-area', 'sonoma-county'),
     label: '511 SF Bay transit alerts',
     home: 'https://511.org/alerts/transit',
     licence: '511 SF Bay open data terms (free token; 60 requests an hour)',
@@ -80,6 +98,7 @@ export const ALERT_FEEDS = Object.freeze({
   }),
   'lametro-bus': Object.freeze({
     id: 'lametro-bus',
+    regions: only('los-angeles'),
     label: 'LA Metro bus alerts',
     home: 'https://alerts.metro.net/',
     licence: 'Swiftly real-time API terms (free key)',
@@ -90,6 +109,7 @@ export const ALERT_FEEDS = Object.freeze({
   }),
   'lametro-rail': Object.freeze({
     id: 'lametro-rail',
+    regions: only('los-angeles'),
     label: 'LA Metro rail alerts',
     home: 'https://alerts.metro.net/',
     licence: 'Swiftly real-time API terms (free key)',
@@ -100,6 +120,7 @@ export const ALERT_FEEDS = Object.freeze({
   }),
   rtc: Object.freeze({
     id: 'rtc',
+    regions: only('las-vegas'),
     label: 'RTC Southern Nevada alerts',
     home: 'https://www.rtcsnv.com/',
     licence: 'Swiftly real-time API terms (free key)',
@@ -110,6 +131,7 @@ export const ALERT_FEEDS = Object.freeze({
   }),
   caloes: Object.freeze({
     id: 'caloes',
+    regions: CALIFORNIA,
     label: 'Cal OES news',
     home: 'https://news.caloes.ca.gov/',
     licence: 'California public information (no licence text)',
@@ -119,6 +141,7 @@ export const ALERT_FEEDS = Object.freeze({
   }),
   socoemergency: Object.freeze({
     id: 'socoemergency',
+    regions: only('sonoma-county'),
     label: 'SoCoEmergency',
     home: 'https://socoemergency.org/',
     licence: 'County of Sonoma public emergency information (no licence text)',
@@ -128,6 +151,7 @@ export const ALERT_FEEDS = Object.freeze({
   }),
   lafd: Object.freeze({
     id: 'lafd',
+    regions: only('los-angeles'),
     label: 'LAFD alerts',
     home: 'https://lafd.org/alerts',
     licence: 'City of Los Angeles public alerts (no licence text)',
