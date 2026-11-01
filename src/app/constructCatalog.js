@@ -27,6 +27,7 @@ import { createApplicationEarthquakes } from './layers/earthquakes.js';
 import { createApplicationAirQuality } from './layers/airQuality.js';
 import { createApplicationFirePerimeters } from './layers/perimeters.js';
 import { createApplicationIncidents } from './layers/incidents.js';
+import { createApplicationAlerts } from './layers/alerts.js';
 import { createApplicationEvents } from './layers/events.js';
 import { createApplicationGnssIntegrity } from './layers/gnss.js';
 import { createApplicationGhostMaps } from './layers/ghostMaps.js';
@@ -140,6 +141,7 @@ export function createApplicationCatalog({
           source: sources['fire-perimeters'],
         }),
         incidents,
+        createApplicationAlerts({ source: sources.alerts }),
         createApplicationGnssIntegrity({
           source: sources['gnss-integrity'],
           windowMs: sources['gnss-integrity'].windowMs,

@@ -250,6 +250,21 @@ const layers = [
       'icons for other layers; query incidents, earthquakes, fires, flights or vessels',
   },
   {
+    id: 'alerts',
+    aliases: ['alerts', 'official alerts', 'warnings', 'advisories'],
+    context: false,
+    query: {
+      fields: {
+        kind: ['t'],
+        severity: ['t'],
+        agency: ['t'],
+        headline: ['t'],
+        issuedMs: ['ms'],
+      },
+      timeField: 'issuedMs',
+    },
+  },
+  {
     id: 'weather-cyclones',
     aliases: ['cyclones', 'hurricanes', 'typhoons', 'tropical storms'],
     context: false,

@@ -71,6 +71,7 @@ const PANEL_GROUPS = [
       'events',
       'rocket-launches',
       'incidents',
+      'alerts',
       'earthquakes',
       'local-firms',
       'fire-perimeters',

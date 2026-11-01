@@ -3123,5 +3123,38 @@
   "Zoom in to see the rest.": "Aproxime o zoom para ver o restante.",
   "Event Map": "Mapa de eventos",
   "Grid view — straight-down, north-up map with a lat/lon and MGRS grid (G)": "Vista em grade — mapa vertical com o norte para cima e grade de lat/lon e MGRS (G)",
-  "Grid": "Grade"
+  "Grid": "Grade",
+  "US EPA air-quality readings in the Alerts layer; unhealthy readings become air alerts": "Leituras de qualidade do ar da EPA dos EUA na camada Alertas; leituras insalubres viram alertas de ar",
+  "Bay Area and Sonoma County transit service alerts in the Alerts layer": "Alertas de serviço do transporte público da Bay Area e de Sonoma County na camada Alertas",
+  "LA Metro and RTC Southern Nevada service alerts in the Alerts layer": "Alertas de serviço da LA Metro e da RTC Southern Nevada na camada Alertas",
+  "Issued {when}": "Emitido {when}",
+  "Starts {when}": "Começa {when}",
+  "Until {time}": "Até {time}",
+  "Placed at the county centre; the feed gave no shape": "Posicionado no centro do condado; o feed não trouxe forma",
+  "Feed copy may be stale": "A cópia do feed pode estar desatualizada",
+  "{count} more bulletins": {
+    "one": "mais {count} boletim",
+    "many": "mais {count} boletins",
+    "other": "mais {count} boletins"
+  },
+  "{region} · {count} bulletins": {
+    "one": "{region} · {count} boletim",
+    "many": "{region} · {count} boletins",
+    "other": "{region} · {count} boletins"
+  },
+  "Alerts source unavailable": "Fonte de alertas indisponível",
+  "key required": "chave necessária",
+  "Colour shows severity. Bulletins without a map shape gather at each region's centre.": "A cor indica a gravidade. Boletins sem forma no mapa ficam reunidos no centro da sua região.",
+  "{live} of {total} feeds live": "{live} de {total} feeds ao vivo",
+  "Extreme": "Risco extremo",
+  "Severe": "Risco grave",
+  "Minor": "Risco baixo",
+  "Unknown severity": "Risco desconhecido",
+  "Roads": "Estradas",
+  "Airports": "Aeroportos",
+  "Advisory": "Aviso",
+  "Alerts feed rate limited (HTTP 429)": "Feed de alertas com limite de taxa (HTTP 429)",
+  "Malformed alerts snapshot": "Instantâneo de alertas malformado",
+  "Malformed airport status": "Status de aeroportos malformado",
+  "Alerts": "Alertas"
 }

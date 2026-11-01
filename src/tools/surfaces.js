@@ -50,6 +50,9 @@ export const TOOL_SURFACES = Object.freeze({
   // agency feeds; live_ops_region combines cameras, incidents and headlines.
   get_incidents: Object.freeze({ mcp: true, voice: true }),
   live_ops_region: Object.freeze({ mcp: true, voice: true }),
+  // Official alerts and FAA airport status for the LIVE OPS regions.
+  get_alerts: Object.freeze({ mcp: true, voice: true }),
+  get_airport_status: Object.freeze({ mcp: true, voice: true }),
 });
 
 /**

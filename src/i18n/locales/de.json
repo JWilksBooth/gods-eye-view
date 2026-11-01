@@ -3053,5 +3053,36 @@
   "Zoom in to see the rest.": "Hineinzoomen, um den Rest zu sehen.",
   "Event Map": "Ereigniskarte",
   "Grid view — straight-down, north-up map with a lat/lon and MGRS grid (G)": "Rasteransicht – senkrechte Karte mit Norden oben sowie Breiten-/Längengrad- und MGRS-Gitter (G)",
-  "Grid": "Raster"
+  "Grid": "Raster",
+  "US EPA air-quality readings in the Alerts layer; unhealthy readings become air alerts": "Luftqualitätsmessungen der US-Umweltbehörde EPA in der Ebene Warnungen; ungesunde Werte werden zu Luftwarnungen",
+  "Bay Area and Sonoma County transit service alerts in the Alerts layer": "ÖPNV-Störungsmeldungen für die Bay Area und Sonoma County in der Ebene Warnungen",
+  "LA Metro and RTC Southern Nevada service alerts in the Alerts layer": "Störungsmeldungen von LA Metro und RTC Southern Nevada in der Ebene Warnungen",
+  "Issued {when}": "Ausgegeben {when}",
+  "Starts {when}": "Beginnt {when}",
+  "Until {time}": "Bis {time}",
+  "Placed at the county centre; the feed gave no shape": "Am Mittelpunkt des Countys platziert; der Feed lieferte keine Fläche",
+  "Feed copy may be stale": "Feed-Kopie ist möglicherweise veraltet",
+  "{count} more bulletins": {
+    "one": "{count} weitere Meldung",
+    "other": "{count} weitere Meldungen"
+  },
+  "{region} · {count} bulletins": {
+    "one": "{region} · {count} Meldung",
+    "other": "{region} · {count} Meldungen"
+  },
+  "Alerts source unavailable": "Warnungsquelle nicht verfügbar",
+  "key required": "Schlüssel erforderlich",
+  "Colour shows severity. Bulletins without a map shape gather at each region's centre.": "Die Farbe zeigt den Schweregrad. Meldungen ohne Kartenfläche sammeln sich in der Mitte ihrer Region.",
+  "{live} of {total} feeds live": "{live} von {total} Feeds live",
+  "Extreme": "Extrem",
+  "Severe": "Schwer",
+  "Minor": "Gering",
+  "Unknown severity": "Schweregrad unbekannt",
+  "Roads": "Straßen",
+  "Airports": "Flughäfen",
+  "Advisory": "Hinweis",
+  "Alerts feed rate limited (HTTP 429)": "Warnungs-Feed ratenbegrenzt (HTTP 429)",
+  "Malformed alerts snapshot": "Fehlerhafter Warnungs-Snapshot",
+  "Malformed airport status": "Fehlerhafter Flughafenstatus",
+  "Alerts": "Warnungen"
 }

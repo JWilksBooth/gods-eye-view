@@ -16,6 +16,7 @@
 @import './src/ui/styles/scenes.css';
 @import './src/ui/styles/live-ops.css';
 @import './src/ui/styles/events.css';
+@import './src/ui/styles/alerts.css';
 @import './src/ui/styles/bhote-koshi.css';
 @import './src/ui/styles/recent-imagery.css';
 @import './src/ui/styles/recording.css';
