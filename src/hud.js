@@ -522,8 +522,8 @@ export class IntelHUD {
       const m = String(now.getMinutes()).padStart(2, '0');
       const s = String(now.getSeconds()).padStart(2, '0');
       // i18n-ignore: sensor codes
-      collEl.textContent =
-        `COLL: ${h}:${m}:${s} ${this._localZoneName()}`.trim();
+      const coll = `COLL: ${h}:${m}:${s} ${this._localZoneName()}`.trim();
+      collEl.textContent = coll;
     }
 
     // Off-nadir angle (ONA): camera pitch of -90 deg is nadir (straight down),
