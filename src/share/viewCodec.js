@@ -242,6 +242,7 @@ export const SHARE_VIEW_FLAGS = freezeAll([
   { bit: 2, key: 'hudVisible', default: BY_STYLE },
   { bit: 3, key: 'celestialRing', default: BY_STYLE },
   { bit: 4, key: 'scopeEnabled', default: true },
+  { bit: 5, key: 'gridView', default: false },
 ]);
 
 /**

@@ -17,6 +17,7 @@ import { applicationServices } from './services/application.js';
 import * as Cesium from 'cesium';
 import { greatCircleKm } from './geoDistance.js';
 import { forward as toMGRS } from 'mgrs';
+import { formatMGRS } from './mgrsFormat.js';
 import { CITY_POIS } from './cityPois.js';
 import { composeLocalityTag } from './hudLocality.js';
 import { hudQuantity, LOCALIZED_LOCALITY } from './hudLocalityFormat.js';
@@ -466,7 +467,7 @@ export class IntelHUD {
     try {
       const mgrsStr = toMGRS([lonDeg, latDeg], 4); // 4 = 10m precision
       // Format: 18SUJ23370716 → 18S UJ 2337 0716
-      const formatted = this._formatMGRS(mgrsStr);
+      const formatted = formatMGRS(mgrsStr);
       mgrsLabel = formatted;
       const el = document.getElementById('hud-mgrs');
       // i18n-ignore: sensor codes
@@ -569,23 +570,6 @@ export class IntelHUD {
       this._markSummaryDirty();
       this._setSummaryText(this._composeSummary(), false);
     }
-  }
-
-  /**
-   * Insert spaces into a raw MGRS string for human-readable display.
-   * @param {string} mgrs - Raw MGRS string, e.g. `"18SUJ23370716"`.
-   * @returns {string} Formatted string, e.g. `"18S UJ 2337 0716"`.
-   */
-  _formatMGRS(mgrs) {
-    // Regex captures: grid zone designator (1-2 digits + band letter),
-    // 100km square ID (2 letters), numeric easting+northing (split in half).
-    const match = mgrs.match(/^(\d{1,2}[A-Z])\s*([A-Z]{2})\s*(\d+)$/);
-    if (!match) return mgrs;
-    const [, zone, square, coords] = match;
-    const half = coords.length / 2;
-    const easting = coords.slice(0, half);
-    const northing = coords.slice(half);
-    return `${zone} ${square} ${easting} ${northing}`;
   }
 
   /**

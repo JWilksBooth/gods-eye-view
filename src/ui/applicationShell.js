@@ -208,6 +208,7 @@ export class StyleManager extends ShellFacade {
         _bloomSliderValue: this._bloomSliderValue,
         _celestialBtn: this._celestialBtn,
         _cockpitDisplayToggleBtn: this._cockpitDisplayToggleBtn,
+        _gridViewBtn: this._gridViewBtn,
         _detectionAllocationRow: this._detectionAllocationRow,
         _detectionBtn: this._detectionBtn,
         _detectionDensitySlider: this._detectionDensitySlider,
@@ -545,6 +546,7 @@ export class StyleManager extends ShellFacade {
         _detectionFadeSlider: this._detectionFadeSlider,
         _detectionOpacitySlider: this._detectionOpacitySlider,
         _celestialBtn: this._celestialBtn,
+        _gridViewBtn: this._gridViewBtn,
         _models3dBtn: this._models3dBtn,
         _scopeFeatherValue: this._scopeFeatherValue,
         _sharpenSliderValue: this._sharpenSliderValue,
@@ -557,6 +559,7 @@ export class StyleManager extends ShellFacade {
         _toggleOrbit: (...args) => this._toggleOrbit(...args),
         toggleCleanView: (...args) => this.toggleCleanView(...args),
         _toggleCctvEnabled: (...args) => this._toggleCctvEnabled(...args),
+        toggleGridView: (...args) => this.toggleGridView(...args),
         _setBloomEnabled: (...args) => this._setBloomEnabled(...args),
         _setBloomIntensity: (...args) => this._setBloomIntensity(...args),
         _setSharpenEnabled: (...args) => this._setSharpenEnabled(...args),
@@ -595,6 +598,7 @@ export class StyleManager extends ShellFacade {
       },
     });
     this._initUI();
+    this.restoreStoredGridView();
     this._initMapStackControl();
     // Headers first: panel chrome builds its toggle labels from them.
     this._applyRuntimeStaticHeaderText();

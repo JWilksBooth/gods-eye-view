@@ -844,6 +844,9 @@
       "src/ui/visualInput.js",
       "src/ui/visualPresets.js",
       "src/ui/visualSettings.js",
+      "src/ui/gridView.js",
+      "src/gridViewMath.js",
+      "src/mgrsFormat.js",
       "src/worldFocus.js",
       "src/data/feedState.js",
       "src/data/layerSnapshot.js",
@@ -891,7 +894,7 @@
       "src/sources/httpBody.js",
       "src/performancePreset.js"
     ],
-    "external": ["cesium"]
+    "external": ["cesium", "mgrs"]
   },
   "ui-styles": {
     "exports": ["./ui/styles"],
@@ -2527,6 +2530,9 @@
       "src/ui/visualInput.js",
       "src/ui/visualPresets.js",
       "src/ui/visualSettings.js",
+      "src/ui/gridView.js",
+      "src/gridViewMath.js",
+      "src/mgrsFormat.js",
       "src/voice/commands.js",
       "src/voice/panel/actionObserver.js",
       "src/voice/panel/host.js",
@@ -3637,6 +3643,11 @@
       "src/ui/visualInput.js",
       "src/ui/visualPresets.js",
       "src/ui/visualSettings.js",
+      "src/ui/gridView.js",
+      "src/data/scenePick.js",
+      "src/ui/cameraOrientationControls.js",
+      "src/gridViewMath.js",
+      "src/mgrsFormat.js",
       "src/ui/segmentedControl.js",
       "src/i18n/marker.js",
       "src/i18n/index.js",
@@ -3656,7 +3667,7 @@
       "src/visualStylePolicy.js",
       "src/performancePreset.js"
     ],
-    "external": ["cesium"]
+    "external": ["cesium", "mgrs"]
   },
   "ui-panel-chrome": {
     "exports": ["./ui/panel-chrome"],

@@ -1099,6 +1099,23 @@ export class ShellFacade {
     return this._visualSettings.celestialRingEnabled;
   }
 
+  /** Whether the top-down grid view (Display → GRID, the G key) is on. */
+  get gridViewEnabled() {
+    return this._visualSettings.gridViewEnabled;
+  }
+
+  setGridViewEnabled(...args) {
+    return this._visualSettings.setGridViewEnabled(...args);
+  }
+
+  toggleGridView(...args) {
+    return this._visualSettings.toggleGridView(...args);
+  }
+
+  restoreStoredGridView(...args) {
+    return this._visualSettings.restoreStoredGridView(...args);
+  }
+
   setOrbit(...args) {
     return this._locationNavigation.setOrbit(...args);
   }

@@ -1,5 +1,6 @@
 import { clampScopeFeatherPct } from '../scopeMaskPolicy.js';
 import { syncScopeControls } from './displayControls.js';
+import { createGridView } from './gridView.js';
 import { STYLE_STATUS_LABELS } from './visualPresets.js';
 import { RETIRED_STYLES } from '../visualStylePolicy.js';
 import { syncSegmentedControl } from './segmentedControl.js';
@@ -89,6 +90,7 @@ export class VisualSettings {
       scopeEnabled,
       scopeFeatherPct,
       scopeTerminusPct,
+      gridView,
       mapStack,
       panelState,
       styleParams,
@@ -176,6 +178,8 @@ export class VisualSettings {
         this._scopeFeatherValue.textContent = `${pct}%`;
       setScopeMaskFeather(pct / 100);
     }
+    if (typeof gridView === 'boolean')
+      this.setGridViewEnabled(gridView, { syncShare: false, persist: false });
     // null restores the altitude-adaptive ramp; a number pins the terminus
     // (clamped to the supported 94..100 band, same as the `sce` hash key).
     if (scopeTerminusPct === null) setScopeTerminusOverride(null);
@@ -319,6 +323,68 @@ export class VisualSettings {
       this._applyDetectionPreset({ densityPct: settings.detectionDensityPct });
     this._syncShareState();
   }
+  // ── Grid view (Display → GRID, the G key) ───────────────────────────
+  // The controller (src/ui/gridView.js) owns the camera, frustum, base tint
+  // and canvas; this owner keeps the button, the browser-local preference
+  // and the share state in step with it. Created on first use so a stub
+  // document in the state-owner tests never touches the scene.
+
+  /** @returns {boolean} Whether the top-down grid view is on. */
+  get gridViewEnabled() {
+    return this._gridView?.isEnabled() ?? false;
+  }
+
+  _ensureGridView() {
+    if (!this._gridView) {
+      this._gridView = createGridView({
+        viewer: this.viewer,
+        mapStackController: this.mapStackController,
+        requestRender: this.services.governorRequestRender,
+        storage: preferenceStorage(),
+      });
+    }
+    return this._gridView;
+  }
+
+  /**
+   * Turn the grid view on or off.
+   * @param {boolean} enabled
+   * @param {{syncShare?: boolean, persist?: boolean}} [options] A share
+   *   restore passes both false: the link is not the user's own choice.
+   * @returns {boolean} Whether the state changed.
+   */
+  setGridViewEnabled(enabled, { syncShare = true, persist = true } = {}) {
+    const target = Boolean(enabled);
+    if (!target && !this._gridView) {
+      this._updateGridViewButtonState();
+      return false;
+    }
+    const changed = this._ensureGridView().setEnabled(target, { persist });
+    this._updateGridViewButtonState();
+    if (changed && syncShare) this._syncShareState();
+    return changed;
+  }
+
+  /** The G key and the Display button: a user choice, so it claims the lane. */
+  toggleGridView() {
+    this.shareLinkManager?.claimRestoreLane?.('visual');
+    return this.setGridViewEnabled(!this.gridViewEnabled);
+  }
+
+  /** Apply the browser-local preference at start-up (a share link still wins). */
+  restoreStoredGridView() {
+    if (!this._ensureGridView().readStored()) return false;
+    return this.setGridViewEnabled(true, { syncShare: false, persist: false });
+  }
+
+  _updateGridViewButtonState() {
+    const button = this._gridViewBtn;
+    if (!button) return;
+    const on = this.gridViewEnabled;
+    button.classList?.toggle('active', on);
+    button.setAttribute?.('aria-pressed', String(on));
+  }
+
   get hud() {
     return this.readHud();
   }
@@ -999,6 +1065,7 @@ export class VisualSettings {
             ? null
             : Math.round(getScopeTerminusOverride() * 100),
         mapStack: this.mapStackController?.getActiveId?.() || 'photoreal',
+        gridView: this.gridViewEnabled,
       },
     };
   }
@@ -1812,6 +1879,8 @@ export class VisualSettings {
   destroy() {
     this.stop();
     this.releaseIrBoost();
+    this._gridView?.destroy();
+    this._gridView = null;
     this._visualEffects.destroy();
   }
 }
