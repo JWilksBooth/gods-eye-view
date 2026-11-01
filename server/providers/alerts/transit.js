@@ -169,9 +169,9 @@ export function transitAlert(
 }
 
 /**
- * One loadable source per transit feed. A keyed feed whose key is absent is
- * returned with `keyRequired: true` and no loader, so the composite can say
- * so without ever requesting it.
+ * One loadable source per transit feed. A keyed feed reads its key on every
+ * load, so one saved in Provider Settings applies without a restart; while
+ * it is absent `keyMissing()` is true and the feed is never requested.
  */
 export function createTransitFeedSources({
   fetchImpl,
@@ -180,12 +180,14 @@ export function createTransitFeedSources({
   feeds = TRANSIT_ALERT_FEEDS,
 } = {}) {
   return feeds.map((feed) => {
-    const key = feed.envVar ? String(env[feed.envVar] || '').trim() : '';
-    if (feed.envVar && !key) return { ...feed, keyRequired: true };
+    const readKey = () =>
+      feed.envVar ? String(env[feed.envVar] || '').trim() : '';
     return {
       ...feed,
-      keyRequired: false,
+      keyMissing: () => Boolean(feed.envVar) && !readKey(),
       async load() {
+        const key = readKey();
+        if (feed.envVar && !key) throw new UpstreamError('no_key');
         const url = feed.url(key);
         const headers = {
           Accept: 'application/x-protobuf, application/json;q=0.9, */*;q=0.1',

@@ -49,9 +49,9 @@ import { createTransitFeedSources } from './transit.js';
 export const ALERTS_ASSEMBLY_TTL_MS = 20_000;
 
 /**
- * Every feed source with its governor attached. Keyed feeds without a key
- * stay in the list with `keyRequired: true` so the payload can say why they
- * are silent.
+ * Every feed source with its governor attached. Keyed feeds stay in the
+ * list while their key is absent (`keyMissing()`), so the payload can say why
+ * they are silent; they are never requested until the key is set.
  */
 export function createAlertFeedSources({
   fetchImpl,
@@ -69,7 +69,6 @@ export function createAlertFeedSources({
   ];
   return sources.map((source) => ({
     ...source,
-    keyRequired: source.keyRequired === true,
     governor: createFeedGovernor({
       id: source.id,
       ttlMs: source.refreshMs,
@@ -86,9 +85,13 @@ const iso = (ms) => (Number.isFinite(ms) ? new Date(ms).toISOString() : null);
 const safeCode = (code) =>
   /^[a-z][a-z0-9_]{0,40}$/.test(String(code ?? '')) ? String(code) : 'unavailable';
 
+/** Whether a keyed source is waiting for its key. */
+export const sourceKeyMissing = (source) =>
+  typeof source?.keyMissing === 'function' ? source.keyMissing() === true : false;
+
 /** Ask one source through its governor; never throw. */
 export async function readSource(source) {
-  if (source.keyRequired)
+  if (sourceKeyMissing(source))
     return {
       source,
       status: 'key-required',
@@ -335,7 +338,7 @@ export function alertsProxy({
         );
       }
       if (path === '/airnow') {
-        if (!airnow || airnow.keyRequired)
+        if (!airnow || sourceKeyMissing(airnow))
           return json(503, { error: 'no_key', provider: 'airnow' });
         const result = await readSource(airnow);
         if (result.status === 'unavailable')
@@ -360,7 +363,7 @@ export function alertsProxy({
       if (path === '/status')
         return json(200, {
           sources: sources.map((source) => ({
-            keyRequired: source.keyRequired,
+            keyRequired: sourceKeyMissing(source),
             envVar: source.envVar || null,
             ...source.governor.describe(),
           })),

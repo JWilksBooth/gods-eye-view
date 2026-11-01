@@ -147,7 +147,9 @@ export function airNowAlert(reading, { fetchedAt = Date.now() } = {}) {
 
 /**
  * The AirNow feed as the proxy loads it: every site's newest reading in the
- * region boxes and the alerts among them. Keyless it is `keyRequired`.
+ * region boxes and the alerts among them. The key is read on every load,
+ * so one saved in Provider Settings applies without a restart; while it is
+ * absent `keyMissing()` is true and the feed is never requested.
  */
 export function createAirNowFeedSource({
   fetchImpl,
@@ -157,12 +159,12 @@ export function createAirNowFeedSource({
 } = {}) {
   const feed = ALERT_FEEDS.airnow;
   const apiKey = () => String(env[feed.envVar] || '').trim();
-  if (!apiKey()) return { ...feed, keyRequired: true };
   return {
     ...feed,
-    keyRequired: false,
+    keyMissing: () => !apiKey(),
     async load() {
       const key = apiKey();
+      if (!key) throw new UpstreamError('no_key');
       const readings = [];
       let loaded = 0;
       let lastError = null;

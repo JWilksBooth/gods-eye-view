@@ -156,7 +156,6 @@ export function createAgencyFeedSources({
     }
     return {
       ...feed,
-      keyRequired: false,
       async load() {
         const tried = new Set();
         const attempts = [working, ...feed.candidates].filter(Boolean);
