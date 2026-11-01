@@ -526,7 +526,7 @@ test('Cyber side panels share one width and one framed surface material', () => 
   assert.match(cyberStyles, /--cyber-panel-control-size: 30px;/);
   assert.match(
     cyberStyles,
-    /--cyber-panel-surface: rgba\(18, 24, 27, 0\.92\);/,
+    /--cyber-panel-surface: rgba\(18, 27, 20, 0\.92\);/,
   );
   assert.match(
     cyberStyles,
@@ -761,7 +761,7 @@ test('the Display selector, voice schema and final stylesheet expose Cyber', () 
   assert.match(cyberStyles, /\.hud-corner::before/);
   assert.match(
     cyberStyles,
-    /--cyber-telemetry-fill: rgba\(13, 20, 23, 0\.985\);/,
+    /--cyber-telemetry-fill: rgba\(13, 23, 16, 0\.985\);/,
   );
   assert.match(cyberStyles, /var\(--cyber-telemetry-fill\)/);
   assert.match(cyberStyles, />\s*\.panel-header\s+\.panel-title::before/);

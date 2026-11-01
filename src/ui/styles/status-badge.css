@@ -8,10 +8,10 @@
   max-width: 100%;
   box-sizing: border-box;
   padding: 4px 8px;
-  border: 1px solid var(--status-badge-border, rgba(0, 212, 255, 0.32));
+  border: 1px solid var(--status-badge-border, rgba(0, 255, 65, 0.32));
   border-radius: 999px;
-  background: var(--status-badge-background, rgba(0, 212, 255, 0.09));
-  color: var(--status-badge-color, #9defff);
+  background: var(--status-badge-background, rgba(0, 255, 65, 0.09));
+  color: var(--status-badge-color, #9dffb6);
   font-family: var(--font-mono);
   font-size: 8px;
   letter-spacing: 1.3px;

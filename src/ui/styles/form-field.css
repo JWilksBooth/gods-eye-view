@@ -36,8 +36,8 @@
   font-family: var(--font-mono);
   font-size: 9px;
   letter-spacing: 0.7px;
-  --gev-field-background: rgba(0, 212, 255, 0.1);
-  --gev-field-border-color: rgba(0, 212, 255, 0.5);
+  --gev-field-background: rgba(0, 255, 65, 0.1);
+  --gev-field-border-color: rgba(0, 255, 65, 0.5);
   border-radius: 4px;
   padding: 1px 3px;
   -moz-appearance: textfield;

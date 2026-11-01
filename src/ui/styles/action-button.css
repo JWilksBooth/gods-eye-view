@@ -23,7 +23,7 @@
 .scene-btn:hover:not(:disabled) {
   color: var(--accent);
   border-color: var(--accent);
-  background: rgba(0, 212, 255, 0.14);
+  background: rgba(0, 255, 65, 0.14);
 }
 
 .gev-action-button:disabled,

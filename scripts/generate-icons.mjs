@@ -17,7 +17,7 @@ const LOGO = path.join(REPO_ROOT, 'public', 'logo.svg');
 const OUT_DIR = path.join(REPO_ROOT, 'public', 'icons');
 
 /** `--bg-dark` from src/ui/styles/foundation.css, so the tile matches the app. */
-const BACKGROUND = '#0a0a0f';
+const BACKGROUND = '#020a04';
 
 /**
  * Fraction of the canvas the mark is allowed to occupy.

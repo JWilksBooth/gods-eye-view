@@ -40,7 +40,7 @@ body.mobile-shell #mobile-tab-bar {
   height: var(--mobile-tab-space);
   padding: 0 max(4px, env(safe-area-inset-right, 0px))
     var(--mobile-bottom-inset) max(4px, env(safe-area-inset-left, 0px));
-  background: rgba(8, 14, 22, 0.94);
+  background: rgba(8, 22, 12, 0.94);
   border-top: 1px solid var(--glass-border);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
@@ -146,7 +146,7 @@ body.mobile-shell[data-mobile-sheet='more'] #right-context-rail {
   overflow-y: auto;
   overscroll-behavior: contain;
   pointer-events: auto;
-  background: rgba(8, 14, 22, 0.96);
+  background: rgba(8, 22, 12, 0.96);
   border: 1px solid var(--glass-border);
   border-bottom: 0;
   border-radius: 18px 18px 0 0;
@@ -262,7 +262,7 @@ body.mobile-shell[data-mobile-sheet='more'] #command-dock {
   overflow-x: hidden;
   overflow-y: auto;
   pointer-events: auto;
-  background: rgba(8, 14, 22, 0.96);
+  background: rgba(8, 22, 12, 0.96);
   border: 1px solid var(--glass-border);
   border-bottom: 0;
   border-radius: 18px 18px 0 0;

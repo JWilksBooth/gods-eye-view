@@ -231,6 +231,21 @@ the original HUD presentation; Cyber retains its existing skin.
 `node scripts/qa-scope-hud.mjs` checks native input, range, layout persistence,
 restoration and both Scope presentations. `QA_SCREENSHOT_DIR` saves screenshots.
 
+## Matrix green shell — November 1, 2026
+
+The application shell reads a Matrix green accent family from the tokens in
+`src/ui/styles/foundation.css` (`--accent: #00ff41`, `--accent-soft`,
+`--accent-bright`, `--surface-green`, `--accent-rgb`), and every hard-coded
+blue/cyan literal in the shell stylesheets, the HUD default palette, the scene
+dialog, the logo and the dock icons follows the same hue. `matrix.css` adds the
+phosphor terminal treatment: static scanlines and a sheen on glass panels, 6px
+corners with a neon edge-light, phosphor glow on accent labels, and motion
+(title breathe, one-shot state flicker) only under
+`prefers-reduced-motion: no-preference`. Map imagery, source media, feed-state
+badges, layer symbology, the cockpit warning amber, the launches geometry, the
+celestial moon marker and provider identity colours keep their own colours. The
+Cyber layout keeps its slate/red skin, now green-tinted, and is not the default.
+
 ## HUD layouts — October 29, 2026
 
 Display > HUD > Layout offers Tactical, Minimal and Cyber; the `set_hud` voice
