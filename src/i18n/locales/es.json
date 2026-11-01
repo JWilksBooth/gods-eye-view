@@ -3060,5 +3060,22 @@
   "Rendering performance preset": "Ajuste predefinido de rendimiento de renderizado",
   "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Resolución completa, antialiasing 4×, 60 fps y densidad completa de etiquetas",
   "Full resolution with 2× anti-aliasing at 60 fps — the default": "Resolución completa con antialiasing 2× a 60 fps: el ajuste predeterminado",
-  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Resolución a tres cuartos, sin multimuestreo, 30 fps, etiquetas escasas y actualizaciones de capas más lentas"
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Resolución a tres cuartos, sin multimuestreo, 30 fps, etiquetas escasas y actualizaciones de capas más lentas",
+  "Live Streams": "Transmisiones en vivo",
+  "YouTube live": "YouTube en vivo",
+  "Live video (HLS)": "Vídeo en vivo (HLS)",
+  "Motion JPEG": "Motion JPEG",
+  "Link out": "Enlace externo",
+  "Position is approximate": "La posición es aproximada",
+  "Placed at the region centre": "Situado en el centro de la región",
+  "Published by {owner}": "Publicado por {owner}",
+  "Checked on {date}": "Comprobado el {date}",
+  "Click card to open the stream": "Haz clic en la tarjeta para abrir la transmisión",
+  "Open {title}": "Abrir {title}",
+  "Live stream source unavailable": "Fuente de transmisiones en vivo no disponible",
+  "Colour shows how a stream plays. Nothing loads until you open one.": "El color indica cómo se reproduce una transmisión. No se carga nada hasta que abres una.",
+  "Live stream feed rate limited (HTTP 429)": "Fuente de transmisiones en vivo limitada (HTTP 429)",
+  "Malformed live stream snapshot": "Instantánea de transmisiones en vivo mal formada",
+  "Discovers geotagged YouTube live streams for the Live Streams layer; keyless, the layer shows its curated cameras": "Descubre transmisiones en vivo de YouTube geolocalizadas para la capa Transmisiones en vivo; sin clave, la capa muestra sus cámaras seleccionadas",
+  "Adds Windy.com webcams to the Live Streams layer, credited \"Webcams provided by windy.com\"": "Añade webcams de Windy.com a la capa Transmisiones en vivo, con el crédito \"Webcams provided by windy.com\""
 }

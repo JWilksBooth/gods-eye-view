@@ -2920,5 +2920,22 @@
   "Rendering performance preset": "描画パフォーマンスのプリセット",
   "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "フル解像度、4倍アンチエイリアス、60 fps、ラベル密度は最大",
   "Full resolution with 2× anti-aliasing at 60 fps — the default": "フル解像度、2倍アンチエイリアス、60 fps（既定）",
-  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "解像度 3/4、マルチサンプリングなし、30 fps、ラベルは少なめ、レイヤー更新は低頻度"
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "解像度 3/4、マルチサンプリングなし、30 fps、ラベルは少なめ、レイヤー更新は低頻度",
+  "Live Streams": "ライブ配信",
+  "YouTube live": "YouTube ライブ",
+  "Live video (HLS)": "ライブ映像 (HLS)",
+  "Motion JPEG": "Motion JPEG",
+  "Link out": "外部リンク",
+  "Position is approximate": "位置はおおよそです",
+  "Placed at the region centre": "地域の中心に配置",
+  "Published by {owner}": "配信元: {owner}",
+  "Checked on {date}": "確認日: {date}",
+  "Click card to open the stream": "カードをクリックして配信を開く",
+  "Open {title}": "{title} を開く",
+  "Live stream source unavailable": "ライブ配信のソースを利用できません",
+  "Colour shows how a stream plays. Nothing loads until you open one.": "色は配信の再生方法を示します。開くまで何も読み込まれません。",
+  "Live stream feed rate limited (HTTP 429)": "ライブ配信フィードがレート制限中 (HTTP 429)",
+  "Malformed live stream snapshot": "ライブ配信スナップショットの形式が不正です",
+  "Discovers geotagged YouTube live streams for the Live Streams layer; keyless, the layer shows its curated cameras": "ライブ配信レイヤー向けに位置情報付きの YouTube ライブ配信を探します。キーがない場合、レイヤーは厳選したカメラを表示します",
+  "Adds Windy.com webcams to the Live Streams layer, credited \"Webcams provided by windy.com\"": "Windy.com のウェブカメラをライブ配信レイヤーに追加します（クレジット \"Webcams provided by windy.com\"）"
 }

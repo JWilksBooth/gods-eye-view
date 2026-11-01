@@ -48,7 +48,8 @@ test('the complete Realtime tool payload pins the manifest-generated layer relea
     // Snow leaves the set_visual_style enum.
     // The Operator HUD layout leaves set_hud's layout enum.
     // Live Incidents (LIVE OPS) extends the generated layer enums.
-    '8f1901da8fd4e3d90da1b1137da94f016f7412b6fcced5f85014565c7e94ac18',
+    // Live Streams extends the generated layer enums.
+    '49a210f5cbd3498c78cfebe93ca609e0dbd35fc0197650554a894251405ab8ec',
   );
 });
 

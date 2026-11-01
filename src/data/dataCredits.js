@@ -297,6 +297,15 @@ export const DATA_CREDITS = [
       '<a href="https://www.nvroads.com/" target="_blank" rel="noopener">Nevada 511</a> events (courtesy)',
   },
   {
+    key: 'live-streams',
+    html:
+      'Live streams: public YouTube live cameras embedded with the standard ' +
+      '<a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener">YouTube</a> player, each credited to its channel; ' +
+      'live stream discovery through the YouTube Data API; traffic video: Caltrans District 4 (courtesy); ' +
+      'Webcams provided by <a href="https://www.windy.com/webcams" target="_blank" rel="noopener">windy.com</a>; ' +
+      'scanner directories: <a href="https://www.broadcastify.com/" target="_blank" rel="noopener">Broadcastify</a> (link only)',
+  },
+  {
     key: 'catalonia-cctv',
     html:
       'CCTV cameras &amp; frames (Catalonia): ' +

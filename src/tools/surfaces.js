@@ -50,6 +50,8 @@ export const TOOL_SURFACES = Object.freeze({
   // agency feeds; live_ops_region combines cameras, incidents and headlines.
   get_incidents: Object.freeze({ mcp: true, voice: true }),
   live_ops_region: Object.freeze({ mcp: true, voice: true }),
+  // Live streams are metadata until opened, so both surfaces may list them.
+  find_live_streams: Object.freeze({ mcp: true, voice: true }),
 });
 
 /**

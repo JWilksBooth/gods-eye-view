@@ -3130,5 +3130,22 @@
   "Rendering performance preset": "Передустановка продуктивності рендерингу",
   "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Повна роздільна здатність, згладжування 4×, 60 к/с і повна щільність підписів",
   "Full resolution with 2× anti-aliasing at 60 fps — the default": "Повна роздільна здатність зі згладжуванням 2× при 60 к/с — типово",
-  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Роздільна здатність 3/4, без мультисемплінгу, 30 к/с, рідкі підписи та повільніше оновлення шарів"
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Роздільна здатність 3/4, без мультисемплінгу, 30 к/с, рідкі підписи та повільніше оновлення шарів",
+  "Live Streams": "Прямі трансляції",
+  "YouTube live": "YouTube наживо",
+  "Live video (HLS)": "Живе відео (HLS)",
+  "Motion JPEG": "Motion JPEG",
+  "Link out": "Зовнішнє посилання",
+  "Position is approximate": "Положення приблизне",
+  "Placed at the region centre": "Розміщено в центрі регіону",
+  "Published by {owner}": "Опубліковано: {owner}",
+  "Checked on {date}": "Перевірено {date}",
+  "Click card to open the stream": "Натисніть на картку, щоб відкрити трансляцію",
+  "Open {title}": "Відкрити {title}",
+  "Live stream source unavailable": "Джерело прямих трансляцій недоступне",
+  "Colour shows how a stream plays. Nothing loads until you open one.": "Колір показує, як відтворюється трансляція. Нічого не завантажується, доки ви її не відкриєте.",
+  "Live stream feed rate limited (HTTP 429)": "Стрічка прямих трансляцій обмежена за частотою (HTTP 429)",
+  "Malformed live stream snapshot": "Пошкоджений знімок прямих трансляцій",
+  "Discovers geotagged YouTube live streams for the Live Streams layer; keyless, the layer shows its curated cameras": "Знаходить геоприв’язані прямі трансляції YouTube для шару «Прямі трансляції»; без ключа шар показує відібрані камери",
+  "Adds Windy.com webcams to the Live Streams layer, credited \"Webcams provided by windy.com\"": "Додає вебкамери Windy.com до шару «Прямі трансляції» із зазначенням «Webcams provided by windy.com»"
 }

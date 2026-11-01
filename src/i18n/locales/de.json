@@ -2990,5 +2990,22 @@
   "Rendering performance preset": "Voreinstellung für die Render-Leistung",
   "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Volle Auflösung, 4-faches Anti-Aliasing, 60 fps und volle Beschriftungsdichte",
   "Full resolution with 2× anti-aliasing at 60 fps — the default": "Volle Auflösung mit 2-fachem Anti-Aliasing bei 60 fps – die Standardeinstellung",
-  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Dreiviertel-Auflösung, kein Multisampling, 30 fps, wenige Beschriftungen und langsamere Ebenen-Aktualisierungen"
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Dreiviertel-Auflösung, kein Multisampling, 30 fps, wenige Beschriftungen und langsamere Ebenen-Aktualisierungen",
+  "Live Streams": "Live-Streams",
+  "YouTube live": "YouTube-Live",
+  "Live video (HLS)": "Live-Video (HLS)",
+  "Motion JPEG": "Motion JPEG",
+  "Link out": "Externer Link",
+  "Position is approximate": "Position ist ungefähr",
+  "Placed at the region centre": "Im Regionszentrum platziert",
+  "Published by {owner}": "Veröffentlicht von {owner}",
+  "Checked on {date}": "Geprüft am {date}",
+  "Click card to open the stream": "Karte anklicken, um den Stream zu öffnen",
+  "Open {title}": "{title} öffnen",
+  "Live stream source unavailable": "Live-Stream-Quelle nicht verfügbar",
+  "Colour shows how a stream plays. Nothing loads until you open one.": "Die Farbe zeigt, wie ein Stream abgespielt wird. Nichts wird geladen, bis Sie einen öffnen.",
+  "Live stream feed rate limited (HTTP 429)": "Live-Stream-Feed ratenbegrenzt (HTTP 429)",
+  "Malformed live stream snapshot": "Fehlerhafter Live-Stream-Snapshot",
+  "Discovers geotagged YouTube live streams for the Live Streams layer; keyless, the layer shows its curated cameras": "Findet georeferenzierte YouTube-Live-Streams für die Ebene Live-Streams; ohne Schlüssel zeigt die Ebene ihre kuratierten Kameras",
+  "Adds Windy.com webcams to the Live Streams layer, credited \"Webcams provided by windy.com\"": "Fügt der Ebene Live-Streams Webcams von Windy.com hinzu, mit dem Hinweis „Webcams provided by windy.com“"
 }

@@ -249,3 +249,9 @@ export function _resetEventAdaptersForTest() {
 //       priority: alert.urgency,
 //     })),
 // });
+
+// Live streams (src/layers/streams): one icon per curated or discovered
+// stream; the feed is the stream's own embed, created by the drawer on open
+// and destroyed on close. Registered for real in src/app/layers/streams.js.
+// import { createStreamsEventAdapter } from '../streams/eventAdapter.js';
+// registerEventAdapter(createStreamsEventAdapter({ layer: streamsLayer }));

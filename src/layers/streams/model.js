@@ -16,7 +16,7 @@ export const STREAM_KIND_TOKENS = Object.freeze({
   youtube: Object.freeze({ token: '--event-stream', fallback: '#7cf5d2' }),
   hls: Object.freeze({ token: '--event-stream', fallback: '#7cf5d2' }),
   mjpeg: Object.freeze({ token: '--event-stream', fallback: '#7cf5d2' }),
-  link: Object.freeze({ token: '--text-muted', fallback: '#9aa4ad' }),
+  link: Object.freeze({ token: '--text-dim', fallback: '#9aa4ad' }),
 });
 
 /** Short English labels per kind; the UI translates them with t(). */
@@ -45,7 +45,10 @@ export function streamAccent(kind, readToken = () => '') {
 }
 
 const SOURCE_RANK = new Map(
-  STREAM_SOURCES.map((source, index) => [source, STREAM_SOURCES.length - index]),
+  STREAM_SOURCES.map((source, index) => [
+    source,
+    STREAM_SOURCES.length - index,
+  ]),
 );
 const KIND_RANK = new Map(
   STREAM_KINDS.map((kind, index) => [kind, STREAM_KINDS.length - index]),
@@ -53,7 +56,9 @@ const KIND_RANK = new Map(
 
 /** Curated and playable streams win the ambient-label cohort. */
 export function streamPriority(row) {
-  return (SOURCE_RANK.get(row.source) ?? 0) * 10 + (KIND_RANK.get(row.kind) ?? 0);
+  return (
+    (SOURCE_RANK.get(row.source) ?? 0) * 10 + (KIND_RANK.get(row.kind) ?? 0)
+  );
 }
 
 /**

@@ -136,6 +136,27 @@ export const KEY_SETUP_KEYS = Object.freeze([
     tier: 'free',
   }),
   Object.freeze({
+    id: 'youtube',
+    title: 'YOUTUBE DATA API', // i18n-ignore: provider product name
+    unlocks: msg(
+      'Discovers geotagged YouTube live streams for the Live Streams layer; keyless, the layer shows its curated cameras',
+    ),
+    getUrl:
+      'https://console.cloud.google.com/apis/library/youtube.googleapis.com',
+    envVars: Object.freeze(['YOUTUBE_API_KEY']),
+    tier: 'free',
+  }),
+  Object.freeze({
+    id: 'windy-webcams',
+    title: 'WINDY WEBCAMS', // i18n-ignore: provider product name
+    unlocks: msg(
+      'Adds Windy.com webcams to the Live Streams layer, credited "Webcams provided by windy.com"',
+    ),
+    getUrl: 'https://api.windy.com/keys',
+    envVars: Object.freeze(['WINDY_WEBCAMS_API_KEY']),
+    tier: 'free',
+  }),
+  Object.freeze({
     id: 'socrata',
     title: 'SOCRATA', // i18n-ignore: provider product name; row is hidden
     unlocks: msg(

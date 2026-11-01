@@ -3130,5 +3130,22 @@
   "Rendering performance preset": "Предустановка производительности рендеринга",
   "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Полное разрешение, сглаживание 4×, 60 к/с и полная плотность подписей",
   "Full resolution with 2× anti-aliasing at 60 fps — the default": "Полное разрешение со сглаживанием 2× при 60 к/с — по умолчанию",
-  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Разрешение 3/4, без мультисэмплинга, 30 к/с, редкие подписи и более редкое обновление слоёв"
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Разрешение 3/4, без мультисэмплинга, 30 к/с, редкие подписи и более редкое обновление слоёв",
+  "Live Streams": "Прямые трансляции",
+  "YouTube live": "YouTube в прямом эфире",
+  "Live video (HLS)": "Живое видео (HLS)",
+  "Motion JPEG": "Motion JPEG",
+  "Link out": "Внешняя ссылка",
+  "Position is approximate": "Положение приблизительное",
+  "Placed at the region centre": "Размещено в центре региона",
+  "Published by {owner}": "Опубликовано: {owner}",
+  "Checked on {date}": "Проверено {date}",
+  "Click card to open the stream": "Нажмите на карточку, чтобы открыть трансляцию",
+  "Open {title}": "Открыть {title}",
+  "Live stream source unavailable": "Источник прямых трансляций недоступен",
+  "Colour shows how a stream plays. Nothing loads until you open one.": "Цвет показывает, как воспроизводится трансляция. Ничего не загружается, пока вы её не откроете.",
+  "Live stream feed rate limited (HTTP 429)": "Лента прямых трансляций ограничена по частоте (HTTP 429)",
+  "Malformed live stream snapshot": "Повреждённый снимок прямых трансляций",
+  "Discovers geotagged YouTube live streams for the Live Streams layer; keyless, the layer shows its curated cameras": "Находит геопривязанные прямые трансляции YouTube для слоя «Прямые трансляции»; без ключа слой показывает отобранные камеры",
+  "Adds Windy.com webcams to the Live Streams layer, credited \"Webcams provided by windy.com\"": "Добавляет веб-камеры Windy.com в слой «Прямые трансляции» с указанием «Webcams provided by windy.com»"
 }

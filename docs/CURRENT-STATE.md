@@ -31,6 +31,23 @@ Docker Compose mounts the checkout with the shared SELinux `:z` label so
 containers can read it on enforcing SELinux hosts. The separate image-owned
 `node_modules` volume and loopback-only port publishing remain unchanged.
 
+## Live Streams — November 1, 2026
+
+The Live Streams layer (`streams`, token `8`, enabled-only; Cameras group)
+reads `/api/streams`, which merges live-stream metadata for the LIVE OPS
+regions: a curated registry of public 24/7 cameras (YouTube entries verified
+through oEmbed, Caltrans District 4 HLS playlists verified live), YouTube Data
+API discovery with `YOUTUBE_API_KEY` (hourly per region under a daily budget,
+discovered streams placed at the region centre and saying so), Windy webcams
+with `WINDY_WEBCAMS_API_KEY` (preview URLs served only while fresh) and
+Broadcastify scanner directories as link-outs. Nothing but metadata crosses
+the wire: a player is created only when a stream is opened in the event map's
+feed drawer and destroyed when it closes. The layer draws points coloured by
+kind with ambient labels; a click opens a card whose activation opens the
+stream in the drawer when the Event Map layer is on and on the provider's page
+otherwise, and the points hide while the Event Map carries the same streams.
+`find_live_streams` exposes the same metadata to MCP and voice.
+
 The HUD's AI summary line looks up place names for the view only when the
 summary can use them. The page asks `GET /api/openai/hud-summary/status` once;
 a server without an OpenAI key answers `{ configured: false }`, and the HUD then

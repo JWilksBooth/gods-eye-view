@@ -22,7 +22,7 @@ app changes until the wiring below lands.
 - `src/layers/events/hoverCard.js` and `interaction.js`: one hover card element,
   throttled hover picks (120 ms), clean-tap clicks, `registerPickOwner('events')`.
 - `src/layers/events/lifecycle.js`: the manager module (`init/enable/disable/
-  update/destroy/getStats`, `attachDataManager`, `findByQuery`, `openEvent`,
+update/destroy/getStats`, `attachDataManager`, `findByQuery`, `openEvent`,
   `nearestCameras`, QA seams).
 - `src/layers/events/adapters/{cctv,fires,earthquakes,aircraft,vessels}.js`.
 - `src/ui/eventFeedDrawer.js` + `src/ui/styles/events.css`: the right-side
@@ -58,12 +58,46 @@ app changes until the wiring below lands.
    are taken) and a DISPLAY button; `gev:grid-view:v1` in localStorage; share
    flag bit 5 `gridView` in `src/share/viewCodec.js`, long-form `gv` in
    `src/sharelink.js`, applied through `visualSettings.js`.
-3. Streams: `server/providers/streams/` (curated registry, YouTube discovery,
-   Windy, scanners), `src/layers/streams/{source,index}.js`, keys in
-   `src/keySetupCore.mjs` and `.env.example`, `find_live_streams` tool,
-   `DATA_SOURCES.md`, `src/data/dataCredits.js`, `docs/TOOLS.md`.
+3. Streams: done on `wip/streams` (see **Streams** below); at merge the
+   `streams` layer takes token `8`.
 4. Translations for every new string in all ten locale catalogs, `npm run i18n`,
    `npm run format`, `npm test`, `scripts/qa-event-map.mjs`, screenshots, PR.
+
+## Streams
+
+The `streams` layer (`src/layers/streams/`, token `8`, enabled-only) and the
+`/api/streams` provider (`server/providers/streams.js`) put geotagged live
+streams on the map for the four LIVE OPS regions. Everything that crosses the
+wire is metadata (`src/layers/streams/records.js`: where, who, and how it
+plays); the source never requests media and never creates a player. A player
+exists only inside the feed drawer, created when an icon is clicked and
+destroyed when the drawer closes.
+
+- **Sources** (`server/providers/streams/`): the curated registry (one JSON
+  file per region under `registry/`; every YouTube entry answered oEmbed, so it
+  is public and embeddable, and every Caltrans HLS playlist answered `#EXTM3U`
+  on its `verified_at`), YouTube Data API discovery behind `YOUTUBE_API_KEY`
+  (hourly per region, a daily budget below the 100-call `search.list` bucket,
+  cached result served when spent, disk copy pruned after 30 days, discovered
+  streams placed at the region centre and saying so), Windy webcams behind
+  `WINDY_WEBCAMS_API_KEY` (hourly per region, preview URLs served only within
+  nine minutes of their fetch, rows link to Windy's player, credited "Webcams
+  provided by windy.com") and Broadcastify scanner directories as link-outs.
+  Keyless, the layer serves the registry and the link-outs.
+- **Registry counts on 2026-10-31**: Los Angeles 16, San Francisco Bay Area
+  15, Las Vegas 8, Sonoma County 8 (2 civic YouTube cameras plus 6 Caltrans
+  District 4 HLS feeds; the county has few public YouTube cameras), plus one
+  or more scanner link-outs per region.
+- **Layer**: points coloured by kind (`--event-stream` for anything that plays
+  in place, `--text-dim` for link-outs), ambient labels, a card on click that
+  opens the stream through the event map's drawer when the Event Map layer is
+  on and on the provider's page otherwise. While the Event Map layer is on, its
+  icons carry the streams and the layer's own points hide, so nothing is drawn
+  twice. `src/app/layers/streams.js` registers the adapter
+  (`src/layers/streams/eventAdapter.js`, kind `stream`, `layerId: 'streams'`)
+  whose `feed()` is `{ type: 'stream', stream, owner, terms }`.
+- **Tool**: `find_live_streams` (region, area, kind, source, limit) on MCP and
+  voice; `docs/TOOLS.md`.
 
 ## Provider terms (researched 2026-11-01)
 
