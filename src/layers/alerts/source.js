@@ -10,20 +10,36 @@ const AIRPORTS_URL = '/api/alerts/airports';
 const MAX_RESPONSE_BYTES = 16 * 1024 * 1024;
 
 /**
- * Request the normalized alert payload through the bounded, same-origin
- * alerts proxy. The proxy assembles every feed; this source only validates
- * the shape, so a malformed answer is refused rather than drawn empty.
+ * Request official alerts through the bounded, same-origin `/api/alerts`
+ * proxy. The proxy assembles and governs every feed; this source only names
+ * what to narrow to and validates the answer's shape, so a malformed answer
+ * is refused rather than drawn empty.
  */
 export function createAlertsSource({
   fetchImpl = (...args) => globalThis.fetch(...args),
 } = {}) {
-  async function getJson(url, signal, label) {
+  async function getJson(url, signal) {
     signal?.throwIfAborted();
     const response = await fetchImpl(url, {
+      cache: 'no-store',
       signal,
       headers: { Accept: 'application/json' },
     });
-    if (!response.ok) throw new Error(`${label} HTTP ${response.status}`);
+    if (!response.ok) {
+      const limited = response.status === 429;
+      throw Object.assign(
+        new Error(
+          limited
+            ? msg('Alerts feed rate limited (HTTP 429)')
+            : `Alerts feed unavailable (HTTP ${response.status})`,
+        ),
+        {
+          status: response.status,
+          retryable: limited || response.status >= 500,
+          retryAfterMs: limited ? 60_000 : null,
+        },
+      );
+    }
     const payload = await readResponseJsonCapped(
       response,
       MAX_RESPONSE_BYTES,
@@ -34,28 +50,44 @@ export function createAlertsSource({
   }
   return {
     /**
-     * Every current alert in the regions, with per-feed provenance.
-     * @returns {Promise<{alerts: object[], sources: object[], regions: object[], fetchedAt: string|null, stale: boolean}>}
+     * Every current alert, optionally narrowed to one LIVE OPS region, some
+     * kinds or a minimum severity, with each feed's state.
+     * @returns {Promise<{alerts: object[], sources: object[], regions: object[], region: string|null, fetchedAt: string|null, stale: boolean}>}
      */
-    async getSnapshot({ signal } = {}) {
-      const payload = await getJson(ALERTS_URL, signal, 'Alerts');
+    async getSnapshot({
+      signal,
+      region = null,
+      kinds = null,
+      minSeverity = null,
+    } = {}) {
+      const params = new URLSearchParams();
+      if (region) params.set('region', String(region));
+      if (Array.isArray(kinds) && kinds.length)
+        params.set('kind', kinds.join(','));
+      if (minSeverity) params.set('severity', String(minSeverity));
+      const query = params.size ? `?${params}` : '';
+      const payload = await getJson(`${ALERTS_URL}${query}`, signal);
       if (!Array.isArray(payload?.alerts) || !Array.isArray(payload?.sources))
         throw new Error(msg('Malformed alerts snapshot'));
       return {
-        alerts: payload.alerts,
+        alerts: payload.alerts.filter(
+          (alert) => alert && typeof alert === 'object' && alert.id,
+        ),
         sources: payload.sources,
         regions: Array.isArray(payload.regions) ? payload.regions : [],
-        fetchedAt: typeof payload.fetchedAt === 'string' ? payload.fetchedAt : null,
+        region: typeof payload.region === 'string' ? payload.region : null,
+        fetchedAt:
+          typeof payload.fetchedAt === 'string' ? payload.fetchedAt : null,
         stale: payload.stale === true,
       };
     },
     /**
-     * The FAA airport status list: every airport with an active program,
-     * with coordinates for the regions' airports.
+     * FAA airport status: the regions' airports (each `normal` or its worst
+     * program) and every airport the FAA lists with a closure, stop or delay.
      */
     async getAirports({ signal } = {}) {
-      const payload = await getJson(AIRPORTS_URL, signal, 'Airport status');
-      if (!Array.isArray(payload?.airports))
+      const payload = await getJson(AIRPORTS_URL, signal);
+      if (!Array.isArray(payload?.airports) || !Array.isArray(payload?.events))
         throw new Error(msg('Malformed airport status'));
       return payload;
     },

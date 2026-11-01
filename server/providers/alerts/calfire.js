@@ -1,8 +1,8 @@
 /**
- * CAL FIRE active incidents from the public incidents API on fire.ca.gov
- * (keyless; California public record). The GeoJSON list is preferred; the
- * plain list and the older host are tried when it is unavailable, and the
- * address that answered is remembered for the next refresh.
+ * CAL FIRE active incidents from the public incidents API
+ * (incidents.fire.ca.gov; keyless; California public incident information).
+ * The GeoJSON list is preferred and the plain list is tried when it is
+ * unavailable; the address that answered is remembered for the next refresh.
  */
 import { clampText, createAlert } from '../../../src/layers/alerts/model.js';
 import { regionsForPoint } from '../../../src/layers/alerts/regions.js';
@@ -11,9 +11,7 @@ import { UpstreamError, fetchUpstreamText, parseJsonText } from './http.js';
 
 export const CALFIRE_INCIDENT_URLS = Object.freeze([
   'https://incidents.fire.ca.gov/umbraco/api/IncidentApi/GeoJsonList?inactive=false',
-  'https://www.fire.ca.gov/umbraco/api/IncidentApi/GeoJsonList?inactive=false',
   'https://incidents.fire.ca.gov/umbraco/api/IncidentApi/List?inactive=false',
-  'https://www.fire.ca.gov/umbraco/api/IncidentApi/List?inactive=false',
 ]);
 const CALFIRE_HOME = 'https://www.fire.ca.gov/';
 const MAX_BYTES = 8 * 1024 * 1024;
@@ -30,6 +28,7 @@ function field(row, name) {
 }
 
 const number = (value) => {
+  if (value === undefined || value === null || value === '') return null;
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
 };
@@ -45,7 +44,7 @@ export function calFireSeverity(acres, containedPct) {
   return 'minor';
 }
 
-/** The rows of a GeoJSON list or a plain list payload. */
+/** The rows of a GeoJSON list or a plain list payload, or null. */
 export function calFireRows(payload) {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.features))
@@ -61,6 +60,7 @@ export function normalizeCalFireIncident(row, { fetchedAt = Date.now() } = {}) {
   if (!row || typeof row !== 'object') return null;
   const active = field(row, 'IsActive');
   if (active === false || String(active).toLowerCase() === 'false') return null;
+  if (field(row, 'ExtinguishedDate')) return null;
   const name = clampText(field(row, 'Name'), 160);
   if (!name) return null;
   const coordinates = Array.isArray(row.__geometry?.coordinates)
@@ -77,7 +77,9 @@ export function normalizeCalFireIncident(row, { fetchedAt = Date.now() } = {}) {
   const location = clampText(field(row, 'Location'), 200);
   const county = clampText(field(row, 'County') ?? field(row, 'Counties'), 80);
   const facts = [
-    acres !== null ? `${Math.round(acres).toLocaleString('en-US')} acres` : null,
+    acres !== null
+      ? `${Math.round(acres).toLocaleString('en-US')} acres`
+      : null,
     contained !== null ? `${Math.round(contained)}% contained` : null,
     clampText(field(row, 'ControlStatement'), 300),
   ].filter(Boolean);
@@ -107,7 +109,7 @@ export function normalizeCalFireIncident(row, { fetchedAt = Date.now() } = {}) {
         .join(', '),
       regions,
       starts: field(row, 'Started'),
-      ends: field(row, 'ExtinguishedDate'),
+      ends: null,
       issued: field(row, 'Updated') ?? field(row, 'Started'),
       updated: field(row, 'Updated'),
       url: url || `${CALFIRE_HOME}incidents`,
@@ -137,7 +139,7 @@ export function createCalFireFeedSource({
             maxBytes: MAX_BYTES,
           });
           const rows = calFireRows(parseJsonText(payload));
-          if (!rows) throw new UpstreamError('calfire_invalid_payload');
+          if (!rows) throw new UpstreamError('invalid_payload');
           preferred = index;
           const fetchedAt = now();
           const alerts = [];
@@ -154,7 +156,7 @@ export function createCalFireFeedSource({
           lastError = error;
         }
       }
-      throw lastError || new UpstreamError('calfire_unavailable');
+      throw lastError || new UpstreamError('unavailable');
     },
   };
 }

@@ -15,8 +15,9 @@
  *
  * `area` is GeoJSON (Point, Polygon or MultiPolygon) or null when the feed
  * gave no geometry; `areaSource` says how the geometry was obtained
- * (`feed` as the feed published it, `zones` from NWS zone shapes, `centroid` of a
- * named county, `site` for a fixed facility such as an airport, or null).
+ * (`feed` as the feed published it, `zones` from NWS zone shapes, `centroid`
+ * of a named county, `site` for a fixed facility such as an airport, or
+ * null). `regions` are LIVE OPS region ids (src/data/liveOpsRegions.js).
  * Times are ISO 8601 strings or null. `freshness` is `live` when the proxy's
  * copy of the feed is within its refresh interval and `stale` when it is
  * serving an older copy because the feed could not be reached.
@@ -36,8 +37,8 @@ export const ALERT_AREA_DESCRIPTION_MAX = 300;
 
 /**
  * Severity bands, worst first. `token` is the CSS custom property the theme
- * paints the band with (src/ui/styles/alerts.css); `fallback` is used only
- * where no stylesheet exists (tests, the MCP server) and is not a theme.
+ * paints the band with (src/ui/styles/alerts.css). Colours live only in the
+ * stylesheet: the renderer resolves the tokens, and nothing here names one.
  */
 export const ALERT_SEVERITIES = Object.freeze([
   Object.freeze({
@@ -45,50 +46,50 @@ export const ALERT_SEVERITIES = Object.freeze([
     rank: 4,
     label: msg('Extreme'),
     token: '--alert-severity-extreme',
-    fallback: '#ff3b5c',
   }),
   Object.freeze({
     id: 'severe',
     rank: 3,
     label: msg('Severe'),
     token: '--alert-severity-severe',
-    fallback: '#ff7a1a',
   }),
   Object.freeze({
     id: 'moderate',
     rank: 2,
     label: msg('Moderate'),
     token: '--alert-severity-moderate',
-    fallback: '#ffc43b',
   }),
   Object.freeze({
     id: 'minor',
     rank: 1,
     label: msg('Minor'),
     token: '--alert-severity-minor',
-    fallback: '#6be8ff',
   }),
   Object.freeze({
     id: 'unknown',
     rank: 0,
     label: msg('Unknown severity'),
     token: '--alert-severity-unknown',
-    fallback: '#8a97a6',
   }),
 ]);
+
+/** Severity ids, worst first. */
+export const ALERT_SEVERITY_IDS = Object.freeze(
+  ALERT_SEVERITIES.map((band) => band.id),
+);
 
 const SEVERITY_BY_ID = new Map(ALERT_SEVERITIES.map((band) => [band.id, band]));
 
 /** The kinds of alert the feeds produce, in legend order. */
 export const ALERT_KINDS = Object.freeze([
-  Object.freeze({ id: 'weather', label: msg('Weather'), icon: '🌦' }),
-  Object.freeze({ id: 'fire', label: msg('Fire'), icon: '🔥' }),
-  Object.freeze({ id: 'air', label: msg('Air quality'), icon: '◍' }),
-  Object.freeze({ id: 'road', label: msg('Roads'), icon: '🚧' }),
-  Object.freeze({ id: 'transit', label: msg('Transit'), icon: '🚌' }),
-  Object.freeze({ id: 'airport', label: msg('Airports'), icon: '✈' }),
-  Object.freeze({ id: 'emergency', label: msg('Emergency'), icon: '🚨' }),
-  Object.freeze({ id: 'advisory', label: msg('Advisory'), icon: '📣' }),
+  Object.freeze({ id: 'weather', label: msg('Weather') }),
+  Object.freeze({ id: 'fire', label: msg('Fire') }),
+  Object.freeze({ id: 'air', label: msg('Air quality') }),
+  Object.freeze({ id: 'road', label: msg('Roads') }),
+  Object.freeze({ id: 'transit', label: msg('Transit') }),
+  Object.freeze({ id: 'airport', label: msg('Airports') }),
+  Object.freeze({ id: 'emergency', label: msg('Emergency') }),
+  Object.freeze({ id: 'advisory', label: msg('Advisory') }),
 ]);
 
 export const ALERT_KIND_IDS = Object.freeze(ALERT_KINDS.map((kind) => kind.id));
@@ -102,15 +103,21 @@ export const ALERT_AREA_SOURCES = Object.freeze([
   'site',
 ]);
 
-/** Airport status kinds the FAA feed reports, with the severity each maps to. */
+/**
+ * Airport status kinds the FAA feed reports, with the severity each maps to
+ * and the English name server-built text uses (feed data, not UI copy).
+ * `restriction` is an airport "closed to" some traffic (a NOTAM that keeps
+ * scheduled flights running), which the FAA lists among closures.
+ */
 export const AIRPORT_STATUS_KINDS = Object.freeze({
-  closure: Object.freeze({ severity: 'severe', label: msg('Airport closure') }),
-  ground_stop: Object.freeze({ severity: 'severe', label: msg('Ground stop') }),
+  closure: Object.freeze({ severity: 'severe', name: 'Airport closure' }),
+  ground_stop: Object.freeze({ severity: 'severe', name: 'Ground stop' }),
   ground_delay: Object.freeze({
     severity: 'moderate',
-    label: msg('Ground delay program'),
+    name: 'Ground delay program',
   }),
-  delay: Object.freeze({ severity: 'minor', label: msg('Delays') }),
+  delay: Object.freeze({ severity: 'minor', name: 'Delays' }),
+  restriction: Object.freeze({ severity: 'minor', name: 'Airport restriction' }),
 });
 
 /** The severity descriptor for an id, or the unknown band. */
@@ -231,7 +238,9 @@ export function validateAlertGeometry(geometry) {
     return {
       type: 'MultiPolygon',
       coordinates: coordinates.map((rings) =>
-        rings.map((ring) => ring.map(([lon, lat]) => [Number(lon), Number(lat)])),
+        rings.map((ring) =>
+          ring.map(([lon, lat]) => [Number(lon), Number(lat)]),
+        ),
       ),
     };
   return null;
@@ -370,7 +379,11 @@ export const ALERT_LOOKAHEAD_MS = 24 * 60 * 60 * 1000;
  * Whether an alert is in force now or starts within the look-ahead. An alert
  * without an end never expires here; the feed drops it when it is over.
  */
-export function alertIsCurrent(alert, now = Date.now(), lookaheadMs = ALERT_LOOKAHEAD_MS) {
+export function alertIsCurrent(
+  alert,
+  now = Date.now(),
+  lookaheadMs = ALERT_LOOKAHEAD_MS,
+) {
   const ends = msOrNull(alert?.ends);
   if (ends !== null && ends < now) return false;
   const starts = msOrNull(alert?.starts);
@@ -404,7 +417,33 @@ export function feedFreshness(fetchedAt, ttlMs, now = Date.now()) {
 export function alertTouchesBbox(alert, bbox) {
   const box = geometryBbox(alert?.area);
   if (!box || !Array.isArray(bbox)) return false;
-  return !(box[2] < bbox[0] || box[0] > bbox[2] || box[3] < bbox[1] || box[1] > bbox[3]);
+  return !(
+    box[2] < bbox[0] ||
+    box[0] > bbox[2] ||
+    box[3] < bbox[1] ||
+    box[1] > bbox[3]
+  );
+}
+
+/**
+ * The alerts a query asks for, order kept: `region` (a region id), `kinds`
+ * (kind ids) and `minSeverity` (a severity id; that band and worse). Absent
+ * criteria do not filter.
+ */
+export function filterAlerts(
+  alerts,
+  { region = null, kinds = null, minSeverity = null } = {},
+) {
+  const wantedKinds =
+    Array.isArray(kinds) && kinds.length ? new Set(kinds) : null;
+  const floor = minSeverity ? severityRank(minSeverity) : 0;
+  return (Array.isArray(alerts) ? alerts : []).filter(
+    (alert) =>
+      (!region ||
+        (Array.isArray(alert?.regions) && alert.regions.includes(region))) &&
+      (!wantedKinds || wantedKinds.has(alert?.kind)) &&
+      severityRank(alert?.severity) >= floor,
+  );
 }
 
 /** Counts of alerts per severity id, every band present. */

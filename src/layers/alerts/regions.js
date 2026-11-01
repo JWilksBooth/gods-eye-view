@@ -1,216 +1,194 @@
 /**
  * @module layers/alerts/regions
  *
- * The four regions the Alerts layer follows, as named bounding boxes. Pure
- * data: no Cesium, no DOM, no network, so the server proxy, the portable
- * source, the tools and the renderer all read one definition.
+ * The Alerts layer's view of the LIVE OPS regions. `src/data/liveOpsRegions.js`
+ * is the single source of truth for every region's id, public name, bounding
+ * box and centre; this module adds only what the alert feeds need to decide
+ * membership, keyed by region id (`ALERT_REGION_FEEDS`):
  *
- * Each region carries what its feeds need to decide membership:
- *   - `bbox` `[west, south, east, north]` in degrees, for geometry tests;
- *   - `anchor`, where a bulletin with no geometry of its own is placed;
- *   - `countyFips`, the SAME/FIPS county codes NWS alerts carry in
- *     `geocode.SAME` (a leading zero plus the 5-digit FIPS code);
- *   - `ugcCounties`, the UGC county codes NWS alerts carry in `geocode.UGC`;
- *   - `states`, the NWS `area` codes that cover the region;
- *   - `caltransDistricts`, the Caltrans districts whose lane-closure files
+ *   - `countyFips`: SAME/FIPS county codes NWS alerts carry in `geocode.SAME`
+ *     (a leading zero plus the five-digit FIPS code) for the counties that
+ *     overlap the region's box;
+ *   - `ugcCounties`: the same counties as UGC county codes (`geocode.UGC`);
+ *   - `nwsAreas`: the NWS `area` (state) codes whose active alerts are read;
+ *   - `closureDistricts`: the Caltrans districts whose lane-closure files
  *     cover the region;
- *   - `airports`, the IATA codes of the airports whose FAA status belongs
- *     to the region;
- *   - `keywords`, place names an agency bulletin mentions when it concerns
- *     the region (matched case-insensitively against headline and body).
+ *   - `airports`: IATA codes of the airports whose FAA status belongs to it;
+ *   - `keywords`: names a statewide bulletin uses when it concerns the
+ *     region, matched whole-word and case-insensitively.
  *
- * The owner unifies this with the application's region registry at merge
- * time; nothing else in the layer family defines a region.
+ * A region added to the LIVE OPS registry appears here automatically with no
+ * alert-specific ids: NWS, CAL FIRE and the bounding-box feeds cover it, the
+ * id-keyed feeds do not until an entry is added. Pure data and functions: no
+ * Cesium, no DOM, no network, so the server proxy, the portable source, the
+ * tools and the renderer all read one definition.
  */
+import { LIVE_OPS_REGIONS } from '../../data/liveOpsRegions.js';
 
-const region = (definition) =>
-  Object.freeze({
-    ...definition,
-    bbox: Object.freeze([...definition.bbox]),
-    anchor: Object.freeze({ ...definition.anchor }),
-    countyFips: Object.freeze([...definition.countyFips]),
-    ugcCounties: Object.freeze([...definition.ugcCounties]),
-    states: Object.freeze([...definition.states]),
-    caltransDistricts: Object.freeze([...definition.caltransDistricts]),
-    airports: Object.freeze([...definition.airports]),
-    keywords: Object.freeze([...definition.keywords]),
-  });
+const frozenList = (values) => Object.freeze([...(values || [])]);
 
-/** The regions in presentation order. Ids are stable; names are public place names. */
-export const ALERT_REGIONS = Object.freeze([
-  region({
-    id: 'los-angeles',
-    name: 'Los Angeles',
-    bbox: [-118.95, 33.3, -117.65, 34.85],
-    anchor: { lat: 34.0522, lon: -118.2437 },
-    countyFips: ['006037'],
-    ugcCounties: ['CAC037'],
-    states: ['CA'],
-    caltransDistricts: [7],
-    airports: ['LAX', 'BUR', 'LGB'],
-    keywords: [
+/** Alert-specific ids per LIVE OPS region. Public place names only. */
+export const ALERT_REGION_FEEDS = Object.freeze({
+  'los-angeles': Object.freeze({
+    countyFips: frozenList(['006037', '006059', '006111']),
+    ugcCounties: frozenList(['CAC037', 'CAC059', 'CAC111']),
+    nwsAreas: frozenList(['CA']),
+    closureDistricts: frozenList([7, 12]),
+    airports: frozenList(['LAX', 'BUR', 'LGB', 'SNA']),
+    keywords: frozenList([
       'Los Angeles',
       'L.A.',
       'LA County',
-      'Hollywood',
-      'Pasadena',
+      'Orange County',
       'Long Beach',
+      'Pasadena',
       'Santa Monica',
       'Burbank',
       'Glendale',
-      'Palmdale',
-      'Lancaster',
       'Malibu',
       'Torrance',
-      'Pomona',
-      'San Fernando',
       'Santa Clarita',
-      'Compton',
+      'Hollywood',
       'Inglewood',
-      'Altadena',
-      'Topanga',
-    ],
+      'Anaheim',
+      'Santa Ana',
+      'Irvine',
+    ]),
   }),
-  region({
-    id: 'sonoma-county',
-    name: 'Sonoma County',
-    bbox: [-123.55, 38.1, -122.35, 38.86],
-    anchor: { lat: 38.4405, lon: -122.7141 },
-    countyFips: ['006097'],
-    ugcCounties: ['CAC097'],
-    states: ['CA'],
-    caltransDistricts: [4],
-    airports: ['STS'],
-    keywords: [
-      'Sonoma',
-      'Santa Rosa',
-      'Petaluma',
-      'Healdsburg',
-      'Sebastopol',
-      'Windsor',
-      'Rohnert Park',
-      'Cotati',
-      'Cloverdale',
-      'Guerneville',
-      'Bodega Bay',
-      'Jenner',
-      'Geyserville',
-      'Russian River',
-    ],
+  'sonoma-county': Object.freeze({
+    countyFips: frozenList(['006097']),
+    ugcCounties: frozenList(['CAC097']),
+    nwsAreas: frozenList(['CA']),
+    closureDistricts: frozenList([4]),
+    airports: frozenList(['STS']),
+    keywords: frozenList(['Sonoma County']),
   }),
-  region({
-    id: 'san-francisco-bay-area',
-    name: 'San Francisco Bay Area',
-    bbox: [-123.55, 36.85, -121.2, 38.9],
-    anchor: { lat: 37.7749, lon: -122.4194 },
-    countyFips: [
+  'sf-bay-area': Object.freeze({
+    countyFips: frozenList([
       '006001',
       '006013',
       '006041',
-      '006055',
       '006075',
       '006081',
       '006085',
-      '006095',
-      '006097',
-    ],
-    ugcCounties: [
+    ]),
+    ugcCounties: frozenList([
       'CAC001',
       'CAC013',
       'CAC041',
-      'CAC055',
       'CAC075',
       'CAC081',
       'CAC085',
-      'CAC095',
-      'CAC097',
-    ],
-    states: ['CA'],
-    caltransDistricts: [4],
-    airports: ['SFO', 'OAK', 'SJC'],
-    keywords: [
+    ]),
+    nwsAreas: frozenList(['CA']),
+    closureDistricts: frozenList([4]),
+    airports: frozenList(['SFO', 'OAK', 'SJC']),
+    keywords: frozenList([
       'San Francisco',
       'Bay Area',
       'Oakland',
       'San Jose',
+      'San José',
       'Berkeley',
       'Fremont',
       'Palo Alto',
       'San Mateo',
-      'Marin',
-      'Napa',
-      'Solano',
-      'Vallejo',
-      'Richmond',
-      'Hayward',
+      'Marin County',
       'Santa Clara',
       'Alameda',
       'Contra Costa',
+      'Hayward',
       'Concord',
       'Walnut Creek',
       'Sunnyvale',
       'Mountain View',
       'Redwood City',
       'Daly City',
-      'Sausalito',
       'San Rafael',
-      'Novato',
-      'Fairfield',
       'Livermore',
-      'Antioch',
       'Milpitas',
-    ],
+    ]),
   }),
-  region({
-    id: 'las-vegas',
-    name: 'Las Vegas',
-    bbox: [-115.6, 35.7, -114.6, 36.6],
-    anchor: { lat: 36.1699, lon: -115.1398 },
-    countyFips: ['032003'],
-    ugcCounties: ['NVC003'],
-    states: ['NV'],
-    caltransDistricts: [],
-    airports: ['LAS'],
-    keywords: [
+  'las-vegas': Object.freeze({
+    countyFips: frozenList(['032003']),
+    ugcCounties: frozenList(['NVC003']),
+    nwsAreas: frozenList(['NV']),
+    closureDistricts: frozenList([]),
+    airports: frozenList(['LAS']),
+    keywords: frozenList([
       'Las Vegas',
+      'North Las Vegas',
       'Clark County',
       'Henderson',
-      'North Las Vegas',
-      'Boulder City',
       'Summerlin',
-      'Paradise',
-      'Spring Valley',
-      'Enterprise',
-      'Mesquite',
-      'Laughlin',
-      'Lake Mead',
       'Nellis',
+      'Lake Mead',
       'Red Rock Canyon',
-    ],
+    ]),
   }),
-]);
+});
 
-/** Every region id, in presentation order. */
+const NO_FEEDS = Object.freeze({
+  countyFips: frozenList([]),
+  ugcCounties: frozenList([]),
+  nwsAreas: frozenList([]),
+  closureDistricts: frozenList([]),
+  airports: frozenList([]),
+  keywords: frozenList([]),
+});
+
+/**
+ * One alert region: the LIVE OPS region's `id`, `name`, `bbox` and centre
+ * (as `anchor`, where bulletins without geometry gather) plus its feed ids.
+ */
+function alertRegionFrom(region) {
+  const feeds = ALERT_REGION_FEEDS[region.id] || NO_FEEDS;
+  return Object.freeze({
+    id: region.id,
+    name: region.name,
+    bbox: region.bbox,
+    anchor: region.center,
+    countyFips: feeds.countyFips,
+    ugcCounties: feeds.ugcCounties,
+    nwsAreas: feeds.nwsAreas,
+    closureDistricts: feeds.closureDistricts,
+    airports: feeds.airports,
+    keywords: feeds.keywords.length ? feeds.keywords : frozenList([region.name]),
+  });
+}
+
+/** The regions in LIVE OPS display order. */
+export const ALERT_REGIONS = Object.freeze(LIVE_OPS_REGIONS.map(alertRegionFrom));
+
+/** Every region id, in display order. */
 export const ALERT_REGION_IDS = Object.freeze(
   ALERT_REGIONS.map((entry) => entry.id),
 );
 
 const BY_ID = new Map(ALERT_REGIONS.map((entry) => [entry.id, entry]));
 
-/** The region with this id, or null. */
+/** The region with this id (case-insensitive), or null. */
 export function alertRegion(id) {
-  return BY_ID.get(String(id ?? '')) || null;
+  return (
+    BY_ID.get(
+      String(id ?? '')
+        .trim()
+        .toLowerCase(),
+    ) || null
+  );
 }
 
 /** The NWS `area` (state) codes the regions need, deduplicated. */
 export const ALERT_NWS_AREAS = Object.freeze([
-  ...new Set(ALERT_REGIONS.flatMap((entry) => entry.states)),
+  ...new Set(ALERT_REGIONS.flatMap((entry) => entry.nwsAreas)),
 ]);
 
-/** The Caltrans districts whose lane-closure feeds the regions need. */
-export const ALERT_CALTRANS_DISTRICTS = Object.freeze([
-  ...new Set(ALERT_REGIONS.flatMap((entry) => entry.caltransDistricts)),
-]);
+/** The Caltrans districts whose lane-closure files the regions need. */
+export const ALERT_CALTRANS_DISTRICTS = Object.freeze(
+  [...new Set(ALERT_REGIONS.flatMap((entry) => entry.closureDistricts))].sort(
+    (a, b) => a - b,
+  ),
+);
 
 /**
  * Airports whose FAA status the layer shows, with the coordinates the globe
@@ -228,6 +206,11 @@ export const ALERT_AIRPORTS = Object.freeze({
     lon: -118.3587,
   }),
   LGB: Object.freeze({ name: 'Long Beach', lat: 33.8177, lon: -118.1516 }),
+  SNA: Object.freeze({
+    name: 'John Wayne–Orange County',
+    lat: 33.6757,
+    lon: -117.8682,
+  }),
   SFO: Object.freeze({
     name: 'San Francisco International',
     lat: 37.6213,
@@ -257,19 +240,20 @@ export const ALERT_AIRPORTS = Object.freeze({
 
 /**
  * Approximate county centroids by SAME/FIPS code, where an NWS alert that
- * names counties but carries no geometry is placed. Degrees.
+ * names a county but has no shape yet is placed. Only counties whose centre
+ * lies inside a region box are listed; elsewhere the alert waits for its
+ * zone shapes. Degrees.
  */
 export const ALERT_COUNTY_CENTROIDS = Object.freeze({
   '006037': Object.freeze({ lat: 34.32, lon: -118.22 }),
+  '006059': Object.freeze({ lat: 33.7, lon: -117.76 }),
   '006097': Object.freeze({ lat: 38.53, lon: -122.93 }),
   '006001': Object.freeze({ lat: 37.65, lon: -121.92 }),
   '006013': Object.freeze({ lat: 37.92, lon: -121.95 }),
-  '006041': Object.freeze({ lat: 38.05, lon: -122.75 }),
-  '006055': Object.freeze({ lat: 38.51, lon: -122.33 }),
+  '006041': Object.freeze({ lat: 38.05, lon: -122.72 }),
   '006075': Object.freeze({ lat: 37.76, lon: -122.44 }),
   '006081': Object.freeze({ lat: 37.43, lon: -122.33 }),
   '006085': Object.freeze({ lat: 37.23, lon: -121.7 }),
-  '006095': Object.freeze({ lat: 38.27, lon: -121.94 }),
   '032003': Object.freeze({ lat: 36.21, lon: -115.01 }),
 });
 
@@ -331,9 +315,12 @@ export function regionsForAirport(code, regions = ALERT_REGIONS) {
     .map((entry) => entry.id);
 }
 
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
- * Region ids whose keywords appear in free text. Word-bounded and
- * case-insensitive, so "Sonoma" matches "Sonoma County" but not "Sonomap".
+ * Region ids whose keywords appear in free text. Whole-word and
+ * case-insensitive, so "Clark County" matches "Clark County officials" but a
+ * keyword inside a longer word does not.
  */
 export function regionsForText(text, regions = ALERT_REGIONS) {
   const haystack = String(text ?? '');
@@ -342,7 +329,7 @@ export function regionsForText(text, regions = ALERT_REGIONS) {
     .filter((entry) =>
       entry.keywords.some((keyword) =>
         new RegExp(
-          `(?<![\\p{L}\\p{N}])${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?![\\p{L}\\p{N}])`,
+          `(?<![\\p{L}\\p{N}])${escapeRegExp(keyword)}(?![\\p{L}\\p{N}])`,
           'iu',
         ).test(haystack),
       ),
@@ -350,12 +337,12 @@ export function regionsForText(text, regions = ALERT_REGIONS) {
     .map((entry) => entry.id);
 }
 
-/** Region ids whose states include this code, for statewide bulletins. */
+/** Region ids whose NWS areas include this state code, for statewide bulletins. */
 export function regionsForState(state, regions = ALERT_REGIONS) {
   const wanted = String(state ?? '')
     .trim()
     .toUpperCase();
   return regions
-    .filter((entry) => entry.states.includes(wanted))
+    .filter((entry) => entry.nwsAreas.includes(wanted))
     .map((entry) => entry.id);
 }

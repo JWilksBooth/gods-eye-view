@@ -1,220 +1,190 @@
 /**
  * Caltrans lane, ramp and road closures from the Commercial Wholesale Web
- * Portal (cwwp2.dot.ca.gov), one JSON file per district, keyless. Closures
- * in effect now, and those scheduled to start within a few hours, become
- * `road` alerts at the closure's starting point. Times in the feed are
- * Pacific local time without an offset; they are converted here.
+ * Portal (cwwp2.dot.ca.gov), one CSV file per district, keyless. The CSV is
+ * the same Lane Closure System data as the district JSON at about a sixth of
+ * the size, with flat columns and UTC epoch times.
+ *
+ * A closure is in effect when the crew has reported it in place ("10-97")
+ * and has not yet reported it lifted ("10-98") or cancelled ("10-22").
+ * Closures in effect, and those scheduled to start within the look-ahead,
+ * become `road` alerts at the closure's starting point.
  */
 import { clampText, createAlert } from '../../../src/layers/alerts/model.js';
 import {
   ALERT_CALTRANS_DISTRICTS,
   regionsForPoint,
 } from '../../../src/layers/alerts/regions.js';
+import { parseCsvRecords } from './csv.js';
 import { ALERT_FEEDS } from './feeds.js';
-import { UpstreamError, fetchUpstreamText, parseJsonText } from './http.js';
+import { UpstreamError, fetchUpstreamText } from './http.js';
 
-/** The district's closure file, as the portal names it (`lcsStatusD07.json`). */
+/** The district's closure file, as the portal names it (`lcsStatusD07.csv`). */
 export const caltransLcsUrl = (district) =>
-  `https://cwwp2.dot.ca.gov/data/d${district}/lcs/lcsStatusD${String(district).padStart(2, '0')}.json`;
+  `https://cwwp2.dot.ca.gov/data/d${district}/lcs/lcsStatusD${String(district).padStart(2, '0')}.csv`;
+/** The district's public closure report, the page a card opens. */
 export const caltransDistrictUrl = (district) =>
   `https://lcswebreports.dot.ca.gov/searchdistricts?district=${district}`;
-/** A scheduled closure this far ahead is already "what is happening". */
-export const CALTRANS_LOOKAHEAD_MS = 6 * 60 * 60_000;
-const MAX_BYTES = 12 * 1024 * 1024;
-const PACIFIC = 'America/Los_Angeles';
+/** A scheduled closure starting this soon is already "what is happening". */
+export const CALTRANS_LOOKAHEAD_MS = 60 * 60_000;
+/** Columns a district file must carry to be read at all. */
+export const CALTRANS_REQUIRED_COLUMNS = Object.freeze([
+  'beginLatitude',
+  'beginLongitude',
+  'closureID',
+  'closureStartEpoch',
+  'closureEndEpoch',
+  'isCode1097',
+  'isCode1098',
+  'typeOfClosure',
+]);
+const MAX_BYTES = 16 * 1024 * 1024;
 
-/** A value by any of several names, skipping empties. */
-function field(object, names) {
-  if (!object || typeof object !== 'object') return undefined;
-  for (const name of names) {
-    const value = object[name];
-    if (value !== undefined && value !== null && value !== '') return value;
-  }
-  return undefined;
-}
-
-/** A value whose key ends with `suffix` (case-insensitive), skipping empties. */
-function fieldEndingWith(object, suffix) {
-  if (!object || typeof object !== 'object') return undefined;
-  const wanted = suffix.toLowerCase();
-  for (const [key, value] of Object.entries(object)) {
-    if (
-      key.toLowerCase().endsWith(wanted) &&
-      value !== undefined &&
-      value !== null &&
-      value !== ''
-    )
-      return value;
-  }
-  return undefined;
-}
+const truthy = (value) => /^(true|y|yes|1)$/i.test(String(value ?? '').trim());
 
 const number = (value) => {
-  const n = Number(value);
+  const text = String(value ?? '').trim();
+  if (!text) return null;
+  const n = Number(text);
   return Number.isFinite(n) ? n : null;
 };
 
-/**
- * The offset, in minutes east of UTC, that a time zone has at an instant.
- * Intl is the only portable source of DST rules.
- */
-function zoneOffsetMinutes(ms, timeZone) {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone,
-    hourCycle: 'h23',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  }).formatToParts(new Date(ms));
-  const get = (type) => Number(parts.find((part) => part.type === type)?.value);
-  const asUtc = Date.UTC(
-    get('year'),
-    get('month') - 1,
-    get('day'),
-    get('hour') % 24,
-    get('minute'),
-    get('second'),
+/** Epoch seconds (or milliseconds) as milliseconds, or null. */
+const epochMs = (value) => {
+  const n = number(value);
+  if (n === null || n <= 0) return null;
+  return n < 1e11 ? n * 1000 : n;
+};
+
+/** `Not Reported` and similar placeholders read as absent. */
+const reported = (value, max) => {
+  const text = clampText(value, max);
+  return text && !/^(not reported|n\/a|none)$/i.test(text) ? text : null;
+};
+
+/** Whether a closure record is in place now (10-97, not lifted or cancelled). */
+export function closureInEffect(record) {
+  return (
+    truthy(record?.isCode1097) &&
+    !truthy(record?.isCode1098) &&
+    !truthy(record?.isCode1022)
   );
-  return Math.round((asUtc - ms) / 60_000);
 }
 
 /**
- * An ISO instant for a local `YYYY-MM-DD` date and `HH:MM[:SS]` time in a
- * zone, or null. The offset is resolved twice so a time near a DST change
- * lands on the right side of it.
- */
-export function zonedLocalToIso(date, time, timeZone = PACIFIC) {
-  const dateMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(date || '').trim());
-  if (!dateMatch) return null;
-  const timeMatch = /^(\d{1,2}):(\d{2})(?::(\d{2}))?/.exec(
-    String(time || '00:00').trim(),
-  );
-  if (!timeMatch) return null;
-  const naive = Date.UTC(
-    Number(dateMatch[1]),
-    Number(dateMatch[2]) - 1,
-    Number(dateMatch[3]),
-    Number(timeMatch[1]),
-    Number(timeMatch[2]),
-    Number(timeMatch[3] || 0),
-  );
-  if (!Number.isFinite(naive)) return null;
-  let utc = naive - zoneOffsetMinutes(naive, timeZone) * 60_000;
-  utc = naive - zoneOffsetMinutes(utc, timeZone) * 60_000;
-  return new Date(utc).toISOString();
-}
-
-/** Whether the feed marks a closure as in place (Caltrans "10-97"). */
-export function closureInEffect(closure) {
-  const code = field(closure, ['code1097', 'Code1097', 'isActive', 'active']);
-  if (code === undefined) return false;
-  if (typeof code === 'boolean') return code;
-  const text = String(code).trim().toLowerCase();
-  if (['n', 'no', 'false', '0', 'null', 'none'].includes(text)) return false;
-  return true;
-}
-
-/**
- * Normalize one closure record to an alert: `null` when it is outside the
- * regions, already over, or further ahead than the look-ahead.
+ * Normalize one closure record to an alert: null when it is outside the
+ * regions, lifted, cancelled, over, or further ahead than the look-ahead.
  */
 export function normalizeCaltransClosure(
   record,
-  { district, now = Date.now(), fetchedAt = now, lookaheadMs = CALTRANS_LOOKAHEAD_MS } = {},
+  {
+    district,
+    now = Date.now(),
+    fetchedAt = now,
+    lookaheadMs = CALTRANS_LOOKAHEAD_MS,
+  } = {},
 ) {
-  const lcs = record?.lcs || record;
-  if (!lcs || typeof lcs !== 'object') return null;
-  const location = lcs.location || {};
-  const begin = location.begin || location;
-  const end = location.end || {};
-  const closure = lcs.closure || {};
-  const lat = number(fieldEndingWith(begin, 'latitude'));
-  const lon = number(fieldEndingWith(begin, 'longitude'));
+  if (!record || typeof record !== 'object') return null;
+  const lat = number(record.beginLatitude);
+  const lon = number(record.beginLongitude);
   if (lat === null || lon === null) return null;
   const regions = regionsForPoint(lon, lat);
   if (!regions.length) return null;
+  if (truthy(record.isCode1098) || truthy(record.isCode1022)) return null;
 
-  const timestamps = closure.closureTimestamp || closure;
-  const starts = zonedLocalToIso(
-    field(timestamps, ['closureStartDate', 'startDate']),
-    field(timestamps, ['closureStartTime', 'startTime']),
-  );
-  const indefinite = /^(true|y|yes|1)$/i.test(
-    String(field(timestamps, ['isClosureEndIndefinite']) ?? ''),
-  );
-  const ends = indefinite
-    ? null
-    : zonedLocalToIso(
-        field(timestamps, ['closureEndDate', 'endDate']),
-        field(timestamps, ['closureEndTime', 'endTime']),
-      );
-  const active = closureInEffect(closure);
-  const startsMs = starts ? Date.parse(starts) : null;
-  const endsMs = ends ? Date.parse(ends) : null;
+  const startsMs = epochMs(record.closureStartEpoch);
+  const indefinite = truthy(record.isClosureEndIndefinite);
+  const endsMs = indefinite ? null : epochMs(record.closureEndEpoch);
+  const active = closureInEffect(record);
   if (endsMs !== null && endsMs < now) return null;
-  if (!active && startsMs !== null && startsMs > now + lookaheadMs) return null;
-  if (!active && startsMs === null) return null;
+  if (!active) {
+    if (startsMs === null) return null;
+    if (startsMs > now + lookaheadMs) return null;
+  }
 
-  const route = clampText(field(begin, ['beginRoute', 'route']), 40);
-  const suffix = clampText(field(begin, ['beginRouteSuffix', 'routeSuffix']), 8);
+  const closureId = clampText(record.closureID, 40);
+  if (!closureId) return null;
+  const logNumber = clampText(record.logNumber, 20);
+  const route = clampText(record.beginRoute, 40);
+  const suffix = clampText(record.beginRouteSuffix, 8);
   const direction = clampText(
-    field(location, ['travelFlowDirection']) ??
-      field(begin, ['beginDirection', 'direction']),
+    record.travelFlowDirection || record.beginDirection,
     40,
   );
-  const typeOfClosure = clampText(field(closure, ['typeOfClosure']), 40) || 'Lane';
-  const facility = clampText(field(closure, ['facility']), 60);
-  const work = clampText(field(closure, ['typeOfWork']), 160);
-  const lanesClosed = number(field(closure, ['lanesClosed']));
-  const totalLanes = number(field(closure, ['totalExistingLanes']));
-  const delay = clampText(field(closure, ['estimatedDelay']), 60);
-  const beginName = clampText(
-    field(begin, ['beginLocationName', 'locationName']),
-    160,
-  );
-  const endName = clampText(field(end, ['endLocationName', 'locationName']), 160);
-  const nearby = clampText(field(begin, ['beginNearbyPlace', 'nearbyPlace']), 80);
-  const closureId =
-    clampText(field(closure, ['closureID', 'closureId', 'logNumber']), 60) ||
-    clampText(field(lcs, ['index']), 40);
-  if (!closureId) return null;
+  const typeOfClosure = clampText(record.typeOfClosure, 40) || 'Lane';
+  const lanesClosed = reported(record.lanesClosed, 40);
+  const totalLanes = reported(record.totalExistingLanes, 10);
+  const delay = reported(record.estimatedDelay, 40);
+  const delayMinutes = number(delay);
   const facts = [
-    work,
-    lanesClosed !== null && totalLanes !== null
+    reported(record.typeOfWork, 160),
+    lanesClosed && totalLanes
       ? `${lanesClosed} of ${totalLanes} lanes closed`
-      : lanesClosed !== null
-        ? `${lanesClosed} lane(s) closed`
+      : lanesClosed
+        ? `Lanes closed: ${lanesClosed}`
         : null,
-    delay && !/^(0|none|no delay)/i.test(delay) ? `Estimated delay ${delay}` : null,
-    facility,
+    delayMinutes !== null && delayMinutes > 0
+      ? `Estimated delay ${delayMinutes} min`
+      : null,
+    reported(record.facility, 60),
+    reported(record.durationOfClosure, 40),
     active ? 'In effect' : 'Scheduled',
   ].filter(Boolean);
-  const recordEpoch = number(field(lcs.recordTimestamp || {}, ['recordEpoch']));
+  const from =
+    reported(record.beginLocationName, 160) ||
+    reported(record.beginFreeFormDescription, 160);
+  const to =
+    reported(record.endLocationName, 160) ||
+    reported(record.endFreeFormDescription, 160);
+  const recordMs = epochMs(record.recordEpoch);
+  const reportedMs = epochMs(record.code1097Epoch);
+  const full = /full/i.test(typeOfClosure);
   return createAlert(
     {
-      id: `caltrans:${district}:${closureId}`,
+      id: `caltrans:${district}:${closureId}:${logNumber || '0'}`,
       source: 'caltrans',
       kind: 'road',
-      severity: /full/i.test(typeOfClosure) ? 'moderate' : 'minor',
+      severity: full ? 'moderate' : 'minor',
       agency: `Caltrans District ${district}`,
-      headline: `${[route ? `${route}${suffix || ''}` : 'Highway', direction].filter(Boolean).join(' ')} · ${typeOfClosure} closure`,
+      headline: `${[route ? `${route}${suffix || ''}` : 'State highway', direction].filter(Boolean).join(' ')} · ${typeOfClosure} closure`,
       body: facts.join(' · ') || null,
       area: { type: 'Point', coordinates: [lon, lat] },
       areaSource: 'feed',
       areaDescription:
-        [beginName, endName].filter(Boolean).join(' → ') || nearby || null,
+        [from, to].filter(Boolean).join(' → ') ||
+        reported(record.beginNearbyPlace, 80),
       regions,
-      starts,
-      ends,
-      issued: recordEpoch ? recordEpoch * (recordEpoch < 1e12 ? 1000 : 1) : null,
-      updated: recordEpoch ? recordEpoch * (recordEpoch < 1e12 ? 1000 : 1) : null,
+      starts: startsMs,
+      ends: endsMs,
+      issued: reportedMs ?? startsMs ?? recordMs,
+      updated: recordMs,
       url: caltransDistrictUrl(district),
     },
     { fetchedAt },
   );
+}
+
+/** The alerts in one district file, or a typed failure for a file that is not one. */
+export function caltransAlertsFromCsv(
+  text,
+  { district, now = Date.now(), fetchedAt = now } = {},
+) {
+  const { header, records } = parseCsvRecords(text);
+  if (!CALTRANS_REQUIRED_COLUMNS.every((name) => header.includes(name)))
+    throw new UpstreamError('invalid_payload');
+  const alerts = [];
+  const seen = new Set();
+  for (const record of records) {
+    const alert = normalizeCaltransClosure(record, {
+      district,
+      now,
+      fetchedAt,
+    });
+    if (alert && !seen.has(alert.id)) {
+      seen.add(alert.id);
+      alerts.push(alert);
+    }
+  }
+  return alerts;
 }
 
 /** The Caltrans feed as the proxy loads it: closures in the regions' districts. */
@@ -232,29 +202,28 @@ export function createCaltransFeedSource({
       let lastError = null;
       for (const district of districts) {
         try {
-          const { payload } = await fetchUpstreamText(caltransLcsUrl(district), {
-            fetchImpl,
-            headers: { Accept: 'application/json' },
-            timeoutMs: 25_000,
-            maxBytes: MAX_BYTES,
-          });
-          const json = parseJsonText(payload);
-          const rows = Array.isArray(json?.data) ? json.data : null;
-          if (!rows) throw new UpstreamError('caltrans_invalid_payload');
-          loaded += 1;
-          for (const row of rows) {
-            const alert = normalizeCaltransClosure(row, {
+          const { payload } = await fetchUpstreamText(
+            caltransLcsUrl(district),
+            {
+              fetchImpl,
+              headers: { Accept: 'text/csv, */*;q=0.5' },
+              timeoutMs: 30_000,
+              maxBytes: MAX_BYTES,
+            },
+          );
+          alerts.push(
+            ...caltransAlertsFromCsv(payload, {
               district,
               now: fetchedAt,
               fetchedAt,
-            });
-            if (alert) alerts.push(alert);
-          }
+            }),
+          );
+          loaded += 1;
         } catch (error) {
           lastError = error;
         }
       }
-      if (!loaded) throw lastError || new UpstreamError('caltrans_unavailable');
+      if (!loaded) throw lastError || new UpstreamError('unavailable');
       return { alerts, fetchedAt, partial: loaded < districts.length };
     },
   };

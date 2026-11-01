@@ -1,36 +1,37 @@
 /** Card and label models for the Alerts layer. Pure — no Cesium types. */
-import { formatNumber, t, tn } from '../../i18n/index.js';
 import {
-  ALERTS_OVERLAY_SOURCE_ID,
-  alertKind,
-  alertSeverity,
-  severityRank,
-} from './model.js';
+  formatDate,
+  formatNumber,
+  formatRelativeTime,
+  t,
+  tn,
+} from '../../i18n/index.js';
+import { alertKind, alertSeverity, severityRank } from './model.js';
 
 export const ALERTS_OVERLAY_COHORT_LIMIT = 64;
 export const ALERTS_OVERLAY_COLLISION_CAPACITY = 40;
 /** Ambient labels stop at this many characters of headline. */
 const LABEL_CHARS = 34;
+/** Bulletins listed on a region card before "N more". */
+const BULLETIN_LINES = 6;
 
-/** Compact age, "5m" / "3h" / "2d", in the UI language. */
-export function formatAlertAge(deltaMs) {
-  if (!Number.isFinite(deltaMs) || deltaMs < 0) return null;
-  const hours = Math.floor(deltaMs / 3600000);
-  if (hours < 1)
-    return t('{count}m', {
-      context: 'age',
-      count: Math.max(1, Math.floor(deltaMs / 60000)),
-    });
-  if (hours < 24) return t('{count}h', { context: 'age', count: hours });
-  return t('{count}d', { context: 'age', count: Math.floor(hours / 24) });
+/**
+ * A time relative to now in the UI language ("2 hours ago", "in 3 hours"),
+ * or null for an unknown time.
+ */
+export function relativeTime(ms, nowMs) {
+  if (!Number.isFinite(ms) || !Number.isFinite(nowMs)) return null;
+  const minutes = Math.round((ms - nowMs) / 60_000);
+  if (Math.abs(minutes) < 60) return formatRelativeTime(minutes, 'minute');
+  const hours = Math.round(minutes / 60);
+  if (Math.abs(hours) < 48) return formatRelativeTime(hours, 'hour');
+  return formatRelativeTime(Math.round(hours / 24), 'day');
 }
 
-/** Hour and minute in the viewer's local time, "14:35". */
-function clock(iso) {
-  const ms = Date.parse(iso || '');
+/** Hour and minute in the viewer's local time and language. */
+function clock(ms) {
   if (!Number.isFinite(ms)) return null;
-  const date = new Date(ms);
-  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  return formatDate(new Date(ms), { hour: '2-digit', minute: '2-digit' });
 }
 
 /** The severity band's label in the UI language. */
@@ -42,6 +43,15 @@ export function severityLabel(severity) {
 export function kindLabel(kind) {
   const descriptor = alertKind(kind);
   return descriptor ? t(descriptor.label) : String(kind ?? '');
+}
+
+/** The host a source link opens, without `www.`, or null. */
+export function sourceHost(url) {
+  try {
+    return new URL(String(url)).hostname.replace(/^www\./, '') || null;
+  } catch {
+    return null;
+  }
 }
 
 /** A short headline for an ambient label. */
@@ -66,7 +76,9 @@ export function createAlertOverlayEntry({ id, position, alert, accent }) {
     accent,
     priority:
       severityRank(alert?.severity) * 1_000_000 +
-      (Number.isFinite(issued) ? Math.min(999_999, Math.floor(issued / 60_000) % 1_000_000) : 0),
+      (Number.isFinite(issued)
+        ? Math.min(999_999, Math.floor(issued / 60_000) % 1_000_000)
+        : 0),
     collisionGroup: 'ambient-label',
     paintLane: 'ambient-label',
     interactive: false,
@@ -98,9 +110,24 @@ export function selectAlertOverlayCohort(
     .slice(0, cap);
 }
 
+/** The when line of a card: issued, starting, ending. */
+function timingLine(alert, nowMs) {
+  const timing = [];
+  const issuedMs = Date.parse(alert.issued || '');
+  const issued = relativeTime(issuedMs, nowMs);
+  if (issued && issuedMs <= nowMs)
+    timing.push(t('Issued {when}', { when: issued }));
+  const startsMs = Date.parse(alert.starts || '');
+  if (Number.isFinite(startsMs) && startsMs > nowMs)
+    timing.push(t('Starts {when}', { when: relativeTime(startsMs, nowMs) }));
+  const ends = clock(Date.parse(alert.ends || ''));
+  if (ends) timing.push(t('Until {time}', { time: ends }));
+  return timing.join(' · ');
+}
+
 /**
  * The selected card for one alert: headline, agency and severity, kind and
- * area, timing, the start of the body, and the link line when a source
+ * area, timing, the start of the body, and the source line when a source
  * page exists. The caller supplies `position` separately.
  */
 export function buildAlertCard(alert, nowMs, { accent, link = null } = {}) {
@@ -114,24 +141,15 @@ export function buildAlertCard(alert, nowMs, { accent, link = null } = {}) {
   if (where) details.push(where);
   if (alert.areaSource === 'centroid')
     details.push(t('Placed at the county centre; the feed gave no shape'));
-  const timing = [];
-  const issuedAge = formatAlertAge(nowMs - Date.parse(alert.issued || ''));
-  if (alert.issued && issuedAge)
-    timing.push(t('issued {age} ago', { age: issuedAge }));
-  const startsMs = Date.parse(alert.starts || '');
-  if (Number.isFinite(startsMs) && startsMs > nowMs) {
-    const until = formatAlertAge(startsMs - nowMs);
-    if (until) timing.push(t('starts in {age}', { age: until }));
-  }
-  const ends = clock(alert.ends);
-  if (ends) timing.push(t('until {time}', { time: ends }));
-  if (timing.length) details.push(timing.join(' · '));
+  const timing = timingLine(alert, nowMs);
+  if (timing) details.push(timing);
   if (alert.body) {
     const body = String(alert.body);
     details.push(body.length > 180 ? `${body.slice(0, 179).trimEnd()}…` : body);
   }
   if (alert.freshness === 'stale') details.push(t('Feed copy may be stale'));
-  if (link) details.push(t('Source ↗ · click card to open'));
+  const host = link ? sourceHost(link) : null;
+  if (host) details.push(`${host} ↗ · ${t('Click card to open the source')}`);
   return {
     id: `alert-card:${alert.id}`,
     selected: true,
@@ -156,23 +174,35 @@ export function buildAlertCard(alert, nowMs, { accent, link = null } = {}) {
 /**
  * The selected card for a region's bulletins: alerts that carry no
  * geometry of their own (transit advisories, agency news), listed worst
- * first at the region's anchor.
+ * first at the region's centre.
  */
-export function buildBulletinCard(region, alerts, nowMs, { accent, link = null } = {}) {
-  const sorted = alerts.slice().sort((a, b) => severityRank(b.severity) - severityRank(a.severity));
-  const details = sorted.slice(0, 6).map((alert) => {
-    const age = formatAlertAge(nowMs - Date.parse(alert.issued || alert.starts || ''));
-    return [alert.headline, alert.agency, age ? t('{age} ago', { age }) : null]
-      .filter(Boolean)
-      .join(' · ');
-  });
-  if (sorted.length > 6)
-    details.push(
-      tn(sorted.length - 6, '{count} more bulletin', '{count} more bulletins', {
-        count: formatNumber(sorted.length - 6),
-      }),
+export function buildBulletinCard(
+  region,
+  alerts,
+  nowMs,
+  { accent, link = null } = {},
+) {
+  const sorted = alerts
+    .slice()
+    .sort((a, b) => severityRank(b.severity) - severityRank(a.severity));
+  const details = sorted.slice(0, BULLETIN_LINES).map((alert) => {
+    const when = relativeTime(
+      Date.parse(alert.issued || alert.starts || ''),
+      nowMs,
     );
-  if (link) details.push(t('Source ↗ · click card to open'));
+    return [alert.headline, alert.agency, when].filter(Boolean).join(' · ');
+  });
+  if (sorted.length > BULLETIN_LINES)
+    details.push(
+      tn(
+        sorted.length - BULLETIN_LINES,
+        '{count} more bulletin',
+        '{count} more bulletins',
+        { count: formatNumber(sorted.length - BULLETIN_LINES) },
+      ),
+    );
+  const host = link ? sourceHost(link) : null;
+  if (host) details.push(`${host} ↗ · ${t('Click card to open the source')}`);
   return {
     id: `alert-bulletins:${region.id}`,
     selected: true,
@@ -184,10 +214,12 @@ export function buildBulletinCard(region, alerts, nowMs, { accent, link = null }
           }),
         }
       : undefined),
-    title: tn(sorted.length, '{region} · {count} bulletin', '{region} · {count} bulletins', {
-      region: region.name,
-      count: formatNumber(sorted.length),
-    }),
+    title: tn(
+      sorted.length,
+      '{region} · {count} bulletin',
+      '{region} · {count} bulletins',
+      { region: region.name, count: formatNumber(sorted.length) },
+    ),
     details,
     accent,
     priority: Number.MAX_SAFE_INTEGER,

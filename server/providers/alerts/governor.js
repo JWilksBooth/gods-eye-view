@@ -1,4 +1,5 @@
 import { coalesceProxyRequest } from '../common/http.js';
+import { upstreamErrorCode } from './http.js';
 
 /**
  * Request governor for one upstream feed, so an open tab never hammers a
@@ -18,7 +19,8 @@ import { coalesceProxyRequest } from '../common/http.js';
  * `acquire` resolves to `{ value, fetchedAt, stale, status }`; `status` is
  * `ok`, `stale` (serving an old copy after a failure), `budget` or
  * `cooldown` (an old copy because upstream was deliberately not asked).
- * Without any copy to fall back on it rejects with the upstream error.
+ * Without any copy to fall back on it rejects with an error whose `code` is
+ * the short failure identifier (`upstreamErrorCode`), never upstream text.
  */
 export function createFeedGovernor({
   id,
@@ -53,15 +55,13 @@ export function createFeedGovernor({
       status,
     };
   }
-  function fallback(status, error) {
+  function fallback(status) {
     const at = now();
     if (cache && at - cache.fetchedAt <= staleMaxMs)
       return result(cache, status);
     lastStatus = 'unavailable';
-    const failure =
-      error instanceof Error
-        ? error
-        : new Error(lastError || `${id} feed unavailable`);
+    const failure = new Error(lastError || 'unavailable');
+    failure.code = lastError || (status === 'stale' ? 'unavailable' : status);
     failure.reason = status;
     throw failure;
   }
@@ -91,7 +91,7 @@ export function createFeedGovernor({
           return cache;
         } catch (error) {
           failures += 1;
-          lastError = String(error?.message || error);
+          lastError = upstreamErrorCode(error);
           retryAt =
             now() + Math.min(maxCooldownMs, cooldownMs * 2 ** (failures - 1));
           throw error;
@@ -99,9 +99,13 @@ export function createFeedGovernor({
       });
       try {
         return result(await promise, 'ok');
-      } catch (error) {
-        return fallback('stale', error);
+      } catch {
+        return fallback('stale');
       }
+    },
+    /** The short code of the last failure, or null after a success. */
+    lastErrorCode() {
+      return lastError;
     },
     /** Diagnostics without data: when, how often and how it last went. */
     describe() {

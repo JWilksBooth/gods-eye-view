@@ -1,13 +1,17 @@
-/* ── Alerts layer severity tokens ──────────────
-   The theme owns these values. The Alerts layer reads them at enable time
-   (src/app/layers/alerts.js → resolveSeverityColors) for its ground
-   markers and polygons, and its row legend paints with the same values, so
-   a restyle changes the globe and the panel together. Unknown falls back to
-   the dim text tone so an unrated bulletin never shouts. */
+/* ── Alerts layer tokens ──────────────────────
+   The theme owns every colour the Alerts layer draws with. The layer reads
+   these tokens when it is enabled and on each refresh (src/app/layers/
+   alerts.js → resolveSeverityColors) for its ground markers, area fills and
+   outlines, label and card accents, and the Layers panel legend paints its
+   swatches with the same tokens, so a restyle changes the globe and the
+   panel together. Severity hues keep their warning meaning across themes;
+   the quiet bands follow the shell: minor alerts take the accent and an
+   unrated bulletin the secondary text tone, so it never shouts. */
 :root {
   --alert-severity-extreme: #ff3b5c;
-  --alert-severity-severe: #ff7a1a;
-  --alert-severity-moderate: #ffc43b;
+  --alert-severity-severe: #ff8a1f;
+  --alert-severity-moderate: #ffd23b;
   --alert-severity-minor: var(--accent);
-  --alert-severity-unknown: #8a97a6;
+  --alert-severity-unknown: var(--text-secondary);
+  --alert-marker-outline: var(--bg-dark);
 }

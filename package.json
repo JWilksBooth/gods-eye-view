@@ -130,6 +130,9 @@
     "./server/providers/incidents": {
       "node": "./server/providers/incidents.js"
     },
+    "./server/providers/alerts": {
+      "node": "./server/providers/alerts.js"
+    },
     "./server/providers/openai": {
       "node": "./server/providers/openai.js"
     },
@@ -171,6 +174,7 @@
     "./layers/recent-imagery/source": "./src/layers/recentImagery/source.js",
     "./layers/perimeters": "./src/layers/perimeters/index.js",
     "./layers/incidents": "./src/layers/incidents/index.js",
+    "./layers/alerts": "./src/layers/alerts/index.js",
     "./layers/gnss": "./src/layers/gnss/index.js",
     "./layers/ghostmaps": "./src/layers/ghostMaps/index.js",
     "./sources/firms-csv": "./src/data/firmsCsv.js",
@@ -252,6 +256,7 @@
     "./layers/earthquakes/source": "./src/layers/earthquakes/source.js",
     "./layers/perimeters/source": "./src/layers/perimeters/source.js",
     "./layers/incidents/source": "./src/layers/incidents/source.js",
+    "./layers/alerts/source": "./src/layers/alerts/source.js",
     "./layers/gnss/source": "./src/layers/gnss/source.js",
     "./layers/ghostmaps/source": "./src/layers/ghostMaps/source.js",
     "./layers/firms/source": "./src/layers/firms/source.js",
