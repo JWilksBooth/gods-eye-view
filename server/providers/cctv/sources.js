@@ -380,7 +380,7 @@ export async function loadCaltransSourcesFromOpenData() {
     process.env.CCTV_CALTRANS_MAX_SOURCES || DEFAULT_CALTRANS_MAX_SOURCES,
   );
   const maxCount = Number.isFinite(maxRaw)
-    ? Math.max(8, Math.min(600, Math.floor(maxRaw)))
+    ? Math.max(8, Math.min(1500, Math.floor(maxRaw)))
     : DEFAULT_CALTRANS_MAX_SOURCES;
   const prioritized = prioritizeSources(cameras, maxCount, CALTRANS_ANCHORS);
   console.log(
@@ -463,7 +463,7 @@ export async function loadTflSourcesFromOpenData() {
       process.env.CCTV_TFL_MAX_SOURCES || DEFAULT_TFL_MAX_SOURCES,
     );
     const maxCount = Number.isFinite(maxRaw)
-      ? Math.max(8, Math.min(600, Math.floor(maxRaw)))
+      ? Math.max(8, Math.min(1500, Math.floor(maxRaw)))
       : DEFAULT_TFL_MAX_SOURCES;
     const prioritized = prioritizeSources(cameras, maxCount, [LONDON_CENTER]);
     console.log(
@@ -788,7 +788,7 @@ export async function loadFintrafficSourcesFromOpenData() {
       process.env.CCTV_FINTRAFFIC_MAX_SOURCES || DEFAULT_FINTRAFFIC_MAX_SOURCES,
     );
     const maxCount = Number.isFinite(maxRaw)
-      ? Math.max(8, Math.min(600, Math.floor(maxRaw)))
+      ? Math.max(8, Math.min(1500, Math.floor(maxRaw)))
       : DEFAULT_FINTRAFFIC_MAX_SOURCES;
     const prioritized = prioritizeSources(cameras, maxCount, FINLAND_ANCHORS);
     console.log(
@@ -2005,7 +2005,7 @@ export async function loadCataloniaSourcesFromOpenData() {
       process.env.CCTV_CATALONIA_MAX_SOURCES || DEFAULT_CATALONIA_MAX_SOURCES,
     );
     const maxCount = Number.isFinite(maxRaw)
-      ? Math.max(8, Math.min(600, Math.floor(maxRaw)))
+      ? Math.max(8, Math.min(1500, Math.floor(maxRaw)))
       : DEFAULT_CATALONIA_MAX_SOURCES;
     const prioritized = prioritizeSources(unique, maxCount, CATALONIA_ANCHORS);
     console.log(

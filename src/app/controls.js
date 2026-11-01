@@ -1,6 +1,6 @@
 import { catalogControlServices } from './catalog.js';
 import { StyleManager } from '../ui/composition.js';
-import { flyToAustin } from '../camera.js';
+import { flyToHome } from '../camera.js';
 import { initCockpitCloudEffects } from '../cockpitCloudEffects.js';
 import { t } from '../i18n/index.js';
 
@@ -47,10 +47,10 @@ export function createApplicationControls({
   });
   defer(() => cockpitCloudEffects?.destroy());
 
-  // If no share link state, do default fly-to Austin
+  // If no share link state, fly to the home view (San Francisco Bay)
   if (!styleManager.hasShareState) {
-    loaderStatus.textContent = t('Flying to Austin, TX...');
-    defer(flyToAustin(viewer));
+    loaderStatus.textContent = t('Flying to San Francisco Bay...');
+    defer(flyToHome(viewer));
   } else {
     loaderStatus.textContent = t('Restoring shared view...');
   }
