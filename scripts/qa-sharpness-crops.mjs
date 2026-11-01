@@ -132,7 +132,7 @@ async function waitForTiles(
   let loadedSince = 0;
   while (Date.now() < deadline) {
     const loaded = await page.evaluate(() => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       gev.requestRender?.('sharpness-crop');
       const scene = gev.viewer.scene;
       const globeDone = !scene.globe.show || scene.globe.tilesLoaded;
@@ -178,12 +178,12 @@ try {
     );
     await page.setViewport({ ...VIEWPORT, deviceScaleFactor });
     await page.goto(url, { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => !!window.__godsEyeView?.viewer, {
+    await page.waitForFunction(() => !!window.__osiris?.viewer, {
       timeout: 180_000,
     });
     await sleep(12_000); // boot flyTo + deferred init
     const settings = await page.evaluate(async () => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       for (const [id, entry] of gev.dataManager.layers)
         if (entry.enabled)
           await gev.dataManager
@@ -206,7 +206,7 @@ try {
       const view = VIEWS[id];
       if (!view) throw new Error(`unknown view ${id}`);
       await page.evaluate((v) => {
-        const gev = window.__godsEyeView;
+        const gev = window.__osiris;
         const camera = gev.viewer.camera;
         camera.cancelFlight();
         const toRad = Math.PI / 180;
@@ -228,7 +228,7 @@ try {
       }, view);
       const settled = await waitForTiles(page);
       const render = await page.evaluate(() => {
-        const gev = window.__godsEyeView;
+        const gev = window.__osiris;
         const { viewer } = gev;
         return {
           snapshot: gev.describePerformancePreset?.() ?? null,

@@ -461,7 +461,7 @@ async function openApp() {
   );
   if (synthetic) await installSyntheticRoutes(page);
   await page.goto(url, { waitUntil: 'domcontentloaded' });
-  await page.waitForFunction(() => !!window.__godsEyeView?.viewer, {
+  await page.waitForFunction(() => !!window.__osiris?.viewer, {
     timeout: 120_000,
   });
   await sleep(12_000); // boot flyTo + deferred init
@@ -470,7 +470,7 @@ async function openApp() {
     // needs no provider metadata, so it is the one that draws under the
     // synthetic feeds. A real-feed run keeps whatever stack the app chose.
     await page.evaluate(async () => {
-      await window.__godsEyeView.mapStackController?.setStack?.('osm', {
+      await window.__osiris.mapStackController?.setStack?.('osm', {
         silent: true,
       });
     });
@@ -518,7 +518,7 @@ async function openApp() {
     });
   }
   await page.evaluate(() => {
-    const gev = window.__godsEyeView;
+    const gev = window.__osiris;
     // The frame-rate readout the owner uses in the field (backtick key).
     document.dispatchEvent(
       new KeyboardEvent('keydown', {
@@ -659,7 +659,7 @@ async function openApp() {
 
 async function describeRenderer(page) {
   return page.evaluate(() => {
-    const gl = window.__godsEyeView.viewer.scene.context._gl;
+    const gl = window.__osiris.viewer.scene.context._gl;
     const info = gl.getExtension('WEBGL_debug_renderer_info');
     return info
       ? gl.getParameter(info.UNMASKED_RENDERER_WEBGL)
@@ -669,7 +669,7 @@ async function describeRenderer(page) {
 
 async function setAllLayers(page, enabledIds) {
   await page.evaluate(async (ids) => {
-    const gev = window.__godsEyeView;
+    const gev = window.__osiris;
     for (const [id, entry] of gev.dataManager.layers) {
       const want = ids.includes(id);
       if (entry.enabled !== want) {
@@ -698,7 +698,7 @@ async function waitForCounts(page, ids, minimum, timeoutMs) {
 
 async function applyPreset(page, preset) {
   return page.evaluate((name) => {
-    const gev = window.__godsEyeView;
+    const gev = window.__osiris;
     if (name === 'baseline')
       return {
         applied: 'baseline',
@@ -793,7 +793,7 @@ async function runScene(page, scene) {
     await page.evaluate((camera) => window.__perfPark(camera), CAMERA);
     await waitForCounts(page, ['flights'], 1, 90_000);
     const entered = await page.evaluate(async () => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       const flights = gev.dataManager.layers.get('flights')?.module;
       try {
         await Promise.race([
@@ -839,7 +839,7 @@ async function runScene(page, scene) {
     const counts = await page.evaluate(() => window.__perfCounts());
     await page.screenshot({ path: path.join(outDir, 'cockpit.png') });
     await page.evaluate(() => {
-      const gev = window.__godsEyeView;
+      const gev = window.__osiris;
       gev.styleManager.cockpitView?.exit?.();
       gev.dataManager.layers.get('flights')?.module?.stopTracking?.();
     });

@@ -257,8 +257,8 @@ try {
   await page.goto(`${BASE}/?welcome=0`, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(
     () =>
-      window.__godsEyeView?.dataManager?.layers?.has('events') &&
-      window.__godsEyeView?.styleManager &&
+      window.__osiris?.dataManager?.layers?.has('events') &&
+      window.__osiris?.styleManager &&
       document.getElementById('loading-screen')?.classList.contains('hidden'),
     { timeout: 90_000 },
   );
@@ -266,11 +266,11 @@ try {
 
   // Park the camera over the city, oblique, before any layer comes on.
   await page.evaluate(({ lat, lon }) => {
-    const { viewer } = window.__godsEyeView;
+    const { viewer } = window.__osiris;
     viewer.camera.cancelFlight?.();
     viewer.camera.setView({
       destination:
-        window.__godsEyeView.viewer.scene.globe.ellipsoid.cartographicToCartesian(
+        window.__osiris.viewer.scene.globe.ellipsoid.cartographicToCartesian(
           // eslint-disable-next-line no-undef
           {
             longitude: (lon * Math.PI) / 180,
@@ -284,7 +284,7 @@ try {
 
   const toggle = async (id) => {
     const enabled = await page.evaluate(async (layerId) => {
-      const manager = window.__godsEyeView.dataManager;
+      const manager = window.__osiris.dataManager;
       if (!manager.isEnabled(layerId))
         await manager.toggle(layerId, { origin: 'qa' });
       await manager.waitForLayerSettled?.(layerId);
@@ -299,7 +299,7 @@ try {
   await page.waitForFunction(
     () => {
       const module =
-        window.__godsEyeView.dataManager.layers.get('events').module;
+        window.__osiris.dataManager.layers.get('events').module;
       const events = module.getEvents();
       return (
         events.some((event) => event.kind === 'camera') &&
@@ -309,7 +309,7 @@ try {
     { timeout: 30_000 },
   );
   const cohort = await page.evaluate(() => {
-    const module = window.__godsEyeView.dataManager.layers.get('events').module;
+    const module = window.__osiris.dataManager.layers.get('events').module;
     return module
       .getEvents()
       .map((event) => ({
@@ -325,7 +325,7 @@ try {
     JSON.stringify(cohort.map((e) => `${e.kind}:${e.title}`)),
   );
   const hoverState = await page.evaluate(() => {
-    const module = window.__godsEyeView.dataManager.layers.get('events').module;
+    const module = window.__osiris.dataManager.layers.get('events').module;
     return module.getUIState();
   });
   check(
@@ -337,7 +337,7 @@ try {
   // Let the imagery settle so the shots show the real map underneath.
   await page
     .waitForFunction(
-      () => window.__godsEyeView.viewer.scene.globe.tilesLoaded === true,
+      () => window.__osiris.viewer.scene.globe.tilesLoaded === true,
       { timeout: 20_000 },
     )
     .catch(() => console.log('  (imagery still loading; capturing anyway)'));
@@ -351,7 +351,7 @@ try {
   const screenPosition = async (pickId) =>
     page.evaluate((id) => {
       const module =
-        window.__godsEyeView.dataManager.layers.get('events').module;
+        window.__osiris.dataManager.layers.get('events').module;
       return module._screenPositionForTest(id);
     }, pickId);
   let at = await screenPosition(fire.pickId);
@@ -421,7 +421,7 @@ try {
   if (!drawerOpen) {
     await page.evaluate(
       (id) =>
-        window.__godsEyeView.dataManager.layers
+        window.__osiris.dataManager.layers
           .get('events')
           .module.openEvent(id),
       fire.pickId,
@@ -503,7 +503,7 @@ try {
   if (!cameraViaClick)
     await page.evaluate(
       (id) =>
-        window.__godsEyeView.dataManager.layers
+        window.__osiris.dataManager.layers
           .get('events')
           .module.openEvent(id),
       camera.pickId,
@@ -582,13 +582,13 @@ try {
   await page.mouse.move(VIEWPORT.width / 2, VIEWPORT.height / 2);
   await page.keyboard.press('g');
   await page.waitForFunction(
-    () => window.__godsEyeView.styleManager.gridViewEnabled === true,
+    () => window.__osiris.styleManager.gridViewEnabled === true,
     { timeout: 5_000 },
   );
   await wait(900);
   const gridState = await page.evaluate(() => {
-    const shell = window.__godsEyeView.styleManager;
-    const camera = window.__godsEyeView.viewer.camera;
+    const shell = window.__osiris.styleManager;
+    const camera = window.__osiris.viewer.camera;
     const state = shell._visualSettings._gridView._stateForTest();
     const canvas = document.getElementById('event-grid-overlay');
     const button = document.getElementById('grid-view-toggle');
@@ -661,7 +661,7 @@ try {
     .catch(() => check('the share link carries gv=1', false, gridState.hash));
   await page
     .waitForFunction(
-      () => window.__godsEyeView.viewer.scene.globe.tilesLoaded === true,
+      () => window.__osiris.viewer.scene.globe.tilesLoaded === true,
       { timeout: 20_000 },
     )
     .catch(() => {});
@@ -674,13 +674,13 @@ try {
   // Back out: perspective, tilt and base restored.
   await page.keyboard.press('g');
   await page.waitForFunction(
-    () => window.__godsEyeView.styleManager.gridViewEnabled === false,
+    () => window.__osiris.styleManager.gridViewEnabled === false,
     { timeout: 5_000 },
   );
   const restored = await page.evaluate(() => {
-    const camera = window.__godsEyeView.viewer.camera;
+    const camera = window.__osiris.viewer.camera;
     const state =
-      window.__godsEyeView.styleManager._visualSettings._gridView._stateForTest();
+      window.__osiris.styleManager._visualSettings._gridView._stateForTest();
     return {
       frustum: camera.frustum.constructor.name,
       tiltLocked: state.tiltLocked,
@@ -688,7 +688,7 @@ try {
       bodyClass: document.body.classList.contains('grid-view'),
       stored: localStorage.getItem('gev:grid-view:v1'),
       imageryBrightness:
-        window.__godsEyeView.viewer.imageryLayers.get(0)?.brightness,
+        window.__osiris.viewer.imageryLayers.get(0)?.brightness,
     };
   });
   check(

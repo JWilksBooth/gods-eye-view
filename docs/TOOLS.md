@@ -87,7 +87,7 @@ service, `/api/live-ops/headlines`). The regions and their boxes come from
 `incidents` service is the incidents layer's source over `/api/incidents`. The `alerts` service is the Alerts layer's source over `/api/alerts` (official alerts for the same regions, narrowed by region, kind and minimum severity) and `/api/alerts/airports` (FAA airport status), which `get_alerts` and `get_airport_status` read. The
 `streams` service is the live-streams layer's source over `/api/streams`, and
 `find_live_streams` answers from it with metadata only (a stream plays only when
-it is opened in God's Eye View or on the provider's page). `app` is `{ baseUrl }`, the address links open. The `bikeshare` service is `{ systems, getStations }`: the system registry and
+it is opened in Osiris or on the provider's page). `app` is `{ baseUrl }`, the address links open. The `bikeshare` service is `{ systems, getStations }`: the system registry and
 the GBFS source. `createGeocodePlaceService` resolves place names through `/api/geocode`;
 `createPlaceSearchService` searches `/api/google/*` and reports when no search key
 is configured; `createRouteService` plans routes through `/api/route`.
