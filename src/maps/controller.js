@@ -14,6 +14,8 @@ const FALLBACK_RETRY_MS = 30_000;
 const FALLBACK_RETRY_MAX_MS = 600_000;
 /** A retry attempt still unsettled after a minute counts as failed. */
 const FALLBACK_ATTEMPT_MS = 60_000;
+/** A refreshed imagery layer replaces the old one once loaded, or after this. */
+const IMAGERY_HANDOVER_MS = 6_000;
 
 const resolved = (provider, effectiveStackId) => ({
   provider,
@@ -57,6 +59,9 @@ export class MapSourceController {
     this._isSwitching = false;
     this._lastError = null;
     this._imageryLayer = null;
+    /** The layer a refresh replaced, kept underneath until its successor loads. */
+    this._retiringImageryLayer = null;
+    this._cancelImageryHandover = null;
     this._activeImageryProvider = null;
     this._activeResolution = null;
     this._removeImageryErrorListener = null;
@@ -557,7 +562,64 @@ export class MapSourceController {
     });
   }
 
+  /**
+   * Rebuild the live imagery layer from the same provider with the current
+   * `createImageryLayer` options (texture filters, anisotropy). Cesium fixes a
+   * tile's sampler when its texture uploads, so only a new layer picks new
+   * options up. The provider, its cached metadata, the tile-failure watch and
+   * the credits are kept; only the layer and its uploaded textures are new.
+   * @returns {boolean} Whether a layer was rebuilt.
+   */
+  refreshImageryLayer() {
+    if (this._destroyed || !this._imageryLayer || !this._activeImageryProvider)
+      return false;
+    // A refresh during a hand-over retires the older layer at once.
+    this._finishImageryHandover();
+    const layers = this.viewer.imageryLayers;
+    const previous = this._imageryLayer;
+    const index = layers.indexOf?.(previous);
+    this._imageryLayer = this._createImageryLayer(this._activeImageryProvider);
+    // The new layer goes directly above the one it replaces, so the loaded
+    // tiles keep showing through until the new textures arrive: rebuilding in
+    // place would expose the bare globe meanwhile.
+    layers.add(
+      this._imageryLayer,
+      Number.isInteger(index) && index >= 0 ? index + 1 : undefined,
+    );
+    this._retiringImageryLayer = previous;
+    let sawLoading = false;
+    const removeProgress =
+      this.viewer.scene?.globe?.tileLoadProgressEvent?.addEventListener?.(
+        (queued) => {
+          if (queued > 0) sawLoading = true;
+          else if (sawLoading) this._finishImageryHandover();
+        },
+      );
+    const timer = setTimeout(
+      () => this._finishImageryHandover(),
+      IMAGERY_HANDOVER_MS,
+    );
+    this._cancelImageryHandover = () => {
+      removeProgress?.();
+      clearTimeout(timer);
+    };
+    this._requestRender('map-stack');
+    return true;
+  }
+
+  /** Retire the layer a refresh replaced, once its successor has loaded. */
+  _finishImageryHandover() {
+    this._cancelImageryHandover?.();
+    this._cancelImageryHandover = null;
+    const retiring = this._retiringImageryLayer;
+    this._retiringImageryLayer = null;
+    if (!retiring) return;
+    this.viewer.imageryLayers.remove(retiring, true);
+    if (!this._destroyed) this._requestRender('map-stack');
+  }
+
   _removeImageryLayer() {
+    this._finishImageryHandover();
     this._removeImageryErrorListener?.();
     this._removeImageryErrorListener = null;
     if (this._imageryLayer)

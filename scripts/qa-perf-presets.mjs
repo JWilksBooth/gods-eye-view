@@ -33,13 +33,16 @@
  *     [--presets baseline|quality,balanced,performance] [--scenes idle,layers,cockpit,traffic]
  *     [--out qa-shots/perf-presets] [--label name] [--no-synthetic]
  *     [--aircraft 2000] [--vessels 6000] [--cameras 4000] [--window 5000]
- *     [--chrome /path/to/chrome] [--gpu] [--profile] [--trace-readpixels]
+ *     [--chrome /path/to/chrome] [--gpu] [--dpr 1] [--profile] [--trace-readpixels]
  *
  * "baseline" measures whatever the app does with no preset selected (the
  * build's default). With `--gpu` the harness does not force SwiftShader, so a
- * desktop GPU is used when the browser can reach one. `--profile` records a
- * V8 CPU profile of every sampled window and prints the top self-time
- * functions and files, so a slow scene can be attributed, not just scored.
+ * desktop GPU is used when the browser can reach one (the high-performance
+ * one where there are two). `--dpr 2` emulates a
+ * HiDPI screen at the same 1600 x 900 CSS viewport, where the presets' device
+ * pixel policies differ. `--profile` records a V8 CPU profile of every
+ * sampled window and prints the top self-time functions and files, so a slow
+ * scene can be attributed, not just scored.
  */
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -77,6 +80,7 @@ const vesselCount = Number(arg('--vessels', '6000')) || 6000;
 const cameraCount = Number(arg('--cameras', '4000')) || 4000;
 const windowMs = Number(arg('--window', '5000')) || 5000;
 const useGpu = flag('--gpu');
+const deviceScaleFactor = Number(arg('--dpr', '1')) || 1;
 const profile = flag('--profile');
 const traceReadPixels = flag('--trace-readpixels');
 mkdirSync(outDir, { recursive: true });
@@ -413,8 +417,10 @@ const browser = await puppeteer.launch({
     '--disable-renderer-backgrounding',
     '--disable-background-timer-throttling',
     '--ignore-gpu-blocklist',
+    // On a machine with an integrated and a discrete GPU, headless Chrome
+    // renders on the integrated one unless told otherwise.
     ...(useGpu
-      ? []
+      ? ['--force_high_performance_gpu']
       : [
           '--use-gl=angle',
           '--use-angle=swiftshader',
@@ -428,6 +434,7 @@ const results = {
   url,
   synthetic,
   windowMs,
+  deviceScaleFactor,
   presets: {},
   population: {
     aircraft: aircraftCount,
@@ -448,7 +455,7 @@ const CAMERA = {
 
 async function openApp() {
   const page = await browser.newPage();
-  await page.setViewport({ width: 1600, height: 900, deviceScaleFactor: 1 });
+  await page.setViewport({ width: 1600, height: 900, deviceScaleFactor });
   page.on('pageerror', (error) =>
     console.warn('  [page error]', error.message),
   );
@@ -583,6 +590,9 @@ async function openApp() {
                 : null,
               drawingBuffer: `${gev.viewer.canvas.width}x${gev.viewer.canvas.height}`,
               resolutionScale: gev.viewer.resolutionScale,
+              // The preset's own account: pixel ratio, globe and tile
+              // detail (builds without the snapshot report null).
+              preset: gev.describePerformancePreset?.() ?? null,
               msaa: gev.viewer.scene.msaaSamples,
               fxaa: gev.viewer.scene.postProcessStages.fxaa.enabled,
               requestRenderMode: scene.requestRenderMode,
@@ -896,7 +906,7 @@ try {
         console.log(`    motion: ${fmt(r.motion)}`);
         console.log(`    rest:   ${fmt(r.rest)}`);
         console.log(
-          `    buffer ${r.motion.drawingBuffer} scale ${r.motion.resolutionScale} msaa ${r.motion.msaa} fxaa ${r.motion.fxaa} holds ${JSON.stringify(r.rest.holds)} heap ${r.rest.heapMiB} MiB counts ${JSON.stringify(r.counts)} (${Math.round((performance.now() - started) / 1000)} s)`,
+          `    buffer ${r.motion.drawingBuffer} scale ${r.motion.resolutionScale} msaa ${r.motion.msaa} fxaa ${r.motion.fxaa} globe SSE ${r.motion.preset?.globe?.maximumScreenSpaceError ?? '-'} holds ${JSON.stringify(r.rest.holds)} heap ${r.rest.heapMiB} MiB counts ${JSON.stringify(r.counts)} (${Math.round((performance.now() - started) / 1000)} s)`,
         );
       }
     }

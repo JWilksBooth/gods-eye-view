@@ -244,10 +244,9 @@ const layers = [
   },
   {
     id: 'events',
-    aliases: ['event map', 'event icons', 'live events', 'events'],
+    aliases: ['event map', 'events'],
     context: false,
-    noQuery:
-      'icons for other layers; query incidents, earthquakes, fires, flights or vessels',
+    noQuery: 'icons of other layers; query those layers',
   },
   {
     id: 'alerts',
