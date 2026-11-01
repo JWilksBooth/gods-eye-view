@@ -1,69 +1,123 @@
-# Event map (work in progress)
+# Event map
 
-Branch `claude/eloquent-wright-n7enqr`. The framework under `src/layers/events/`
-is written but not yet registered in the layer catalog; nothing in the running
-app changes until the wiring below lands.
+Live events and places as constant-size icons on the globe, a hover card with
+a one-line description, a click that opens a right-side feed drawer with the
+live content, and a top-down grid view. The layer is `events` in the Data
+Layers panel (Events group); the grid view is Display → GRID or the `G` key.
 
-## Done
+## How it is built
 
-- `src/layers/events/adapters.js`: the adapter registry. A layer joins the event
-  map with `registerEventAdapter({ id, kind, layerId, getEvents, feed? })`;
-  the interface, every field, and commented stubs for the `incidents` and
-  `alerts` layers are documented in that file.
+- `src/layers/events/adapters.js`: the adapter registry. A layer joins the
+  event map with `registerEventAdapter({ id, kind, layerId, getEvents,
+feed? })`; the interface, every field and the remaining `alerts` stub (with
+  what its adapter needs from that layer) are documented in the file.
+- `src/layers/events/adapters/{cctv,fires,earthquakes,aircraft,vessels,
+incidents}.js`: the built-in adapters, registered by `src/app/layers/
+events.js` from the catalog's own layer instances. An adapter is read only
+  while its layer is on, so the event map shows what the operator has turned
+  on. The incidents adapter lists LIVE OPS incidents newest first and reuses
+  the incident card (`buildIncidentCard`) for the drawer detail, with an "Open
+  at source" action for the agency page.
 - `src/layers/events/model.js`: pick ids (`event:<adapter>:<id>`), record
-  normalization, priority-then-distance ranking, freshness, cluster summaries,
-  nearest-camera lookups.
+  normalization, priority-then-distance ranking, freshness, cluster summaries
+  and nearest-camera lookups.
 - `src/layers/events/icons.js`: SVG icons per kind coloured from CSS tokens
-  (`--event-<kind>` in `src/ui/styles/events.css`, derived from the foundation
-  palette), plus count badges for clusters.
+  (`--event-<kind>` in `src/ui/styles/events.css`), plus cluster count badges.
 - `src/layers/events/rendering.js`: a clustered `CustomDataSource` (Cesium
-  `EntityCluster`, the Radio layer's pattern): constant screen size, depth test
-  off, horizon cull, reconciled on data changes and camera stops only.
-- `src/layers/events/hoverCard.js` and `interaction.js`: one hover card element,
-  throttled hover picks (120 ms), clean-tap clicks, `registerPickOwner('events')`.
+  `EntityCluster`): constant screen size, depth test off, horizon cull,
+  reconciled on data changes and camera stops only, never per frame.
+- `src/layers/events/hoverCard.js` and `interaction.js`: one hover card
+  element, throttled hover picks (120 ms), clean-tap clicks, pick ownership.
 - `src/layers/events/lifecycle.js`: the manager module (`init/enable/disable/
-  update/destroy/getStats`, `attachDataManager`, `findByQuery`, `openEvent`,
+update/destroy/getStats`, `attachDataManager`, `findByQuery`, `openEvent`,
   `nearestCameras`, QA seams).
-- `src/layers/events/adapters/{cctv,fires,earthquakes,aircraft,vessels}.js`.
 - `src/ui/eventFeedDrawer.js` + `src/ui/styles/events.css`: the right-side
   drawer (`dialog[data-panel-surface]`, Esc or × closes and tears media down;
-  camera video paints from the CCTV layer's single decoder; stream embeds are
-  created on open and destroyed on close).
+  a camera's video paints from the CCTV layer's single decoder; stream embeds
+  are created on open and destroyed on close).
 - `src/layers/streams/{embed,playback}.js`: pure embed descriptors (YouTube
-  privacy-enhanced iframe, muted autoplay; HLS; MJPEG; link-out) and bounded
-  hls.js playback.
-- `src/app/layers/events.js`: application wiring that registers the built-in
-  adapters and lazily creates the drawer.
+  privacy-enhanced iframe, HLS, MJPEG, link-out) and bounded hls.js playback.
+  The `streams` layer that feeds them is built separately (see Remaining).
+
+### Registration
+
+`events` holds layer-state token `7` (`src/data/layerState.js`,
+`src/data/layerStateTokenReservations.json`); it is named in
+`src/ui/layerNames.js`, placed first in the Events group of
+`src/ui/layerPanel.js`, has pick kind `event` in `src/data/pickedContext.js`,
+is constructed last in `src/app/constructCatalog.js` with the CCTV, FIRMS,
+earthquakes, flights, military, vessels and incidents instances and
+`sources.cctv`, occludes world overlays behind `#event-feed-drawer`
+(`src/overlays/worldOverlay.js`), is reachable by voice as a toggle
+(`src/voice/layerManifest.js`), and its stylesheet is imported from
+`style.css`.
+
+### Grid view
+
+`src/ui/gridView.js` (controller) and `src/gridViewMath.js` (pure geometry),
+owned by `VisualSettings` (`setGridViewEnabled`, `toggleGridView`,
+`restoreStoredGridView`), bound to the DISPLAY button `#grid-view-toggle` and
+the `G` key by `displayBindings.js`.
+
+- The 3D camera is switched to an `OrthographicFrustum`
+  (`camera.switchToOrthographicFrustum()`), never `SceneMode.SCENE2D`. The
+  frustum gets `fov`/`fovy` readers that answer the perspective angle a camera
+  at the current height would need, so the flights, military, CCTV, launches
+  and celestial-ring pixel math keeps working; writes are ignored. On exit the
+  saved perspective frustum is restored.
+- The camera is aimed straight down and north up through
+  `readCameraTargetFrame`/`setCameraTargetFrame`. While the view is on every
+  camera stop re-checks the orbit frame and straightens it, so a flight or an
+  orbit ends top-down; a camera still in flight when the view is turned on is
+  straightened on arrival.
+- Tilt and look (`screenSpaceCameraController.enableTilt/enableLook`) are
+  locked while on and restored on exit.
+- The base is darkened: a shown 3D tileset gets a grey `Cesium3DTileStyle`
+  tint, a globe imagery base gets `brightness` 0.55
+  (`GRID_VIEW_BASE_LUMINANCE`); the previous style or brightness is restored
+  on exit, and a map-stack switch while on re-applies it to the new base.
+- `#event-grid-overlay`, a canvas inside `#cesiumContainer`, draws lat/lon
+  lines at a 1-2-5 spacing chosen for the visible extent, degree labels on
+  the top and left edges and an MGRS label per cell (`src/mgrsFormat.js`, the
+  HUD's formatter, now shared). Colours come from the `--event-grid-*` tokens.
+  It repaints on camera stops, resizes and theme changes, and per rendered
+  frame only while the camera is moving.
+- The choice is remembered in `localStorage` (`gev:grid-view:v1`, applied at
+  start-up) and travels in share links: long-form `gv=1` (written only while
+  on) and compact flag bit 5 `gridView` (`docs/SHARE-LINK-FORMAT.md`).
+
+## QA
+
+`npm run qa:event-map` (`scripts/qa-event-map.mjs`) drives a real Chrome
+against a running app with seeded cameras and incidents over San Francisco on
+top of the real imagery: it enables the layers, hovers an icon with the real
+pointer, clicks it open, opens the drawer on a camera, presses `G` and checks
+the frustum, lock, tint, canvas, button, preference and share hash, then
+turns the view off again. Screenshots land in `docs/media/event-map/`:
+
+| Shot                     | Shows                                                 |
+| ------------------------ | ----------------------------------------------------- |
+| `01-icons.png`           | camera and incident icons over the city               |
+| `02-hover.png`           | the hover card on a fire incident                     |
+| `03-drawer-incident.png` | the drawer with the incident card and nearest cameras |
+| `04-drawer-camera.png`   | the drawer with a camera snapshot                     |
+| `05-grid-view.png`       | the grid view: top-down, dimmed, graticule and MGRS   |
 
 ## Remaining
 
-1. Register the layer: `events` token `6` (and `streams` `7`) in
-   `src/data/layerState.js` and `layerStateTokenReservations.json`; update the
-   pinned counts in `src/data/layerState.test.mjs` (32 → 34, next token `6` →
-   `8`) and `layerStateTokenLedger.test.mjs` (fixture tokens `6`/`7` → `8`/`9`,
-   `[...'6789']` → `[...'89']`, "33 published" → "35 published"); add
-   `events`/`streams` to `src/ui/layerNames.js`, `PANEL_GROUPS` in
-   `src/ui/layerPanel.js`, `KIND_BY_LAYER` in `src/data/pickedContext.js`;
-   import `events.css` from `style.css`; construct the layer in
-   `src/app/constructCatalog.js` with the catalog's cctv, firms, earthquakes,
-   flights, military and vessel instances and `sources.cctv`; add
-   `#event-feed-drawer` to `WORLD_OVERLAY_OCCLUDER_SELECTORS`.
-2. Grid view: orthographic frustum on the 3D camera (not `SceneMode.SCENE2D`,
-   which six modules assume away) with `fov`/`fovy` compatibility getters so the
-   flights, military and CCTV pixel math keeps working; north-up straight-down
-   through `readCameraTargetFrame`; tilt and look locked while on; darker base
-   via tileset tint and imagery brightness, restored on exit; grid canvas with
-   lat/lon lines and MGRS labels through the HUD's `_formatMGRS` (move it to a
-   shared module); `G` key (free: 1–6, H, O, V, F, D, C, Q–T, backtick and Esc
-   are taken) and a DISPLAY button; `gev:grid-view:v1` in localStorage; share
-   flag bit 5 `gridView` in `src/share/viewCodec.js`, long-form `gv` in
-   `src/sharelink.js`, applied through `visualSettings.js`.
-3. Streams: `server/providers/streams/` (curated registry, YouTube discovery,
-   Windy, scanners), `src/layers/streams/{source,index}.js`, keys in
-   `src/keySetupCore.mjs` and `.env.example`, `find_live_streams` tool,
-   `DATA_SOURCES.md`, `src/data/dataCredits.js`, `docs/TOOLS.md`.
-4. Translations for every new string in all ten locale catalogs, `npm run i18n`,
-   `npm run format`, `npm test`, `scripts/qa-event-map.mjs`, screenshots, PR.
+- Streams (built in parallel on the same base): `server/providers/streams/`
+  (curated registry, YouTube discovery, Windy, scanners),
+  `src/layers/streams/{source,index}.js` with token `8`, keys in
+  `src/keySetupCore.mjs` and `.env.example`, `find_live_streams` tool,
+  `DATA_SOURCES.md`, `src/data/dataCredits.js`, `docs/TOOLS.md`, and a
+  `streams` adapter registered like the built-in ones.
+- Alerts (built in parallel): the `alerts` layer and its adapter from the
+  stub in `src/layers/events/adapters.js`.
+- At merge, reconcile the three branches' layer-state tokens and the pinned
+  counts in `src/data/layerState.test.mjs` and
+  `src/data/layerStateTokenLedger.test.mjs`, the voice tool-schema pins in
+  `src/firstRunExperience.test.mjs` and `src/voice/actionSchemas.test.mjs`,
+  and the catalog counts in `src/app/constructCatalog.test.mjs`.
 
 ## Provider terms (researched 2026-11-01)
 
