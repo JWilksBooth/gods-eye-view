@@ -43,7 +43,24 @@ import {
   setCyberSonarEnabled,
 } from '../cyberSonar.js';
 import { cyberVisualDefaultsForHudTransition } from '../hudLayouts.js';
+import {
+  getPerformancePreset as activePerformancePreset,
+  getPerformanceSettings,
+  normalizePerformancePreset,
+  persistPerformancePreset,
+  readStoredPerformancePreset,
+  setPerformancePreset as activatePerformancePreset,
+} from '../performancePreset.js';
 const DETECTION_ALLOCATION_STORAGE_KEY = 'gev:detection-allocation:v1';
+
+/** localStorage, or null where even reading the property throws. */
+function preferenceStorage() {
+  try {
+    return globalThis.localStorage ?? null;
+  } catch {
+    return null;
+  }
+}
 
 /** Own visual preferences, detection overrides and display-control state. */
 export class VisualSettings {
@@ -231,6 +248,74 @@ export class VisualSettings {
     this._detectionAllocationPreference = normalizeAllocationStrategy(
       storedDetectionAllocation,
     );
+    // Display → PERFORMANCE. The stored choice is adopted here, before the
+    // first-load baseline runs, so `_applyPerformancePresetVisuals` can land
+    // its sharpen and density on that baseline; tools.js applies the same
+    // choice to the viewer's scene knobs when the render governor installs.
+    this._performancePresetBtns = [
+      ...document.querySelectorAll(
+        '#performance-preset-seg [data-performance]',
+      ),
+    ];
+    const storedPreset = readStoredPerformancePreset(preferenceStorage());
+    if (storedPreset) activatePerformancePreset(storedPreset);
+    this._syncPerformancePresetControl();
+  }
+
+  /** @returns {string} The active Performance preset id. */
+  getPerformancePreset() {
+    return activePerformancePreset();
+  }
+
+  /**
+   * Select a Performance preset. A device-level preference: remembered in
+   * this browser, never written to the share link. The scene knobs follow
+   * through the module's subscribers; the visual half (sharpen, detection
+   * density) is applied here because Display owns those settings.
+   * @param {string} preset quality | balanced | performance
+   * @param {{persist?: boolean}} [options]
+   * @returns {boolean} Whether the preset changed.
+   */
+  setPerformancePreset(preset, { persist = true } = {}) {
+    const { governorRequestRender } = this.services;
+    const id = normalizePerformancePreset(preset, null);
+    if (!id) return false;
+    const changed = activatePerformancePreset(id);
+    if (persist) persistPerformancePreset(id, preferenceStorage());
+    this._syncPerformancePresetControl();
+    if (changed) {
+      this._applyPerformancePresetVisuals();
+      governorRequestRender('performance-preset');
+    }
+    return changed;
+  }
+
+  _syncPerformancePresetControl() {
+    syncSegmentedControl(
+      this._performancePresetBtns,
+      activePerformancePreset(),
+      {
+        valueOf: (button) => button.dataset.performance,
+      },
+    );
+  }
+
+  /**
+   * The preset's Display settings: the app's own sharpen pass and the
+   * detection density stop. Mode is left alone (a preset never turns
+   * detection on or off) and the operator's detection override is not
+   * claimed — a preset is a device choice, not a hand edit.
+   */
+  _applyPerformancePresetVisuals() {
+    const settings = getPerformanceSettings();
+    if (
+      typeof settings.sharpen === 'boolean' &&
+      settings.sharpen !== this.sharpenEnabled
+    )
+      this._setSharpenEnabled(settings.sharpen);
+    if (typeof settings.detectionDensityPct === 'number')
+      this._applyDetectionPreset({ densityPct: settings.detectionDensityPct });
+    this._syncShareState();
   }
   get hud() {
     return this.readHud();

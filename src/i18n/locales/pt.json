@@ -3013,5 +3013,12 @@
   "Load scenes from an exported JSON file": "Carregar cenas de um arquivo JSON exportado",
   "Download the timing log of the last play": "Baixar o registro de tempos da última reprodução",
   "Edit anchors, data packs and shot details": "Editar âncoras, pacotes de dados e detalhes dos planos",
-  "Download this scene as JSON or an asset bundle": "Baixar esta cena como JSON ou pacote de recursos"
+  "Download this scene as JSON or an asset bundle": "Baixar esta cena como JSON ou pacote de recursos",
+  "Performance": "Desempenho",
+  "Quality": "Qualidade",
+  "Balanced": "Equilibrado",
+  "Rendering performance preset": "Predefinição de desempenho de renderização",
+  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Resolução total, anti-aliasing 4×, 60 fps e densidade total de rótulos",
+  "Full resolution with 2× anti-aliasing at 60 fps — the default": "Resolução total com anti-aliasing 2× a 60 fps: o padrão",
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Resolução a três quartos, sem multiamostragem, 30 fps, rótulos esparsos e atualizações de camadas mais lentas"
 }

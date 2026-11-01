@@ -874,7 +874,8 @@
       "src/ui/statusText.js",
       "src/ui/statusBadge.js",
       "src/scopeMaskPolicy.js",
-      "src/visualStylePolicy.js"
+      "src/visualStylePolicy.js",
+      "src/performancePreset.js"
     ],
     "external": ["cesium"]
   },
@@ -1072,7 +1073,8 @@
       "src/i18n/locales/uk.json",
       "src/i18n/locales/zh-CN.json",
       "src/i18n/locales/zh-Hant.json",
-      "src/ui/unitLabels.js"
+      "src/ui/unitLabels.js",
+      "src/performancePreset.js"
     ],
     "external": ["cesium"]
   },
@@ -1195,7 +1197,8 @@
       "src/i18n/locales/ru.json",
       "src/i18n/locales/uk.json",
       "src/i18n/locales/zh-CN.json",
-      "src/i18n/locales/zh-Hant.json"
+      "src/i18n/locales/zh-Hant.json",
+      "src/performancePreset.js"
     ],
     "external": ["cesium"]
   },
@@ -1438,7 +1441,8 @@
       "src/i18n/locales/uk.json",
       "src/i18n/locales/zh-CN.json",
       "src/i18n/locales/zh-Hant.json",
-      "src/ui/unitLabels.js"
+      "src/ui/unitLabels.js",
+      "src/performancePreset.js"
     ],
     "external": ["cesium"]
   },
@@ -1494,7 +1498,8 @@
       "src/i18n/locales/ru.json",
       "src/i18n/locales/uk.json",
       "src/i18n/locales/zh-CN.json",
-      "src/i18n/locales/zh-Hant.json"
+      "src/i18n/locales/zh-Hant.json",
+      "src/performancePreset.js"
     ],
     "external": ["cesium", "pbf", "@mapbox/vector-tile"]
   },
@@ -1585,7 +1590,8 @@
       "src/i18n/locales/ru.json",
       "src/i18n/locales/uk.json",
       "src/i18n/locales/zh-CN.json",
-      "src/i18n/locales/zh-Hant.json"
+      "src/i18n/locales/zh-Hant.json",
+      "src/performancePreset.js"
     ],
     "external": ["hls.js", "cesium"]
   },
@@ -2810,7 +2816,9 @@
       "src/ui/statusBadge.js",
       "src/sceneCommandRelease.js",
       "src/scopeMaskPolicy.js",
-      "src/visualStylePolicy.js"
+      "src/visualStylePolicy.js",
+      "src/services/surfaceHeight.js",
+      "src/performancePreset.js"
     ],
     "external": [
       "hls.js",
@@ -3394,7 +3402,9 @@
       "src/layers/streetLevel/providers/mapillary/policy.js",
       "src/data/geoImportImages.js",
       "src/data/geoImportPins.js",
-      "src/data/geoFileImport.js"
+      "src/data/geoFileImport.js",
+      "src/services/surfaceHeight.js",
+      "src/performancePreset.js"
     ],
     "external": [
       "hls.js",
@@ -3464,7 +3474,8 @@
       "src/sources/featureSource.js",
       "src/sources/capability.js",
       "src/data/cameraArrival.js",
-      "src/data/cameraFraming.js"
+      "src/data/cameraFraming.js",
+      "src/services/surfaceHeight.js"
     ],
     "external": [
       "cesium",
@@ -3572,7 +3583,8 @@
       "src/i18n/locales/zh-Hant.json",
       "src/scopeMaskPolicy.js",
       "src/ui/displayControls.js",
-      "src/visualStylePolicy.js"
+      "src/visualStylePolicy.js",
+      "src/performancePreset.js"
     ],
     "external": ["cesium"]
   },
@@ -4024,7 +4036,8 @@
       "src/i18n/locales/ru.json",
       "src/i18n/locales/uk.json",
       "src/i18n/locales/zh-CN.json",
-      "src/i18n/locales/zh-Hant.json"
+      "src/i18n/locales/zh-Hant.json",
+      "src/services/surfaceHeight.js"
     ],
     "external": ["cesium", "egm96-universal", "pbf"]
   },

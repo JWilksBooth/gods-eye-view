@@ -731,6 +731,14 @@ html:not([lang='en']) .pp-slider-row > .pp-slider-mini-label {
   padding: 5px 8px 6px;
 }
 
+/* Performance preset: a standalone segmented row with no toggle above it. */
+#performance-preset-row {
+  min-width: 170px;
+  padding: 5px 8px 6px;
+  border-top: 1px solid var(--glass-border);
+  border-radius: 8px;
+}
+
 .detection-fade-row,
 .detection-opacity-row {
   min-width: 170px;

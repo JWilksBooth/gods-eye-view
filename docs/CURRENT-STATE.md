@@ -231,6 +231,64 @@ the original HUD presentation; Cyber retains its existing skin.
 `node scripts/qa-scope-hud.mjs` checks native input, range, layout persistence,
 restoration and both Scope presentations. `QA_SCREENSHOT_DIR` saves screenshots.
 
+## Performance presets — November 1, 2026
+
+Display has a PERFORMANCE row with three presets: Quality, Balanced and
+Performance. Balanced is the default. The choice is a property of this
+browser, remembered under `gev:performance-preset:v1` like the detection
+allocation preference, and it is deliberately not written to share links in
+either form: a link still carries the sharpen and detection values themselves,
+so a recipient sees the same view at their own preset, and a link's `dm`/`dd`
+land on top of the preset on restore exactly as they land on top of the
+first-load baseline.
+
+`src/performancePreset.js` owns the preset table and the active choice; it is
+pure (no DOM, no Cesium) and the viewer, tileset and storage are handed in.
+Each preset sets the drawing-buffer resolution scale, MSAA samples, FXAA, the
+continuous-loop frame-rate cap, whether the app's own sharpen pass is on, the
+detection density stop, a cadence multiplier the live layers read at use time
+(fleet dead-reckoning, vessel visibility passes, CCTV view passes, Contacts
+readouts), the share of the street-traffic dot budget that animates, and the
+photoreal tileset's screen-space error and GPU cache. Quality keeps every
+first-load default (full resolution, 4× MSAA, 60 fps, Dense @ 75, SDK tile
+cache). Balanced is Quality at 2× MSAA. Performance renders at three-quarter
+resolution with FXAA instead of MSAA, caps the continuous loop at 30 fps,
+turns the sharpen pass off, solves Sparse @ 25, doubles the layer cadences,
+halves the traffic dot budget and raises the tileset's screen-space error to
+24 with a 768 MiB cache. Idle mode is unaffected by the frame-rate cap: a
+parked scene still renders on demand only.
+
+`src/app/tools.js` adopts the remembered preset where the render governor is
+installed and keeps the scene knobs in step for the viewer's lifetime.
+`VisualSettings` owns the Display row: it reads the stored choice at
+construction, applies the preset's visual half (sharpen, detection density)
+right after the first-load baseline and before share restoration, persists a
+change, repaints the segmented control and requests one frame. The facade
+exposes `setPerformancePreset` / `getPerformancePreset`. A preset change never
+claims the operator's detection override and never changes the detection
+mode, only its density stop.
+
+Measurement: `node scripts/qa-perf-presets.mjs --presets quality,balanced,performance`
+(a running dev server) follows the protocol in docs/PERFORMANCE.md at
+1600 × 900, DPR 1, with synthetic Flights, Vessels and CCTV populations so
+the scenes repeat on a machine without the live feeds; `--profile` attributes
+a slow window to functions and `--trace-readpixels` to the code issuing GPU
+read-backs.
+
+## Surface height samples — November 1, 2026
+
+The aircraft ground snap for grounded 3D-modeled planes, the mesh-floor cell
+sampler and the camera ground guard read the rendered surface through
+`scene.getHeight` (`src/services/surfaceHeight.js`), a CPU ray test against
+loaded terrain and every tileset with `enableCollision`, which the photoreal
+globe has. They no longer call `scene.sampleHeight`, which re-rendered the
+scene into a pick buffer and read pixels back synchronously on every call: at
+an airport with Flights on and 3D models in range, that pick render ran up to
+16 times a second and stalled the GPU each time. A cell without loaded
+geometry answers undefined, which every caller already treats as a miss to
+retry later. Only a scene with no CPU path at all (an older Cesium, or a test
+stand-in) still falls back to the pick render.
+
 ## HUD layouts — October 29, 2026
 
 Display > HUD > Layout offers Tactical, Minimal and Cyber; the `set_hud` voice

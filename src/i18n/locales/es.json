@@ -3013,5 +3013,12 @@
   "Play from this scene through the rest of the project": "Reproduce desde esta escena hasta el resto del proyecto",
   "Play the shot after the selected one, moving on to the next scene when needed": "Reproduce el plano posterior al seleccionado y pasa a la siguiente escena si hace falta",
   "Edit anchors, data packs and shot details": "Edita anclas, paquetes de datos y detalles de los planos",
-  "Download this scene as JSON or an asset bundle": "Descarga esta escena como JSON o como paquete de recursos"
+  "Download this scene as JSON or an asset bundle": "Descarga esta escena como JSON o como paquete de recursos",
+  "Performance": "Rendimiento",
+  "Quality": "Calidad",
+  "Balanced": "Equilibrado",
+  "Rendering performance preset": "Ajuste predefinido de rendimiento de renderizado",
+  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Resolución completa, antialiasing 4×, 60 fps y densidad completa de etiquetas",
+  "Full resolution with 2× anti-aliasing at 60 fps — the default": "Resolución completa con antialiasing 2× a 60 fps: el ajuste predeterminado",
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Resolución a tres cuartos, sin multimuestreo, 30 fps, etiquetas escasas y actualizaciones de capas más lentas"
 }

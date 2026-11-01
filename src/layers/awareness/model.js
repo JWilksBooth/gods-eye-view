@@ -4,6 +4,7 @@ import {
   AWARENESS_MOTION_SETTLE_MS,
   AWARENESS_REEVALUATE_DISTANCE_M,
 } from './policy.js';
+import { performanceCadenceScale } from '../../performancePreset.js';
 
 export function createModel({ state: layerState, services, parts, source }) {
   const flightsLayer = services.flights;
@@ -42,7 +43,10 @@ export function createModel({ state: layerState, services, parts, source }) {
    */
 
   function awarenessRefreshIntervalMs(cameraMoving) {
-    return cameraMoving ? AWARENESS_MOTION_REFRESH_MS : AWARENESS_REFRESH_MS;
+    return (
+      (cameraMoving ? AWARENESS_MOTION_REFRESH_MS : AWARENESS_REFRESH_MS) *
+      performanceCadenceScale()
+    );
   }
 
   /**

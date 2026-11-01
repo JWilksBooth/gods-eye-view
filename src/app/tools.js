@@ -8,6 +8,7 @@ import { initGevVoiceCommands } from '../voice/gevRealtime.js';
 import { installViews, isEmbeddedInline } from './embed.js';
 import { installScopeMask, destroyScopeMask } from '../scopeMask.js';
 import { installLayerReleaseTrim } from '../sceneCommandRelease.js';
+import { installPerformancePreset } from '../performancePreset.js';
 import {
   installRenderGovernor,
   getRenderGovernorDiagnostics,
@@ -111,6 +112,22 @@ export function createApplicationTools({
   // nothing animates per frame. Installed AFTER every module above has had
   // its chance to register pre-install holds. (perf wave 2)
   installRenderGovernor(viewer);
+  // Display → PERFORMANCE: adopt the preset this browser remembers and keep
+  // the viewer's resolution scale, anti-aliasing, frame-rate cap and tileset
+  // refinement in step with it for the viewer's lifetime.
+  let presetStorage = null;
+  try {
+    presetStorage = globalThis.localStorage ?? null;
+  } catch {
+    /* storage unavailable: Balanced */
+  }
+  defer(
+    installPerformancePreset(viewer, {
+      tileset,
+      storage: presetStorage,
+      requestRender: governorRequestRender,
+    }),
+  );
   // Cesium keeps a turned-off layer's draw commands (and so all its entities)
   // alive in reused per-pass arrays; trim them after each disable.
   defer(

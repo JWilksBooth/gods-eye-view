@@ -3083,5 +3083,12 @@
   "Load scenes from an exported JSON file": "Завантажити сцени з експортованого файлу JSON",
   "Download the timing log of the last play": "Завантажити журнал таймінгів останнього відтворення",
   "Edit anchors, data packs and shot details": "Змінити якорі, пакети даних і параметри кадрів",
-  "Download this scene as JSON or an asset bundle": "Завантажити цю сцену у форматі JSON або архівом ресурсів"
+  "Download this scene as JSON or an asset bundle": "Завантажити цю сцену у форматі JSON або архівом ресурсів",
+  "Performance": "Продуктивність",
+  "Quality": "Якість",
+  "Balanced": "Баланс",
+  "Rendering performance preset": "Передустановка продуктивності рендерингу",
+  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Повна роздільна здатність, згладжування 4×, 60 к/с і повна щільність підписів",
+  "Full resolution with 2× anti-aliasing at 60 fps — the default": "Повна роздільна здатність зі згладжуванням 2× при 60 к/с — типово",
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Роздільна здатність 3/4, без мультисемплінгу, 30 к/с, рідкі підписи та повільніше оновлення шарів"
 }

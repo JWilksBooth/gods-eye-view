@@ -3083,5 +3083,12 @@
   "Play from this scene through the rest of the project": "Воспроизвести с этой сцены и далее по всему проекту",
   "Play the shot after the selected one, moving on to the next scene when needed": "Воспроизвести кадр после выбранного, при необходимости перейдя к следующей сцене",
   "Edit anchors, data packs and shot details": "Изменить якоря, пакеты данных и параметры кадров",
-  "Download this scene as JSON or an asset bundle": "Скачать эту сцену в формате JSON или архивом ресурсов"
+  "Download this scene as JSON or an asset bundle": "Скачать эту сцену в формате JSON или архивом ресурсов",
+  "Performance": "Производительность",
+  "Quality": "Качество",
+  "Balanced": "Баланс",
+  "Rendering performance preset": "Предустановка производительности рендеринга",
+  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Полное разрешение, сглаживание 4×, 60 к/с и полная плотность подписей",
+  "Full resolution with 2× anti-aliasing at 60 fps — the default": "Полное разрешение со сглаживанием 2× при 60 к/с — по умолчанию",
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Разрешение 3/4, без мультисэмплинга, 30 к/с, редкие подписи и более редкое обновление слоёв"
 }

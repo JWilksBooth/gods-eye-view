@@ -2873,5 +2873,12 @@
   "Play from this scene through the rest of the project": "從此場景開始播放項目中的其餘場景",
   "Play the shot after the selected one, moving on to the next scene when needed": "播放所選鏡頭的下一個鏡頭，必要時進入下一個場景",
   "Edit anchors, data packs and shot details": "編輯錨點、數據包和鏡頭詳情",
-  "Download this scene as JSON or an asset bundle": "將此場景下載為 JSON 或資源包"
+  "Download this scene as JSON or an asset bundle": "將此場景下載為 JSON 或資源包",
+  "Performance": "效能",
+  "Quality": "畫質",
+  "Balanced": "均衡",
+  "Rendering performance preset": "渲染效能預設",
+  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "全解析度、4 倍反鋸齒、60 fps，標籤密度最高",
+  "Full resolution with 2× anti-aliasing at 60 fps — the default": "全解析度、2 倍反鋸齒、60 fps（預設）",
+  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "四分之三解析度、無多重取樣、30 fps、標籤稀疏、圖層更新較慢"
 }

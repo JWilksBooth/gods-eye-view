@@ -572,6 +572,7 @@ export class StyleManager extends ShellFacade {
           this.setCelestialRingEnabled(...args),
         _setModels3dEnabled: (...args) => this._setModels3dEnabled(...args),
         _syncModels3dModeRow: (...args) => this._syncModels3dModeRow(...args),
+        setPerformancePreset: (...args) => this.setPerformancePreset(...args),
         _setModels3dMode: (...args) => this._setModels3dMode(...args),
       },
       readState: () => ({
@@ -584,6 +585,7 @@ export class StyleManager extends ShellFacade {
         _models3dEnabled: this._models3dEnabled,
         _models3dModeBtns: this._models3dModeBtns,
         _detectionAllocationBtns: this._detectionAllocationBtns,
+        _performancePresetBtns: this._performancePresetBtns,
       }),
       claimDetection: () => {
         this._visualSettings._detectionUserOverridden = true;
@@ -610,6 +612,9 @@ export class StyleManager extends ShellFacade {
     this._initHUDToggle();
     this._initModels3dToggle();
     this._applyGlobalPostDefaults();
+    // The remembered Performance preset's visual half lands on the baseline,
+    // and a share link's own values still land on top of both.
+    this._applyPerformancePresetVisuals();
     this._initOrbit();
     this._initRecordingOverlay();
     this._startAnimationLoop();

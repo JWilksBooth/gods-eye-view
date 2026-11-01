@@ -1,4 +1,5 @@
 import * as Cesium from 'cesium';
+import { performanceCadenceScale } from '../../performancePreset.js';
 import { cyberSonarBaseAlpha } from '../../cyberSonar.js';
 import { selectModelEligible } from '../../data/modelEligibility.js';
 import { civilAircraftModelSpec } from './modelSpec.js';
@@ -853,7 +854,11 @@ export function createRendering({
     // (The tracked trail head is now the per-frame _trailHeadEntity segment — no 1 Hz
     // primitive rebuild needed here anymore.)
 
-    if (nowMs - flightState._lastFleetTickMs < FLEET_DR_INTERVAL_MS) return;
+    if (
+      nowMs - flightState._lastFleetTickMs <
+      FLEET_DR_INTERVAL_MS * performanceCadenceScale()
+    )
+      return;
     const tickDtSec = flightState._lastFleetTickMs
       ? Math.min(
           COURSE_SLEW_DT_MAX_SEC,

@@ -48,6 +48,9 @@ export class DisplayBindings {
   get _detectionAllocationBtns() {
     return this.readState()._detectionAllocationBtns;
   }
+  get _performancePresetBtns() {
+    return this.readState()._performancePresetBtns;
+  }
   _initUI() {
     const {
       cycleDetectionMode,
@@ -125,6 +128,7 @@ export class DisplayBindings {
         celestialButton: this._celestialBtn,
         modelsButton: this._models3dBtn,
         modelModeButtons: this._models3dBtn ? this._models3dModeBtns : [],
+        performanceButtons: this._performancePresetBtns,
       },
       actions: {
         setStyle: (style) => this.setStyle(style, { userInitiated: true }),
@@ -220,6 +224,7 @@ export class DisplayBindings {
           this._syncModels3dModeRow();
         },
         setModelsMode: (mode) => this._setModels3dMode(mode),
+        setPerformancePreset: (value) => this.setPerformancePreset(value),
       },
     });
   }

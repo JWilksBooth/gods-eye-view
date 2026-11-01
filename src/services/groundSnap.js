@@ -8,8 +8,12 @@
  * renders inside the tiles or hovering above them. Billboards dodge this with
  * disableDepthTestDistance; a depth-tested glTF model cannot.
  *
- * Discipline (CCTV-B9b style): scene.sampleHeight forces a synchronous offscreen
- * pick render, so it is NEVER called per frame. Each grounded modeled plane gets
+ * Discipline (CCTV-B9b style): a surface sample is NEVER taken per frame. Since
+ * the 2026-11-01 perf pass the sample is the CPU `scene.getHeight` (see
+ * services/surfaceHeight.js) rather than the `scene.sampleHeight` pick render,
+ * which re-rendered the whole scene and stalled the GPU on every call; the
+ * one-shot, backoff and budget discipline below still bounds the CPU ray tests
+ * and the retries that follow a miss. Each grounded modeled plane gets
  * ONE successful sample, cached per icao; the cache stops answering directly when
  * the plane moves >MOVE_INVALIDATE_M from the sampled spot (taxiing). Misses (tiles
  * still streaming, OSM fallback with no tileset skin, sample outside loaded
@@ -47,6 +51,7 @@
  */
 
 import * as Cesium from 'cesium';
+import { sampleRenderedSurfaceHeight } from './surfaceHeight.js';
 
 /** Taxi threshold: a cached snap answers directly for moves up to this far from
  *  the sampled spot (m). Past it the value is demoted to a held last-known and a
@@ -354,11 +359,11 @@ export function createGroundSnap({ groundFloor }) {
         Cesium.Ellipsoid.WGS84,
         scratchCarto,
       );
-      // sampleHeight throws when unsupported (no depth textures) — that's a miss.
-      sampled = viewer.scene.sampleHeight(
-        carto,
-        getExclusions ? getExclusions() : undefined,
-      );
+      // The CPU surface height (surfaceHeight.js): no pick render, no pixel
+      // read-back. An unloaded cell, or a scene that cannot answer, is a miss.
+      sampled = sampleRenderedSurfaceHeight(viewer.scene, carto, {
+        excludeObjects: getExclusions ? getExclusions() : undefined,
+      });
     } catch {
       sampled = undefined;
     }
