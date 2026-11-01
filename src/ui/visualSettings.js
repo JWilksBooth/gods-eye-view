@@ -280,6 +280,8 @@ export class VisualSettings {
     // the visual half (sharpen permission, detection density) on the
     // first-load baseline, and every later change, whoever makes it, repaints
     // this row through the subscription.
+    // Tolerates the minimal documents the state-owner tests stub in, which
+    // only provide getElementById.
     this._performancePresetBtns = [
       ...(document.querySelectorAll?.(
         '#performance-preset-seg [data-performance]',
