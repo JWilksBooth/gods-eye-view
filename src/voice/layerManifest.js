@@ -228,26 +228,14 @@ const layers = [
   },
   {
     id: 'incidents',
-    aliases: [
-      'incidents',
-      'live incidents',
-      'police incidents',
-      'fire incidents',
-      'emergency incidents',
-      'dispatch',
-      'live ops',
-    ],
+    aliases: ['incidents', 'live incidents', 'dispatch', 'live ops'],
     context: false,
     query: {
       fields: {
         type: ['t'],
-        typeDetail: ['t'],
         agency: ['t'],
-        source: ['t'],
         location: ['t'],
-        area: ['t'],
         region: ['t'],
-        description: ['t'],
         timeMs: ['ms'],
       },
       timeField: 'timeMs',
