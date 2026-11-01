@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<State>
+<Center ID = "LAHB">
+<Dispatch ID = "LACC">
+
+		<Log ID = "261101LA1794">
+			<LogTime>"Nov  1 2026  2:24PM"</LogTime>
+			<LogType>"1179-Trfc Collision-1141 Enrt"</LogType>
+			<Location>"E Cypress St / N Vincent Ave"</Location>
+			<LocationDesc>""</LocationDesc>
+			<Area>"Baldwin Park"</Area>
+			<ThomasBrothers>""</ThomasBrothers>
+			<LATLON>"34095884:117925381"</LATLON>
+			<LogDetails>
+		<details>
+			<DetailTime>"Nov  1 2026  2:25PM"</DetailTime>
+			<IncidentDetail>"[3] BLKG LNS "</IncidentDetail>
+		</details>
+		<details>
+			<DetailTime>"Nov  1 2026  2:25PM"</DetailTime>
+			<IncidentDetail>"[2] WHI TK VS BLK SUV VS CADI  VS WHI SED"</IncidentDetail>
+		</details>
+		<details>
+			<DetailTime>"Nov  1 2026  2:24PM"</DetailTime>
+			<IncidentDetail>"[1] 4 VEH TC"</IncidentDetail>
+		</details><units>
+			<UnitTime>"Nov  1 2026  2:25PM"</UnitTime>
+			<UnitDetail>"Unit Enroute"</UnitDetail></units><units>
+			<UnitTime>"Nov  1 2026  2:25PM"</UnitTime>
+			<UnitDetail>"Unit Assigned"</UnitDetail></units></LogDetails></Log>
+</Dispatch>
+</Center>
+</State>
