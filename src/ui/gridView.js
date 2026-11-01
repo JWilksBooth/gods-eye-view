@@ -171,7 +171,7 @@ export function createGridView({
     draw();
   });
 
-  const window = () => documentRef?.defaultView ?? null;
+  const pageWindow = () => documentRef?.defaultView ?? null;
 
   function groundDistance() {
     const height = camera.positionCartographic?.height;
@@ -440,7 +440,10 @@ export function createGridView({
     const width = sceneCanvas?.clientWidth || 0;
     const height = sceneCanvas?.clientHeight || 0;
     if (!width || !height) return;
-    const ratio = Math.min(MAX_PIXEL_RATIO, window()?.devicePixelRatio || 1);
+    const ratio = Math.min(
+      MAX_PIXEL_RATIO,
+      pageWindow()?.devicePixelRatio || 1,
+    );
     const bufferWidth = Math.round(width * ratio);
     const bufferHeight = Math.round(height * ratio);
     if (canvas.width !== bufferWidth || canvas.height !== bufferHeight) {
@@ -505,7 +508,7 @@ export function createGridView({
   }
 
   function installEnabledListeners() {
-    const view = window();
+    const view = pageWindow();
     if (view?.addEventListener) {
       const onResize = () => draw();
       const onStyle = () => {

@@ -6,4 +6,4 @@
   top-down grid view: an orthographic, north-up, straight-down camera with
   tilt locked, a dimmed base map and a lat/lon graticule with MGRS labels; it
   is remembered per browser and travels in share links (`gv`, flag bit 5)
-  (JWilksBooth, #0000).
+  (JWilksBooth, #5).
