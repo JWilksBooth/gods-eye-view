@@ -85,7 +85,7 @@
   overscroll-behavior: contain;
   padding-right: 4px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 212, 255, 0.5) rgba(255, 255, 255, 0.04);
+  scrollbar-color: rgba(0, 255, 65, 0.5) rgba(255, 255, 255, 0.04);
   scrollbar-gutter: stable;
 }
 
@@ -101,8 +101,8 @@
 .data-toggle-list::-webkit-scrollbar-thumb {
   background: linear-gradient(
     180deg,
-    rgba(0, 212, 255, 0.65),
-    rgba(0, 212, 255, 0.2)
+    rgba(0, 255, 65, 0.65),
+    rgba(0, 255, 65, 0.2)
   );
   border-radius: 999px;
 }
@@ -282,7 +282,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 212, 255, 0.4) transparent;
+  scrollbar-color: rgba(0, 255, 65, 0.4) transparent;
 }
 #right-context-rail.layout-focus
   > #weather-panel:not(.collapsed)
@@ -374,9 +374,9 @@
   min-height: 0;
   gap: 8px;
   padding: 9px;
-  border: 1px solid rgba(98, 181, 255, 0.2);
+  border: 1px solid rgba(98, 255, 138, 0.2);
   border-radius: 7px;
-  background: rgba(4, 17, 31, 0.28);
+  background: rgba(4, 31, 11, 0.28);
 }
 #space-mission-panel-host .space-mission-roster-header {
   display: flex;
@@ -384,7 +384,7 @@
   justify-content: space-between;
   gap: 10px;
   padding: 1px 3px 7px;
-  border-bottom: 1px solid rgba(34, 230, 230, 0.14);
+  border-bottom: 1px solid rgba(34, 230, 84, 0.14);
   font-family: 'JetBrains Mono', monospace;
 }
 #space-mission-panel-host .space-mission-roster-header > div {
@@ -393,18 +393,18 @@
   gap: 3px;
 }
 #space-mission-panel-host .space-mission-roster-header strong {
-  color: #8fcfff;
+  color: #8fffac;
   font-size: 9px;
   letter-spacing: 0.16em;
 }
 #space-mission-panel-host .space-mission-roster-header span {
-  color: rgba(190, 230, 230, 0.46);
+  color: rgba(190, 230, 200, 0.46);
   font-size: 7px;
   letter-spacing: 0.1em;
 }
 #space-mission-panel-host .space-mission-roster-header output {
   flex: 0 0 auto;
-  color: #22e6e6;
+  color: #22e654;
   font-size: 9px;
   letter-spacing: 0.08em;
 }
@@ -415,7 +415,7 @@
   overflow-x: hidden;
   overflow-y: auto;
   padding-right: 3px;
-  scrollbar-color: rgba(34, 230, 230, 0.38) transparent;
+  scrollbar-color: rgba(34, 230, 84, 0.38) transparent;
   scrollbar-width: thin;
 }
 #space-mission-panel-host .space-mission-roster-item {
@@ -427,10 +427,10 @@
   width: 100%;
   min-height: 42px;
   padding: 7px 7px;
-  border: 1px solid rgba(98, 181, 255, 0.13);
+  border: 1px solid rgba(98, 255, 138, 0.13);
   border-radius: 4px;
-  color: #d8ffff;
-  background: rgba(42, 113, 171, 0.045);
+  color: #d8ffe2;
+  background: rgba(42, 171, 75, 0.045);
   font-family: 'JetBrains Mono', monospace;
   text-align: left;
   cursor: pointer;
@@ -446,23 +446,23 @@
   z-index: 1;
   opacity: 0;
   background:
-    linear-gradient(#22e6e6, #22e6e6) left top / 9px 1px no-repeat,
-    linear-gradient(#22e6e6, #22e6e6) left top / 1px 9px no-repeat,
-    linear-gradient(#22e6e6, #22e6e6) right top / 9px 1px no-repeat,
-    linear-gradient(#22e6e6, #22e6e6) right top / 1px 9px no-repeat,
-    linear-gradient(#22e6e6, #22e6e6) left bottom / 9px 1px no-repeat,
-    linear-gradient(#22e6e6, #22e6e6) left bottom / 1px 9px no-repeat,
-    linear-gradient(#22e6e6, #22e6e6) right bottom / 9px 1px no-repeat,
-    linear-gradient(#22e6e6, #22e6e6) right bottom / 1px 9px no-repeat;
-  filter: drop-shadow(0 0 4px rgba(34, 230, 230, 0.45));
+    linear-gradient(#22e654, #22e654) left top / 9px 1px no-repeat,
+    linear-gradient(#22e654, #22e654) left top / 1px 9px no-repeat,
+    linear-gradient(#22e654, #22e654) right top / 9px 1px no-repeat,
+    linear-gradient(#22e654, #22e654) right top / 1px 9px no-repeat,
+    linear-gradient(#22e654, #22e654) left bottom / 9px 1px no-repeat,
+    linear-gradient(#22e654, #22e654) left bottom / 1px 9px no-repeat,
+    linear-gradient(#22e654, #22e654) right bottom / 9px 1px no-repeat,
+    linear-gradient(#22e654, #22e654) right bottom / 1px 9px no-repeat;
+  filter: drop-shadow(0 0 4px rgba(34, 230, 84, 0.45));
   pointer-events: none;
   transition: opacity 0.12s ease;
 }
 #space-mission-panel-host .space-mission-roster-item:hover,
 #space-mission-panel-host .space-mission-roster-item:focus-visible {
-  border-color: rgba(34, 230, 230, 0.58);
+  border-color: rgba(34, 230, 84, 0.58);
   outline: none;
-  background: rgba(34, 230, 230, 0.09);
+  background: rgba(34, 230, 84, 0.09);
   transform: translateX(2px);
 }
 #space-mission-panel-host .space-mission-roster-item:hover::before,
@@ -478,9 +478,9 @@
   height: 5px;
   justify-self: center;
   border-radius: 50%;
-  background: var(--mission-roster-color, #22e6e6);
+  background: var(--mission-roster-color, #22e654);
   box-shadow: 0 0 7px
-    color-mix(in srgb, var(--mission-roster-color, #22e6e6) 70%, transparent);
+    color-mix(in srgb, var(--mission-roster-color, #22e654) 70%, transparent);
 }
 #space-mission-panel-host .space-mission-roster-copy {
   display: grid;
@@ -494,24 +494,24 @@
   white-space: nowrap;
 }
 #space-mission-panel-host .space-mission-roster-copy strong {
-  color: #d8ffff;
+  color: #d8ffe2;
   font-size: 9px;
   font-weight: 500;
   letter-spacing: 0.07em;
 }
 #space-mission-panel-host .space-mission-roster-copy small {
-  color: rgba(190, 230, 230, 0.48);
+  color: rgba(190, 230, 200, 0.48);
   font-size: 7px;
   letter-spacing: 0.035em;
 }
 #space-mission-panel-host .space-mission-roster-chevron {
-  color: rgba(34, 230, 230, 0.54);
+  color: rgba(34, 230, 84, 0.54);
   font-size: 16px;
   line-height: 1;
 }
 #space-mission-panel-host .space-mission-roster-empty {
   padding: 18px 10px;
-  color: rgba(190, 230, 230, 0.48);
+  color: rgba(190, 230, 200, 0.48);
   font:
     8px/1.5 'JetBrains Mono',
     monospace;
@@ -521,7 +521,7 @@
 #space-mission-panel-host .space-mission-roster-focus-continuation {
   margin: 0;
   padding: 3px;
-  color: rgba(190, 230, 230, 0.58);
+  color: rgba(190, 230, 200, 0.58);
   font:
     7px/1.4 'JetBrains Mono',
     monospace;
@@ -533,8 +533,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 0 2px;
-  border-top: 1px solid rgba(34, 230, 230, 0.18);
-  color: rgba(190, 230, 230, 0.58);
+  border-top: 1px solid rgba(34, 230, 84, 0.18);
+  color: rgba(190, 230, 200, 0.58);
   font:
     8px 'JetBrains Mono',
     monospace;
@@ -543,21 +543,21 @@
 #space-mission-panel .space-mission-view-header button {
   width: 24px;
   height: 24px;
-  border: 1px solid rgba(98, 181, 255, 0.24);
+  border: 1px solid rgba(98, 255, 138, 0.24);
   border-radius: 5px;
-  color: rgba(190, 230, 230, 0.7);
-  background: rgba(42, 113, 171, 0.08);
+  color: rgba(190, 230, 200, 0.7);
+  background: rgba(42, 171, 75, 0.08);
   cursor: pointer;
 }
 #space-mission-panel .space-mission-view-header button:hover {
-  border-color: #22e6e6;
+  border-color: #22e654;
   color: #fff;
 }
 #space-mission-panel .space-mission-detail {
   display: grid;
   gap: 8px;
   padding: 12px 0;
-  color: var(--hud-cyan, #22e6e6);
+  color: var(--hud-cyan, #22e654);
   font:
     11px 'JetBrains Mono',
     monospace;
@@ -567,20 +567,20 @@
   font-size: 14px;
 }
 #space-mission-panel .space-mission-detail span {
-  color: rgba(190, 230, 230, 0.7);
+  color: rgba(190, 230, 200, 0.7);
 }
 #space-mission-panel .space-mission-detail b {
-  color: #d8ffff;
+  color: #d8ffe2;
   font-weight: 400;
 }
 #space-mission-panel .mission-data-section {
   margin: 0 0 11px;
-  border-top: 1px solid rgba(34, 230, 230, 0.18);
+  border-top: 1px solid rgba(34, 230, 84, 0.18);
   padding-top: 9px;
 }
 #space-mission-panel .mission-data-section h4 {
   margin: 0 0 6px;
-  color: #22e6e6;
+  color: #22e654;
   font:
     10px 'JetBrains Mono',
     monospace;
@@ -593,7 +593,7 @@
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  color: #d8ffff;
+  color: #d8ffe2;
   font:
     9px 'JetBrains Mono',
     monospace;
@@ -601,15 +601,15 @@
 }
 #space-mission-panel .mission-data-table th {
   padding: 4px 5px;
-  border-bottom: 1px solid rgba(34, 230, 230, 0.22);
-  color: rgba(190, 230, 230, 0.58);
+  border-bottom: 1px solid rgba(34, 230, 84, 0.22);
+  color: rgba(190, 230, 200, 0.58);
   font-weight: 400;
   text-align: left;
 }
 #space-mission-panel .mission-data-table td {
   overflow-wrap: anywhere;
   padding: 6px 5px;
-  border-bottom: 1px solid rgba(34, 230, 230, 0.1);
+  border-bottom: 1px solid rgba(34, 230, 84, 0.1);
   vertical-align: top;
 }
 #space-mission-panel .mission-data-table th:nth-child(1),
@@ -623,12 +623,12 @@
 #space-mission-panel .mission-data-table small {
   display: block;
   margin-top: 3px;
-  color: rgba(190, 230, 230, 0.56);
+  color: rgba(190, 230, 200, 0.56);
   font-size: 8px;
   line-height: 1.35;
 }
 #space-mission-panel .mission-table-empty {
-  color: rgba(190, 230, 230, 0.56);
+  color: rgba(190, 230, 200, 0.56);
   text-align: center;
 }
 #space-mission-panel .mission-replay-speed-control {
@@ -636,9 +636,9 @@
   gap: 5px;
   margin: 1px 0 10px;
   padding: 8px 10px 6px;
-  border: 1px solid rgba(34, 230, 230, 0.2);
+  border: 1px solid rgba(34, 230, 84, 0.2);
   border-radius: 5px;
-  background: rgba(3, 21, 31, 0.36);
+  background: rgba(3, 31, 10, 0.36);
 }
 #space-mission-panel .mission-replay-speed-control[hidden] {
   display: none;
@@ -647,7 +647,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: rgba(190, 230, 230, 0.68);
+  color: rgba(190, 230, 200, 0.68);
   font:
     8px 'JetBrains Mono',
     monospace;
@@ -663,7 +663,7 @@
 #space-mission-panel .mission-replay-speed-scale {
   display: flex;
   justify-content: space-between;
-  color: rgba(190, 230, 230, 0.42);
+  color: rgba(190, 230, 200, 0.42);
   font:
     7px 'JetBrains Mono',
     monospace;
@@ -686,7 +686,7 @@
   background: linear-gradient(
     90deg,
     rgba(255, 159, 67, 0.08),
-    rgba(34, 230, 230, 0.08)
+    rgba(34, 230, 84, 0.08)
   );
   font:
     9px 'JetBrains Mono',
@@ -700,9 +700,9 @@
     box-shadow 0.15s ease;
 }
 #space-mission-panel .mission-focus-button {
-  border-color: rgba(34, 230, 230, 0.58);
-  color: #22e6e6;
-  background: rgba(34, 230, 230, 0.07);
+  border-color: rgba(34, 230, 84, 0.58);
+  color: #22e654;
+  background: rgba(34, 230, 84, 0.07);
 }
 #space-mission-panel .mission-replay-button:hover,
 #space-mission-panel .mission-replay-button:focus-visible,
@@ -715,14 +715,14 @@
 }
 #space-mission-panel .mission-focus-button:hover,
 #space-mission-panel .mission-focus-button:focus-visible {
-  border-color: #22e6e6;
-  box-shadow: 0 0 14px rgba(34, 230, 230, 0.14);
+  border-color: #22e654;
+  box-shadow: 0 0 14px rgba(34, 230, 84, 0.14);
 }
 #space-mission-panel .mission-replay-button.active {
-  border-color: #22e6e6;
-  color: #d8ffff;
-  background: rgba(34, 230, 230, 0.13);
-  box-shadow: inset 0 0 16px rgba(34, 230, 230, 0.08);
+  border-color: #22e654;
+  color: #d8ffe2;
+  background: rgba(34, 230, 84, 0.13);
+  box-shadow: inset 0 0 16px rgba(34, 230, 84, 0.08);
 }
 #space-mission-panel .mission-replay-transport {
   flex: 1;
@@ -738,10 +738,10 @@
   min-width: 0;
   min-height: 34px;
   padding: 0;
-  border: 1px solid rgba(34, 230, 230, 0.5);
+  border: 1px solid rgba(34, 230, 84, 0.5);
   border-radius: 4px;
-  color: #22e6e6;
-  background: rgba(34, 230, 230, 0.08);
+  color: #22e654;
+  background: rgba(34, 230, 84, 0.08);
   font:
     15px/1 'JetBrains Mono',
     monospace;
@@ -755,11 +755,11 @@
 }
 #space-mission-panel .mission-replay-transport button:hover:not(:disabled),
 #space-mission-panel .mission-replay-transport button:focus-visible {
-  border-color: #d8ffff;
+  border-color: #d8ffe2;
   color: #fff;
   outline: none;
-  background: rgba(34, 230, 230, 0.16);
-  box-shadow: 0 0 12px rgba(34, 230, 230, 0.14);
+  background: rgba(34, 230, 84, 0.16);
+  box-shadow: 0 0 12px rgba(34, 230, 84, 0.14);
 }
 #space-mission-panel .mission-replay-transport button:disabled {
   opacity: 0.28;
@@ -773,10 +773,10 @@
 #space-mission-panel
   .mission-replay-transport.is-paused
   [data-mission-replay-play] {
-  border-color: #22e6e6;
-  color: #d8ffff;
-  background: rgba(34, 230, 230, 0.18);
-  box-shadow: inset 0 0 12px rgba(34, 230, 230, 0.1);
+  border-color: #22e654;
+  color: #d8ffe2;
+  background: rgba(34, 230, 84, 0.18);
+  box-shadow: inset 0 0 12px rgba(34, 230, 84, 0.1);
 }
 #space-mission-panel .space-mission-nav {
   display: flex;
@@ -788,9 +788,9 @@
 #space-mission-panel .mission-nav-button {
   min-width: 94px;
   padding: 7px 10px;
-  border: 1px solid rgba(34, 230, 230, 0.55);
-  background: rgba(8, 34, 42, 0.72);
-  color: #22e6e6;
+  border: 1px solid rgba(34, 230, 84, 0.55);
+  background: rgba(8, 42, 17, 0.72);
+  color: #22e654;
   font:
     11px 'JetBrains Mono',
     monospace;
@@ -802,8 +802,8 @@
     opacity 0.15s ease;
 }
 #space-mission-panel .mission-nav-button:hover:not(:disabled) {
-  background: rgba(34, 230, 230, 0.18);
-  border-color: #22e6e6;
+  background: rgba(34, 230, 84, 0.18);
+  border-color: #22e654;
 }
 #space-mission-panel .mission-nav-button:disabled {
   cursor: not-allowed;
@@ -817,7 +817,7 @@
 #space-mission-panel .mission-nav-index {
   min-width: 58px;
   text-align: center;
-  color: #d8ffff;
+  color: #d8ffe2;
   font:
     11px 'JetBrains Mono',
     monospace;
@@ -856,8 +856,8 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #22e6e6;
-  box-shadow: 0 0 7px rgba(34, 230, 230, 0.78);
+  background: #22e654;
+  box-shadow: 0 0 7px rgba(34, 230, 84, 0.78);
 }
 
 .mission-replay-vehicle-overlay[data-mode='orbit']
@@ -876,18 +876,18 @@
   width: 48px;
   height: 72px;
   overflow: visible;
-  filter: drop-shadow(0 0 6px rgba(34, 230, 230, 0.66));
+  filter: drop-shadow(0 0 6px rgba(34, 230, 84, 0.66));
 }
 
 .mission-replay-rocket-body {
-  fill: #22e6e6;
-  stroke: #22e6e6;
+  fill: #22e654;
+  stroke: #22e654;
   stroke-width: 2;
   stroke-linejoin: round;
 }
 
 .mission-replay-rocket-port {
-  fill: #22e6e6;
+  fill: #22e654;
   stroke: none;
 }
 
@@ -903,7 +903,7 @@
   width: 72px;
   height: 72px;
   overflow: visible;
-  filter: drop-shadow(0 0 4px rgba(34, 230, 230, 0.9));
+  filter: drop-shadow(0 0 4px rgba(34, 230, 84, 0.9));
 }
 
 .mission-replay-vehicle-overlay.is-thrusting .mission-replay-thrust {
@@ -912,7 +912,7 @@
 
 .mission-replay-thrust ellipse {
   fill: none;
-  stroke: rgba(34, 230, 230, 0.98);
+  stroke: rgba(34, 230, 84, 0.98);
   stroke-width: 2;
   opacity: 0;
   vector-effect: non-scaling-stroke;
@@ -921,7 +921,7 @@
 }
 
 .mission-replay-thrust ellipse:nth-child(2n) {
-  stroke: rgba(216, 255, 255, 0.78);
+  stroke: rgba(216, 255, 226, 0.78);
 }
 
 .mission-replay-vehicle-overlay.is-paused .mission-replay-thrust ellipse {
@@ -939,8 +939,8 @@
     monospace;
   letter-spacing: 0.075em;
   text-shadow:
-    0 1px 2px #001018,
-    0 0 6px #001018;
+    0 1px 2px #001806,
+    0 0 6px #001806;
   white-space: nowrap;
 }
 
@@ -950,7 +950,7 @@
 }
 
 .mission-replay-overlay-callout strong {
-  color: #22e6e6;
+  color: #22e654;
   font-size: 10px;
   font-weight: 500;
 }
@@ -1042,9 +1042,9 @@
   width: 26px;
   min-height: 30px;
   padding: 0;
-  border: 1px solid rgba(98, 181, 255, 0.22);
+  border: 1px solid rgba(98, 255, 138, 0.22);
   border-radius: 5px;
-  background: rgba(42, 113, 171, 0.08);
+  background: rgba(42, 171, 75, 0.08);
   /* The saucer is a COLOR-font glyph: `color` and `text-shadow` cannot touch
      it, so the dim/lit states are carried by `filter` alongside the border and
      fill. 14px sits inside the 26px chip with breathing room. */
@@ -1065,18 +1065,18 @@
 }
 .tr3b-toggle:hover,
 .tr3b-toggle:focus-visible {
-  border-color: rgba(127, 200, 255, 0.6);
-  background: rgba(66, 148, 211, 0.18);
+  border-color: rgba(127, 255, 160, 0.6);
+  background: rgba(66, 211, 103, 0.18);
   filter: grayscale(0.15) opacity(0.95);
   outline: none;
 }
 .tr3b-toggle[aria-pressed='true'] {
-  border-color: rgba(190, 220, 255, 0.75);
-  background: rgba(20, 23, 28, 0.9);
+  border-color: rgba(190, 255, 207, 0.75);
+  background: rgba(20, 28, 22, 0.9);
   /* Active: full-colour saucer with a soft halo. drop-shadow works on an emoji
      where text-shadow does not, so the glyph itself telegraphs the state
      rather than relying on the chrome alone. */
-  filter: drop-shadow(0 0 5px rgba(150, 210, 255, 0.9));
+  filter: drop-shadow(0 0 5px rgba(150, 255, 177, 0.9));
 }
 /* One segmented control: the two modes read as a single choice. */
 .global-context-modes {
@@ -1085,7 +1085,7 @@
   gap: 2px;
   margin: 0 0 12px;
   padding: 2px;
-  border: 1px solid rgba(98, 181, 255, 0.22);
+  border: 1px solid rgba(98, 255, 138, 0.22);
   border-radius: 7px;
   background: rgba(0, 0, 0, 0.22);
 }
@@ -1099,7 +1099,7 @@
   padding: 6px 8px;
   border: 1px solid transparent;
   border-radius: 5px;
-  color: rgba(214, 236, 255, 0.72);
+  color: rgba(214, 255, 224, 0.72);
   background: transparent;
   font: 600 10px/1.2 var(--font-mono);
   letter-spacing: 0.06em;
@@ -1115,7 +1115,7 @@
 .context-mode-button:hover,
 .context-mode-button:focus-visible {
   color: #fff;
-  background: rgba(98, 181, 255, 0.08);
+  background: rgba(98, 255, 138, 0.08);
   outline: none;
 }
 /* Keep focus distinct when the selected tab owns the accent colors. */
@@ -1125,9 +1125,9 @@
 }
 
 .context-mode-button.active {
-  border-color: rgba(0, 212, 255, 0.55);
+  border-color: rgba(0, 255, 65, 0.55);
   color: #fff;
-  background: rgba(0, 212, 255, 0.16);
+  background: rgba(0, 255, 65, 0.16);
 }
 .context-mode-button:disabled {
   opacity: 0.55;
@@ -1142,7 +1142,7 @@
   display: grid;
   gap: 6px;
   padding: 2px 2px 4px;
-  color: rgba(214, 236, 255, 0.72);
+  color: rgba(214, 255, 224, 0.72);
   font: 10px/1.6 var(--font-mono);
   letter-spacing: 0.02em;
 }
@@ -1165,25 +1165,25 @@
 .panel-layer-toggle {
   min-width: 54px;
   padding: 4px 7px;
-  border: 1px solid rgba(98, 181, 255, 0.3);
+  border: 1px solid rgba(98, 255, 138, 0.3);
   border-radius: 5px;
-  color: #8fcfff;
-  background: rgba(42, 113, 171, 0.12);
+  color: #8fffac;
+  background: rgba(42, 171, 75, 0.12);
   font: 7px/1.1 var(--font-mono);
   letter-spacing: 0.1em;
   cursor: pointer;
 }
 .panel-layer-toggle:hover,
 .panel-layer-toggle:focus-visible {
-  border-color: #79c2ff;
+  border-color: #79ff9b;
   color: #fff;
   outline: none;
 }
 .panel-layer-toggle.active {
-  border-color: rgba(0, 212, 255, 0.7);
+  border-color: rgba(0, 255, 65, 0.7);
   color: #fff;
-  background: rgba(0, 212, 255, 0.14);
-  box-shadow: 0 0 12px rgba(0, 212, 255, 0.14);
+  background: rgba(0, 255, 65, 0.14);
+  box-shadow: 0 0 12px rgba(0, 255, 65, 0.14);
 }
 .panel-layer-toggle:disabled {
   opacity: 0.45;

@@ -1,4 +1,5 @@
 import * as Cesium from 'cesium';
+import { performanceCadenceScale } from '../../performancePreset.js';
 import { viewshedColors, cameraHue } from '../../data/cctvViewshed.js';
 import { CCTV_OVERLAY_SOURCE_ID } from '../../data/cctvCards.js';
 import { GIZMO_ID_PREFIX } from '../../data/cctvGizmo.js';
@@ -77,7 +78,14 @@ export function createLifecycle({
     if (!layerState._enabled) return;
     const now = performance.now();
     const pass = layerState._viewMotionPass;
-    if (pass && now - pass.at < pass.ms * VIEW_MOTION_COST_FACTOR) return;
+    // The Performance preset stretches the cadence by skipping timer ticks:
+    // at scale 1 the gap (half an interval) never skips one.
+    const minGapMs = VIEW_MOTION_REFRESH_MS * (performanceCadenceScale() - 0.5);
+    if (
+      pass &&
+      now - pass.at < Math.max(pass.ms * VIEW_MOTION_COST_FACTOR, minGapMs)
+    )
+      return;
     if (!viewPoseChanged()) return;
     if (parts.rendering.refreshHorizonCulling())
       layerState._viewUnpublished = true;

@@ -11,20 +11,20 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.45rem 0.7rem;
-  color: rgba(225, 244, 248, 0.92);
+  color: rgba(225, 248, 231, 0.92);
   font-family: var(--font-mono);
   font-size: 0.6rem;
   letter-spacing: 0.09rem;
   background: linear-gradient(
     145deg,
-    rgba(10, 27, 37, 0.92),
-    rgba(7, 13, 22, 0.9)
+    rgba(10, 37, 17, 0.92),
+    rgba(7, 22, 11, 0.9)
   );
-  border: 1px solid rgba(54, 220, 255, 0.38);
+  border: 1px solid rgba(54, 255, 105, 0.38);
   border-radius: 0.42rem;
   box-shadow:
     0 0.4rem 1.6rem rgba(0, 0, 0, 0.5),
-    0 0 1.2rem rgba(0, 212, 255, 0.07);
+    0 0 1.2rem rgba(0, 255, 65, 0.07);
   backdrop-filter: blur(18px) saturate(1.2);
   -webkit-backdrop-filter: blur(18px) saturate(1.2);
   cursor: pointer;
@@ -38,16 +38,16 @@
 #key-setup-chip:focus-visible {
   background: linear-gradient(
     145deg,
-    rgba(14, 38, 51, 0.95),
-    rgba(9, 18, 28, 0.93)
+    rgba(14, 51, 23, 0.95),
+    rgba(9, 28, 14, 0.93)
   );
-  border-color: rgba(54, 220, 255, 0.7);
+  border-color: rgba(54, 255, 105, 0.7);
   outline: none;
   transform: translateY(-1px);
 }
 
 #key-setup-chip .material-symbols-outlined {
-  color: #55dff5;
+  color: #55f57e;
   font-size: 0.95rem;
 }
 
@@ -69,13 +69,13 @@
   overflow: hidden;
   color: var(--text-primary);
   background:
-    linear-gradient(145deg, rgba(10, 27, 37, 0.97), rgba(7, 13, 22, 0.95)),
-    rgba(7, 17, 25, 0.96);
-  border: 1px solid rgba(54, 220, 255, 0.42);
+    linear-gradient(145deg, rgba(10, 37, 17, 0.97), rgba(7, 22, 11, 0.95)),
+    rgba(7, 25, 12, 0.96);
+  border: 1px solid rgba(54, 255, 105, 0.42);
   border-radius: 0.65rem;
   box-shadow:
     0 1.4rem 4.5rem rgba(0, 0, 0, 0.72),
-    0 0 2.5rem rgba(0, 212, 255, 0.09),
+    0 0 2.5rem rgba(0, 255, 65, 0.09),
     inset 0 0 0 1px rgba(255, 255, 255, 0.025);
   backdrop-filter: blur(28px) saturate(1.25);
   -webkit-backdrop-filter: blur(28px) saturate(1.25);
@@ -105,10 +105,10 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(54, 220, 255, 0.8),
+    rgba(54, 255, 105, 0.8),
     transparent
   );
-  box-shadow: 0 0 1rem rgba(54, 220, 255, 0.45);
+  box-shadow: 0 0 1rem rgba(54, 255, 105, 0.45);
   pointer-events: none;
 }
 
@@ -118,7 +118,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  color: rgba(171, 210, 220, 0.6);
+  color: rgba(171, 220, 183, 0.6);
   font-family: var(--font-mono);
   font-size: 0.58rem;
   letter-spacing: 0.1rem;
@@ -126,14 +126,14 @@
 }
 
 .key-setup-kicker {
-  color: rgba(54, 220, 255, 0.86);
+  color: rgba(54, 255, 105, 0.86);
 }
 
 .key-setup-close {
   display: grid;
   place-items: center;
   padding: 0.15rem;
-  color: rgba(171, 210, 220, 0.6);
+  color: rgba(171, 220, 183, 0.6);
   background: none;
   border: 1px solid transparent;
   border-radius: 0.3rem;
@@ -145,8 +145,8 @@
 
 .key-setup-close:hover,
 .key-setup-close:focus-visible {
-  color: rgba(225, 244, 248, 0.95);
-  border-color: rgba(54, 220, 255, 0.5);
+  color: rgba(225, 248, 231, 0.95);
+  border-color: rgba(54, 255, 105, 0.5);
   outline: none;
 }
 
@@ -165,7 +165,7 @@
 #key-setup-description {
   max-width: 31rem;
   margin-top: 0.3rem;
-  color: rgba(215, 231, 235, 0.66);
+  color: rgba(215, 235, 220, 0.66);
   font-size: 0.78rem;
   line-height: 1.5;
 }
@@ -173,7 +173,7 @@
 #key-setup-description code {
   padding: 0.05rem 0.25rem;
   font-size: 0.92em;
-  background: rgba(54, 220, 255, 0.08);
+  background: rgba(54, 255, 105, 0.08);
   border-radius: 0.2rem;
 }
 
@@ -185,7 +185,7 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
-  scrollbar-color: rgba(54, 220, 255, 0.45) transparent;
+  scrollbar-color: rgba(54, 255, 105, 0.45) transparent;
   scrollbar-gutter: stable;
 }
 
@@ -193,7 +193,7 @@
   width: 6px;
 }
 .key-setup-rows::-webkit-scrollbar-thumb {
-  background: rgba(54, 220, 255, 0.45);
+  background: rgba(54, 255, 105, 0.45);
   border-radius: 3px;
 }
 
@@ -201,8 +201,8 @@
   display: grid;
   gap: 0.35rem;
   padding: 0.6rem 0.7rem;
-  background: rgba(29, 69, 81, 0.14);
-  border: 1px solid rgba(100, 200, 220, 0.15);
+  background: rgba(29, 81, 42, 0.14);
+  border: 1px solid rgba(100, 220, 131, 0.15);
   border-radius: 0.42rem;
 }
 
@@ -228,7 +228,7 @@
   width: 0.5rem;
   height: 0.5rem;
   flex: none;
-  background: rgba(148, 178, 188, 0.35);
+  background: rgba(148, 188, 158, 0.35);
   border-radius: 50%;
 }
 
@@ -253,7 +253,7 @@
 
 .key-setup-get {
   margin-left: auto;
-  color: rgba(54, 220, 255, 0.75);
+  color: rgba(54, 255, 105, 0.75);
   font-size: 0.58rem;
   letter-spacing: 0.08rem;
   text-decoration: none;
@@ -262,14 +262,14 @@
 
 .key-setup-get:hover,
 .key-setup-get:focus-visible {
-  color: rgba(54, 220, 255, 1);
+  color: rgba(54, 255, 105, 1);
   text-decoration: underline;
   outline: none;
 }
 
 .key-setup-unlocks {
   margin: 0;
-  color: rgba(198, 220, 226, 0.6);
+  color: rgba(198, 226, 205, 0.6);
   font-size: 0.66rem;
 }
 
@@ -281,21 +281,21 @@
 .key-setup-fields input {
   width: 100%;
   padding: 0.42rem 0.55rem;
-  color: rgba(225, 244, 248, 0.92);
+  color: rgba(225, 248, 231, 0.92);
   font-family: var(--font-mono);
   font-size: 0.66rem;
-  background: rgba(4, 14, 20, 0.72);
-  border: 1px solid rgba(100, 200, 220, 0.22);
+  background: rgba(4, 20, 8, 0.72);
+  border: 1px solid rgba(100, 220, 131, 0.22);
   border-radius: 0.32rem;
 }
 
 .key-setup-fields input:focus {
-  border-color: rgba(54, 220, 255, 0.65);
+  border-color: rgba(54, 255, 105, 0.65);
   outline: none;
 }
 
 .key-setup-fields input::placeholder {
-  color: rgba(148, 178, 188, 0.42);
+  color: rgba(148, 188, 158, 0.42);
 }
 
 .key-setup-cloud-auth {
@@ -305,7 +305,7 @@
 }
 
 .key-setup-cloud-auth-state {
-  color: rgba(190, 214, 222, 0.7);
+  color: rgba(190, 222, 198, 0.7);
   font-family: var(--font-mono);
   font-size: 0.56rem;
   letter-spacing: 0.05rem;
@@ -314,19 +314,19 @@
 .key-setup-cloud-auth-toggle {
   margin-left: auto;
   padding: 0.28rem 0.55rem;
-  color: rgba(54, 220, 255, 0.9);
+  color: rgba(54, 255, 105, 0.9);
   font-family: var(--font-mono);
   font-size: 0.55rem;
   letter-spacing: 0.06rem;
-  background: rgba(54, 220, 255, 0.08);
-  border: 1px solid rgba(54, 220, 255, 0.28);
+  background: rgba(54, 255, 105, 0.08);
+  border: 1px solid rgba(54, 255, 105, 0.28);
   border-radius: 0.32rem;
   cursor: pointer;
 }
 
 .key-setup-cloud-auth-toggle:hover,
 .key-setup-cloud-auth-toggle:focus-visible {
-  border-color: rgba(54, 220, 255, 0.65);
+  border-color: rgba(54, 255, 105, 0.65);
   outline: none;
 }
 
@@ -341,12 +341,12 @@
 
 .key-setup-apply {
   padding: 0.5rem 0.95rem;
-  color: #04141c;
+  color: #041c0a;
   font-family: var(--font-mono);
   font-size: 0.66rem;
   font-weight: 700;
   letter-spacing: 0.09rem;
-  background: linear-gradient(180deg, #45e0ff, #1fb9dd);
+  background: linear-gradient(180deg, #45ff74, #1fdd4f);
   border: none;
   border-radius: 0.38rem;
   cursor: pointer;
@@ -368,7 +368,7 @@
 .key-setup-note {
   min-height: 1.1rem;
   margin-top: 0.5rem;
-  color: rgba(199, 225, 231, 0.62);
+  color: rgba(199, 231, 207, 0.62);
   font-family: var(--font-mono);
   font-size: 0.62rem;
   line-height: 1.35;
@@ -390,11 +390,11 @@ body.scene-playback-mode #key-setup {
 /* Provider Settings additions: externally-managed badge + per-row remove. */
 .key-setup-external {
   padding: 0.05rem 0.3rem;
-  color: rgba(148, 200, 220, 0.7);
+  color: rgba(148, 220, 166, 0.7);
   font-size: 0.5rem;
   letter-spacing: 0.06rem;
   text-transform: uppercase;
-  border: 1px solid rgba(148, 200, 220, 0.28);
+  border: 1px solid rgba(148, 220, 166, 0.28);
   border-radius: 0.3rem;
   white-space: nowrap;
 }

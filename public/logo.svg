@@ -12,8 +12,8 @@
       }
 
       .cls-1 {
-        fill: #4454727a;
-        stroke: #48b;
+        fill: #4472507a;
+        stroke: #44bb62;
         stroke-width: 10px;
       }
 
@@ -22,11 +22,11 @@
       }
 
       .cls-2 {
-        fill: #00f6ff;
+        fill: #00ff41;
       }
 
       .cls-3 {
-        stroke: #00f6ff;
+        stroke: #00ff41;
         stroke-linecap: round;
         stroke-width: 6.99px;
       }

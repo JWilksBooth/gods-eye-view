@@ -16,6 +16,10 @@
  */
 import * as Cesium from 'cesium';
 import { ownCameraArrival } from './data/cameraArrival.js';
+import {
+  sampleRenderedSurfaceHeight,
+  surfaceHeightSupported,
+} from './services/surfaceHeight.js';
 
 /** Minimum eye height above the rendered surface for a usable view. */
 export const MIN_EYE_CLEARANCE_M = 120;
@@ -37,10 +41,11 @@ const probeScratch = new Cesium.Cartographic();
 function sampleSurfaceM(scene, cells) {
   let heightM = Number.NaN;
   let sampled = 0;
-  if (typeof scene?.sampleHeight !== 'function') return { heightM, sampled };
+  if (!surfaceHeightSupported(scene)) return { heightM, sampled };
   for (const cell of cells) {
     try {
-      const height = scene.sampleHeight(
+      const height = sampleRenderedSurfaceHeight(
+        scene,
         Cesium.Cartographic.fromDegrees(cell.lon, cell.lat, 0, probeScratch),
       );
       if (!Number.isFinite(height)) continue;

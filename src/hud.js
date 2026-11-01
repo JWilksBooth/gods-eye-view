@@ -59,9 +59,9 @@ const HUD_COLORS = {
     border: 'rgba(255, 170, 0, 0.2)',
   },
   _default: {
-    main: 'rgba(0, 255, 255, 0.6)',
-    glow: 'rgba(0, 255, 255, 0.4)',
-    border: 'rgba(0, 255, 255, 0.15)',
+    main: 'rgba(0, 255, 65, 0.6)',
+    glow: 'rgba(0, 255, 65, 0.4)',
+    border: 'rgba(0, 255, 65, 0.15)',
   },
 };
 
@@ -522,8 +522,8 @@ export class IntelHUD {
       const m = String(now.getMinutes()).padStart(2, '0');
       const s = String(now.getSeconds()).padStart(2, '0');
       // i18n-ignore: sensor codes
-      collEl.textContent =
-        `COLL: ${h}:${m}:${s} ${this._localZoneName()}`.trim();
+      const coll = `COLL: ${h}:${m}:${s} ${this._localZoneName()}`.trim();
+      collEl.textContent = coll;
     }
 
     // Off-nadir angle (ONA): camera pitch of -90 deg is nadir (straight down),

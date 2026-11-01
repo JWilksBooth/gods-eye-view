@@ -1,4 +1,5 @@
 import * as Cesium from 'cesium';
+import { performanceScaledBudget } from '../../performancePreset.js';
 import { MAX_DOTS, roadDotBudget } from './policy.js';
 
 export const DOT_CHANGE_BUDGET = 768;
@@ -179,7 +180,7 @@ export function createRetention({ state, parts }) {
     const budgets = parts.model.allocateRoadDotBudgets(
       wanted,
       altitude,
-      roadDotBudget(altitude),
+      performanceScaledBudget(roadDotBudget(altitude)),
     );
     for (let i = 0; i < wanted.length; i++)
       records.get(wanted[i].key).target = budgets[i];

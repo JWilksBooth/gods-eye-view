@@ -46,6 +46,10 @@ export const TOOL_SURFACES = Object.freeze({
   find_radio_stations: mcpOff,
   get_bike_share: mcpOff,
   get_transit_vehicles: mcpOff,
+  // The LIVE OPS console: on both surfaces. get_incidents answers from the
+  // agency feeds; live_ops_region combines cameras, incidents and headlines.
+  get_incidents: Object.freeze({ mcp: true, voice: true }),
+  live_ops_region: Object.freeze({ mcp: true, voice: true }),
 });
 
 /**

@@ -46,6 +46,7 @@ export const CATALOG_SOURCE_CONTRACTS = Object.freeze({
   cyclones: contract(['weather-cyclones'], ['getSnapshot']),
   earthquakes: contract(['earthquakes'], ['getSnapshot']),
   'fire-perimeters': contract(['fire-perimeters'], ['getSnapshot']),
+  incidents: contract(['incidents'], ['getSnapshot']),
   'air-quality': contract(['air-quality'], ['getSnapshot']),
   'gnss-integrity': contract(['gnss-integrity'], ['getSnapshot']),
   's2-ghostmaps': contract(['s2-ghostmaps'], ['getCatalog', 'getFile']),

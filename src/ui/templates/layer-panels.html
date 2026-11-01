@@ -142,6 +142,26 @@
     </div>
   </div>
 
+  <!-- LIVE OPS region console -->
+  <div id="live-ops-panel" class="panel-collapsible collapsed" data-panel-id="live-ops-panel">
+    <div class="panel-glow"></div>
+    <div class="live-ops-panel-inner">
+      <div class="panel-header">
+        <span class="panel-title" title="Cameras, incidents, traffic and headlines for one region" data-i18n data-i18n-title>LIVE OPS</span>
+        <span class="panel-divider"></span>
+        <button class="panel-collapse-btn" data-collapse-target="live-ops-panel" title="Collapse panel" data-i18n-title>+</button>
+      </div>
+      <div class="cyber-panel-body live-ops-body">
+        <p class="live-ops-hint" data-i18n>One click flies to a region and turns on its cameras, live incidents and traffic.</p>
+        <div id="live-ops-regions" class="live-ops-regions" role="group" aria-label="Region" data-i18n-aria-label></div>
+        <div id="live-ops-status" class="live-ops-status" role="status" aria-live="polite" data-i18n-runtime>Pick a region</div>
+        <div id="live-ops-feeds" class="live-ops-feeds" hidden></div>
+        <div class="live-ops-headlines-heading" data-i18n>HEADLINES</div>
+        <ul id="live-ops-headlines" class="live-ops-headlines" aria-label="Headlines" data-i18n-aria-label></ul>
+      </div>
+    </div>
+  </div>
+
   <!-- Scene Director Panel -->
   <div id="scene-panel" class="panel-collapsible collapsed" data-panel-id="scene-panel">
     <div class="panel-glow"></div>

@@ -1,4 +1,5 @@
 import { roadIdentity } from './retention.js';
+import { performanceScaledBudget } from '../../performancePreset.js';
 import * as Cesium from 'cesium';
 import {
   prepareRoadSurfaces,
@@ -379,7 +380,7 @@ export function createFlow({ state: layerState, services, parts, source }) {
     const budgets = parts.model.allocateRoadDotBudgets(
       selected,
       altitude,
-      roadDotBudget(altitude),
+      performanceScaledBudget(roadDotBudget(altitude)),
     );
     const admitted = selected.filter((r, i) => budgets[i] > 0);
     const camera = layerState._viewer.camera?.positionWC;

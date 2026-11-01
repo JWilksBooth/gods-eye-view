@@ -1,4 +1,5 @@
 import * as Cesium from 'cesium';
+import { performanceCadenceScale } from '../../performancePreset.js';
 import { t } from '../../i18n/index.js';
 import {
   vesselTypeCss,
@@ -221,7 +222,8 @@ export function createRendering({
     if (state.trailingVisibilityTimer) return;
     const waitMs = Math.max(
       0,
-      VISIBILITY_UPDATE_MS - (now - state.lastVisibilityUpdate),
+      VISIBILITY_UPDATE_MS * performanceCadenceScale() -
+        (now - state.lastVisibilityUpdate),
     );
     state.trailingVisibilityTimer = vesselState._aisRuntime.setTimeout(() => {
       state.trailingVisibilityTimer = null;
@@ -241,7 +243,9 @@ export function createRendering({
     const now = focusNowMs(performance.now());
     const focusTarget = getFocusTarget();
     const regularPass =
-      force || now - state.lastVisibilityUpdate >= VISIBILITY_UPDATE_MS;
+      force ||
+      now - state.lastVisibilityUpdate >=
+        VISIBILITY_UPDATE_MS * performanceCadenceScale();
     const focusPass =
       focusPassIsNeeded(focusTarget, state.activeFocusCount) &&
       (force || now - state.lastFocusUpdate >= FOCUS_UPDATE_MS);

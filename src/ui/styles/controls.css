@@ -69,7 +69,7 @@
   letter-spacing: 1.8px;
   color: var(--accent);
   text-transform: uppercase;
-  text-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.3);
 }
 
 .panel-title {
@@ -325,8 +325,8 @@ html:not([lang='en']):not(:lang(zh)):not(:lang(ja))
   border-color: var(--accent);
   background: var(--accent-dim);
   box-shadow:
-    0 0 20px rgba(0, 212, 255, 0.15),
-    0 0 0 1px rgba(0, 212, 255, 0.1) inset;
+    0 0 20px rgba(0, 255, 65, 0.15),
+    0 0 0 1px rgba(0, 255, 65, 0.1) inset;
 }
 
 .style-btn.active .btn-icon {
@@ -401,7 +401,7 @@ html:not([lang='en']):not(:lang(zh)):not(:lang(ja))
   width: 128px;
   height: auto;
   margin: 0 auto 24px;
-  filter: drop-shadow(0 0 24px rgba(0, 246, 255, 0.42));
+  filter: drop-shadow(0 0 24px rgba(0, 255, 65, 0.42));
   animation: logo-pulse 2s ease-in-out infinite;
 }
 
@@ -609,7 +609,7 @@ html:not([lang='en']):not(:lang(zh)):not(:lang(ja))
 .pp-toggle-btn.active {
   border-color: var(--accent);
   background: var(--accent-dim);
-  box-shadow: 0 0 12px rgba(0, 212, 255, 0.15);
+  box-shadow: 0 0 12px rgba(0, 255, 65, 0.15);
 }
 
 .pp-icon {
@@ -731,6 +731,26 @@ html:not([lang='en']) .pp-slider-row > .pp-slider-mini-label {
   padding: 5px 8px 6px;
 }
 
+/* Performance preset: a standalone segmented row with no toggle above it.
+   The label sits on its own line so the three segments get the full rail
+   width; the rail is too narrow for QUALITY · BALANCED · PERFORMANCE beside it. */
+#performance-preset-row {
+  flex-wrap: wrap;
+  min-width: 170px;
+  padding: 5px 8px 6px;
+  border-top: 1px solid var(--glass-border);
+  border-radius: 8px;
+}
+#performance-preset-row .pp-slider-mini-label {
+  flex-basis: 100%;
+}
+#performance-preset-seg {
+  flex: 1 1 100%;
+}
+#performance-preset-seg .gev-segment {
+  padding: 4px 4px;
+}
+
 .detection-fade-row,
 .detection-opacity-row {
   min-width: 170px;
@@ -769,14 +789,14 @@ html:not([lang='en']) .pp-slider-row > .pp-slider-mini-label {
   gap: 6px;
   margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid rgba(123, 189, 211, 0.18);
+  border-top: 1px solid rgba(123, 211, 145, 0.18);
 }
 
 .map-source-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: rgba(190, 221, 230, 0.62);
+  color: rgba(190, 230, 200, 0.62);
   font-family: var(--font-mono);
   font-size: 8px;
   letter-spacing: 1.35px;
@@ -852,7 +872,7 @@ html:not([lang='en']) .pp-slider-row > .pp-slider-mini-label {
   color: var(--accent);
   border-color: var(--accent);
   background: var(--accent-dim);
-  box-shadow: 0 0 10px rgba(0, 212, 255, 0.15);
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.15);
 }
 
 .map-stack-chip.unavailable,
@@ -1059,7 +1079,7 @@ body.gev-geo-import-drag #cesiumContainer {
 }
 
 .pp-mode-btn:focus-visible {
-  box-shadow: inset 0 0 0 4px #061014;
+  box-shadow: inset 0 0 0 4px #06140a;
 }
 
 #clean-view-toggle {
@@ -1074,8 +1094,8 @@ body.gev-geo-import-drag #cesiumContainer {
   z-index: 300;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(8, 10, 14, 0.88);
-  color: #d9f7ff;
+  background: rgba(8, 14, 10, 0.88);
+  color: #d9ffe3;
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 1.8px;
@@ -1223,8 +1243,8 @@ body.ui-clean-view #scene-runtime.active {
 #param-slider-panel:not(.collapsed) .param-panel-divider {
   background: linear-gradient(
     90deg,
-    rgb(0 212 255 / 28%),
-    rgba(0, 212, 255, 0.18) 58%,
+    rgb(0 255 65 / 28%),
+    rgba(0, 255, 65, 0.18) 58%,
     transparent
   );
 }

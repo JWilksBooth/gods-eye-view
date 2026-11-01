@@ -227,6 +227,22 @@ const layers = [
     },
   },
   {
+    id: 'incidents',
+    aliases: ['incidents', 'live incidents', 'dispatch', 'live ops'],
+    context: false,
+    query: {
+      fields: {
+        type: ['t'],
+        agency: ['t'],
+        location: ['t'],
+        region: ['t'],
+        timeMs: ['ms'],
+      },
+      timeField: 'timeMs',
+      window: 'last 24 h',
+    },
+  },
+  {
     id: 'weather-cyclones',
     aliases: ['cyclones', 'hurricanes', 'typhoons', 'tropical storms'],
     context: false,
