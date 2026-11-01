@@ -249,7 +249,7 @@ test('production registry is exact, canonical, and rejects incomplete contracts'
       alpha: '7',
       bravo: '8',
     }),
-    '9',
+    '00',
   );
   const digitsExhausted = {
     ...LAYER_STATE_TOKEN_RESERVATIONS,
@@ -308,7 +308,7 @@ test('production registry is exact, canonical, and rejects incomplete contracts'
     validateLayerStateAllocations(LAYER_STATE_TOKEN_RESERVATIONS, {
       ...LAYER_STATE_TOKEN_RESERVATIONS,
       future: '7',
-      next: '9',
+      next: '8',
     }),
     true,
   );
@@ -321,12 +321,12 @@ test('production registry is exact, canonical, and rejects incomplete contracts'
     /next free token 7/,
   );
   const beforeLastDigit = { ...digitsExhausted };
-  delete beforeLastDigit['prior-9'];
+  delete beforeLastDigit['prior-8'];
   assert.equal(
     validateLayerStateAllocations(beforeLastDigit, {
       ...beforeLastDigit,
       futurePair: '00',
-      futureDigit: '9',
+      futureDigit: '8',
     }),
     true,
   );
@@ -344,7 +344,7 @@ test('production registry is exact, canonical, and rejects incomplete contracts'
         { ...LAYER_STATE_TOKEN_RESERVATIONS, merged: '7' },
         { ...LAYER_STATE_TOKEN_RESERVATIONS, merged: '7', competing: '7' },
       ),
-    /next free token 9/,
+    /next free token 8/,
   );
   assert.throws(
     () => validateLayerStateAllocations({ future: '00' }, { future: '01' }),

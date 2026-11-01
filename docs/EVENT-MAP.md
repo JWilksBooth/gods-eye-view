@@ -59,13 +59,13 @@ update/destroy/getStats`, `attachDataManager`, `findByQuery`, `openEvent`,
    flag bit 5 `gridView` in `src/share/viewCodec.js`, long-form `gv` in
    `src/sharelink.js`, applied through `visualSettings.js`.
 3. Streams: done on `wip/streams` (see **Streams** below); at merge the
-   `streams` layer takes token `8`.
+   `streams` layer takes token `9`.
 4. Translations for every new string in all ten locale catalogs, `npm run i18n`,
    `npm run format`, `npm test`, `scripts/qa-event-map.mjs`, screenshots, PR.
 
 ## Streams
 
-The `streams` layer (`src/layers/streams/`, token `8`, enabled-only) and the
+The `streams` layer (`src/layers/streams/`, token `9`, enabled-only) and the
 `/api/streams` provider (`server/providers/streams.js`) put geotagged live
 streams on the map for the four LIVE OPS regions. Everything that crosses the
 wire is metadata (`src/layers/streams/records.js`: where, who, and how it

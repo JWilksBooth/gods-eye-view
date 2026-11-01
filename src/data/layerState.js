@@ -667,7 +667,7 @@ export const LAYER_STATE_REGISTRY = Object.freeze([
     disposition: 'enabled+options',
     optionOwner: 'satellites',
   }),
-  Object.freeze({ id: 'streams', token: '8', disposition: 'enabled-only' }),
+  Object.freeze({ id: 'streams', token: '9', disposition: 'enabled-only' }),
   Object.freeze({
     id: 'street-level',
     token: '0',

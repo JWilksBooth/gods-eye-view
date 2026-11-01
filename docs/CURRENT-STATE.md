@@ -33,7 +33,7 @@ containers can read it on enforcing SELinux hosts. The separate image-owned
 
 ## Live Streams — November 1, 2026
 
-The Live Streams layer (`streams`, token `8`, enabled-only; Cameras group)
+The Live Streams layer (`streams`, token `9`, enabled-only; Cameras group)
 reads `/api/streams`, which merges live-stream metadata for the LIVE OPS
 regions: a curated registry of public 24/7 cameras (YouTube entries verified
 through oEmbed, Caltrans District 4 HLS playlists verified live), YouTube Data
