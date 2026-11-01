@@ -17,6 +17,15 @@ test('a Caltrans playlist on the agency media host is accepted as published', ()
   );
 });
 
+test('dot segments normalize to the real district path before the check', () => {
+  assert.equal(
+    caltransStreamUrl(
+      'https://wzmedia.dot.ca.gov/D4/../D7/N101.stream/playlist.m3u8',
+    ),
+    'https://wzmedia.dot.ca.gov/D7/N101.stream/playlist.m3u8',
+  );
+});
+
 test('anything off the media host, off HTTPS, or decorated is refused', () => {
   for (const bad of [
     undefined,
@@ -26,7 +35,6 @@ test('anything off the media host, off HTTPS, or decorated is refused', () => {
     'https://user:pw@wzmedia.dot.ca.gov/D4/N101.stream/playlist.m3u8',
     'https://wzmedia.dot.ca.gov/D4/N101.stream/playlist.m3u8?token=1',
     'https://wzmedia.dot.ca.gov/D4/N101.stream/chunklist.m3u8',
-    'https://wzmedia.dot.ca.gov/D4/../D7/N101.stream/playlist.m3u8',
     'https://wzmedia.dot.ca.gov/N101.stream/playlist.m3u8',
     'not a url',
   ]) {

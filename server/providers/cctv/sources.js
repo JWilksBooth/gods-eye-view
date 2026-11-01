@@ -300,7 +300,7 @@ export function caltransStreamUrl(value) {
     url.password ||
     url.search ||
     url.hash ||
-    !/^/Dd{1,2}/[A-Za-z0-9_.-]+.stream/playlist.m3u8$/.test(url.pathname)
+    !/^\/D\d{1,2}\/[A-Za-z0-9_.-]+\.stream\/playlist\.m3u8$/.test(url.pathname)
   ) {
     return null;
   }
