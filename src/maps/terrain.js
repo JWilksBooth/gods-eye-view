@@ -5,8 +5,22 @@ import { createTerrainRetryPolicy } from './terrainRetry.js';
 export const KEYLESS_TERRAIN_URL =
   'https://terrain.reearth.land/cesium-mesh/ellipsoid';
 
-/** These factories are lazy: a hidden globe must not trigger terrain loading. */
-export async function createWorldTerrain(accessToken, { signal } = {}) {
+/**
+ * These factories are lazy: a hidden globe must not trigger terrain loading.
+ *
+ * Vertex normals only feed globe lighting (`globe.enableLighting`), which the
+ * app never turns on, so they are requested only for a caller that lights the
+ * globe; every other terrain tile is smaller to download and decode. The wind
+ * layer's relief shading reads normals when the terrain has them and draws
+ * its globe-curvature shading otherwise, as it already does on the keyless
+ * terrain.
+ * @param {string} accessToken
+ * @param {{signal?: AbortSignal, lighting?: boolean}} [options]
+ */
+export async function createWorldTerrain(
+  accessToken,
+  { signal, lighting = false } = {},
+) {
   accessToken = String(accessToken || '').trim();
   if (!accessToken)
     throw new Error('World terrain requires an explicit ion token');
@@ -15,7 +29,7 @@ export async function createWorldTerrain(accessToken, { signal } = {}) {
   signal?.throwIfAborted();
   return {
     provider: await Cesium.CesiumTerrainProvider.fromUrl(resource, {
-      requestVertexNormals: true,
+      requestVertexNormals: lighting === true,
       requestWaterMask: false,
       ellipsoid: Cesium.Ellipsoid.WGS84,
     }),

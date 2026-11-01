@@ -750,6 +750,26 @@ html:not([lang='en']) .pp-slider-row > .pp-slider-mini-label {
 #performance-preset-seg .gev-segment {
   padding: 4px 4px;
 }
+/* The drawing buffer the preset produced, e.g. 1600 × 900 px · MSAA 2×. */
+.performance-preset-status {
+  flex-basis: 100%;
+  padding-top: 4px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.4px;
+}
+.performance-preset-status:empty {
+  display: none;
+}
+/* Sharpen while the Performance preset withholds the pass. */
+#pp-toggles .pp-toggle-btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+#sharpen-slider-row:has(input:disabled) {
+  opacity: 0.45;
+}
 
 .detection-fade-row,
 .detection-opacity-row {

@@ -1382,3 +1382,71 @@ test('a hung imagery attempt that lands after its deadline is released, never ca
   await settle();
   assert.equal(good.destroyed, true);
 });
+
+test('refreshing imagery keeps the provider and hands the old layer over once the new one has loaded', async () => {
+  const progress = event();
+  let built = 0;
+  const env = publicFixture({
+    createImageryLayer: (provider) => ({ provider, build: ++built }),
+  });
+  env.viewer.scene.globe.tileLoadProgressEvent = progress;
+  const renders = [];
+  env.controller._requestRender = (reason) => renders.push(reason);
+  assert.equal(env.controller.refreshImageryLayer(), false, 'no live layer');
+  await env.controller.setStack('esri-imagery');
+  const provider = env.providers.get('esri-imagery');
+  const [old] = env.imagery;
+  const errors = provider.errorEvent;
+  renders.length = 0;
+  assert.equal(env.controller.refreshImageryLayer(), true);
+  // The new layer from the same provider is live; the old one stays under it
+  // while the new textures load.
+  const fresh = env.imagery.at(-1);
+  assert.notEqual(fresh, old);
+  assert.equal(fresh.provider, provider);
+  assert.deepEqual(env.imagery, [old, fresh]);
+  assert.equal(env.removed.length, 0);
+  assert.deepEqual(renders, ['map-stack']);
+  progress.raise(0); // A stale idle report before the new tiles queue.
+  assert.equal(env.removed.length, 0);
+  progress.raise(12);
+  progress.raise(0);
+  assert.deepEqual(env.removed, [{ value: old, destroy: true }]);
+  assert.deepEqual(env.imagery, [fresh]);
+  assert.equal(progress.size, 0, 'the progress listener is released');
+  // The tile-failure watch still belongs to the same provider.
+  assert.equal(errors.size, 1);
+  assert.equal(env.controller.getActiveId(), 'esri-imagery');
+  env.controller.destroy();
+  assert.deepEqual(env.imagery, []);
+});
+
+test('a hand-over that never reports idle ends at its deadline, and a stack switch ends it at once', async (t) => {
+  t.mock.timers.enable({ apis: ['setTimeout'] });
+  const env = publicFixture();
+  await env.controller.setStack('esri-imagery');
+  const [first] = env.imagery;
+  env.controller.refreshImageryLayer();
+  const second = env.imagery.at(-1);
+  t.mock.timers.tick(5_999);
+  assert.equal(env.imagery.length, 2);
+  t.mock.timers.tick(1);
+  assert.deepEqual(env.imagery, [second]);
+  assert.equal(env.removed[0].value, first);
+  // A second refresh mid-hand-over retires the older layer immediately.
+  env.controller.refreshImageryLayer();
+  const third = env.imagery.at(-1);
+  env.controller.refreshImageryLayer();
+  const fourth = env.imagery.at(-1);
+  assert.deepEqual(env.imagery, [third, fourth]);
+  // Leaving the globe removes the live and the retiring layer together.
+  await env.controller.setStack('photoreal');
+  assert.deepEqual(env.imagery, []);
+  t.mock.timers.tick(10_000);
+  assert.equal(
+    env.removed.filter(({ value }) => value === third).length,
+    1,
+    'the deadline does not remove a layer twice',
+  );
+  env.controller.destroy();
+});

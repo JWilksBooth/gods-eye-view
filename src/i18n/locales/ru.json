@@ -3128,7 +3128,11 @@
   "Quality": "Качество",
   "Balanced": "Баланс",
   "Rendering performance preset": "Предустановка производительности рендеринга",
-  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Полное разрешение, сглаживание 4×, 60 к/с и полная плотность подписей",
-  "Full resolution with 2× anti-aliasing at 60 fps — the default": "Полное разрешение со сглаживанием 2× при 60 к/с — по умолчанию",
-  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Разрешение 3/4, без мультисэмплинга, 30 к/с, редкие подписи и более редкое обновление слоёв"
+  "Every screen pixel, 4× anti-aliasing and the sharpest imagery and 3D tiles at 60 fps": "Каждый пиксель экрана, сглаживание 4× и самые чёткие снимки и 3D-тайлы при 60 к/с",
+  "Every pixel on a standard screen, three quarters on HiDPI, 2× anti-aliasing at 60 fps — the default": "Каждый пиксель на обычном экране, три четверти на HiDPI, сглаживание 2× при 60 к/с — по умолчанию",
+  "Fewer pixels, FXAA instead of multisampling, no sharpening, coarser tiles, 30 fps, sparse labels and slower layer updates": "Меньше пикселей, FXAA вместо мультисэмплинга, без повышения резкости, более грубые тайлы, 30 к/с, редкие подписи и более редкое обновление слоёв",
+  "Sharpening is off in the Performance preset": "Повышение резкости отключено в предустановке «Производительность»",
+  "{width} × {height} px · MSAA {samples}×": "{width} × {height} пикс. · MSAA {samples}×",
+  "{width} × {height} px · FXAA": "{width} × {height} пикс. · FXAA",
+  "{width} × {height} px": "{width} × {height} пикс."
 }

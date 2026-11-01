@@ -103,8 +103,19 @@ export function installTrackpadPinchZoom(
   };
 }
 
-/** Cesium.Viewer options of the standard globe viewer. */
-export function applicationViewerOptions(creditContainer) {
+/**
+ * Cesium.Viewer options of the standard globe viewer. A host that sizes the
+ * drawing buffer itself (app/scene.js, through the Performance preset) passes
+ * the preset's MSAA samples and `deviceResolution: true`, so the first
+ * framebuffers are allocated in device pixels at the preset's sampling.
+ * Without them Cesium's CSS-pixel buffer and 4x MSAA stand.
+ * @param {Element|string} creditContainer
+ * @param {{msaaSamples?: number, deviceResolution?: boolean}} [options]
+ */
+export function applicationViewerOptions(
+  creditContainer,
+  { msaaSamples = 4, deviceResolution = false } = {},
+) {
   return {
     timeline: false,
     animation: false,
@@ -122,18 +133,31 @@ export function applicationViewerOptions(creditContainer) {
     // which would also stop CesiumWidget from creating the Sun and Moon.
     skyBox: new StarrySky(),
     creditContainer,
-    msaaSamples: 4,
+    msaaSamples,
+    ...(deviceResolution ? { useBrowserRecommendedResolution: false } : {}),
     contextOptions: { webgl: { preserveDrawingBuffer: true } },
   };
 }
 
-/** Create the standard globe viewer in caller-owned, visible containers. */
-export function createApplicationViewer({ container, creditContainer }) {
+/**
+ * Create the standard globe viewer in caller-owned, visible containers.
+ * `msaaSamples` and `deviceResolution` shape the construction-time buffer;
+ * see applicationViewerOptions.
+ */
+export function createApplicationViewer({
+  container,
+  creditContainer,
+  msaaSamples,
+  deviceResolution,
+}) {
   if (!container || !creditContainer)
     throw new TypeError('Viewer and credit containers are required');
   const viewer = new Cesium.Viewer(
     container,
-    applicationViewerOptions(creditContainer),
+    applicationViewerOptions(creditContainer, {
+      msaaSamples,
+      deviceResolution,
+    }),
   );
   try {
     viewer.targetFrameRate = 60;

@@ -3058,7 +3058,11 @@
   "Quality": "Qualidade",
   "Balanced": "Equilibrado",
   "Rendering performance preset": "Predefinição de desempenho de renderização",
-  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Resolução total, anti-aliasing 4×, 60 fps e densidade total de rótulos",
-  "Full resolution with 2× anti-aliasing at 60 fps — the default": "Resolução total com anti-aliasing 2× a 60 fps: o padrão",
-  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Resolução a três quartos, sem multiamostragem, 30 fps, rótulos esparsos e atualizações de camadas mais lentas"
+  "Every screen pixel, 4× anti-aliasing and the sharpest imagery and 3D tiles at 60 fps": "Cada pixel da tela, anti-aliasing 4× e as imagens e os blocos 3D mais nítidos a 60 fps",
+  "Every pixel on a standard screen, three quarters on HiDPI, 2× anti-aliasing at 60 fps — the default": "Cada pixel em uma tela padrão, três quartos em HiDPI, anti-aliasing 2× a 60 fps: o padrão",
+  "Fewer pixels, FXAA instead of multisampling, no sharpening, coarser tiles, 30 fps, sparse labels and slower layer updates": "Menos pixels, FXAA em vez de multiamostragem, sem nitidez, blocos mais grosseiros, 30 fps, rótulos esparsos e atualizações de camadas mais lentas",
+  "Sharpening is off in the Performance preset": "A nitidez fica desativada na predefinição Desempenho",
+  "{width} × {height} px · MSAA {samples}×": "{width} × {height} px · MSAA {samples}×",
+  "{width} × {height} px · FXAA": "{width} × {height} px · FXAA",
+  "{width} × {height} px": "{width} × {height} px"
 }

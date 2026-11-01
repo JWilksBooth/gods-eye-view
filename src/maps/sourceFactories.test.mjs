@@ -1,9 +1,45 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as Cesium from 'cesium';
-import { createIonImagery } from './imagery.js';
+import {
+  OSM_MAXIMUM_LEVEL,
+  createIonImagery,
+  createOsmImagery,
+  imageryLayerOptions,
+} from './imagery.js';
 import { createWorldTerrain, createKeylessTerrain } from './terrain.js';
 import { createDefaultMapSources } from './defaultSources.js';
+
+test('OSM stops at the deepest level tile.openstreetmap.org serves', () => {
+  assert.equal(OSM_MAXIMUM_LEVEL, 19);
+  const provider = createOsmImagery();
+  assert.equal(provider.maximumLevel, 19);
+});
+
+test('base-map layer options keep LINEAR filters so Cesium mipmaps and filters anisotropically', () => {
+  const { LINEAR: MIN_LINEAR } = Cesium.TextureMinificationFilter;
+  const { LINEAR: MAG_LINEAR } = Cesium.TextureMagnificationFilter;
+  assert.deepEqual(imageryLayerOptions({ maximumAnisotropy: 16 }), {
+    minificationFilter: MIN_LINEAR,
+    magnificationFilter: MAG_LINEAR,
+    maximumAnisotropy: 16,
+  });
+  // No cap (or a nonsense one) leaves Cesium's "maximum supported" default.
+  for (const cap of [undefined, 0, Number.NaN, -4])
+    assert.deepEqual(imageryLayerOptions({ maximumAnisotropy: cap }), {
+      minificationFilter: MIN_LINEAR,
+      magnificationFilter: MAG_LINEAR,
+    });
+  // A real layer takes the cap and both filters.
+  const layer = new Cesium.ImageryLayer(
+    createOsmImagery(),
+    imageryLayerOptions({ maximumAnisotropy: 4 }),
+  );
+  assert.equal(layer.minificationFilter, MIN_LINEAR);
+  assert.equal(layer.magnificationFilter, MAG_LINEAR);
+  assert.equal(layer._maximumAnisotropy, 4);
+  layer.destroy();
+});
 
 test('Esri uses Re:Earth without keys and preserves ion terrain when configured', async () => {
   const originalTerrain = Cesium.CesiumTerrainProvider.fromUrl;
@@ -94,9 +130,12 @@ test('imagery and terrain pass their own ion token without relying on SDK defaul
     assert.equal(calls[0].options.accessToken, 'imagery-token');
     assert.equal(calls[1].options.accessToken, 'terrain-token');
     assert.equal(calls[1].id, 1);
-    assert.equal(calls[2].options.requestVertexNormals, true);
+    // Normals only feed globe lighting, which nothing in the app turns on.
+    assert.equal(calls[2].options.requestVertexNormals, false);
     assert.equal(result.provider.id, 'terrain');
     assert.equal(Cesium.Ion.defaultAccessToken, defaultToken);
+    await createWorldTerrain('terrain-token', { lighting: true });
+    assert.equal(calls.at(-1).options.requestVertexNormals, true);
   } finally {
     Cesium.IonImageryProvider.fromAssetId = originalImagery;
     Cesium.IonResource.fromAssetId = originalResource;
