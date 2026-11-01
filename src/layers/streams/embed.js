@@ -86,7 +86,9 @@ export function streamEmbed(stream) {
     }
     case 'mjpeg': {
       const url = httpsUrl(embed.url);
-      return url ? { kind: 'mjpeg', url, link: httpsUrl(stream?.pageUrl) } : null;
+      return url
+        ? { kind: 'mjpeg', url, link: httpsUrl(stream?.pageUrl) }
+        : null;
     }
     case 'link': {
       const url = httpsUrl(embed.url) || httpsUrl(stream?.pageUrl);

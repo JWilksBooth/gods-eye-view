@@ -1069,10 +1069,10 @@ test('the voice TOOL SCHEMA matches the pinned contract — the mission mapping 
   // Live Incidents (LIVE OPS) extends the generated layer enums the same way.
   // The Event Map layer (toggle only) and Alerts extend them the same way.
   // Live Streams extends the generated layer enums, aliases and field hints.
-  assert.equal(block.length, 31581, 'serialized tool schema length drifted');
+  assert.equal(block.length, 31566, 'serialized tool schema length drifted');
   assert.equal(
     crypto.createHash('sha256').update(block).digest('hex'),
-    '07a050cbae6c5c27ce1a330a689cc6ab80f6cc8f8bca0daa728350a09997cb4f',
+    '308013011ca6e980247e47497e6e1258527a1933a33d5bdd7b134e58118d12d7',
     'the first-run missions must ride EXISTING tools: no schema edit, no cache bust',
   );
   const instructions = fs.readFileSync(

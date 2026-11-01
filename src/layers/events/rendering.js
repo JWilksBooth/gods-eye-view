@@ -1,5 +1,8 @@
 import * as Cesium from 'cesium';
-import { cameraPoseSignature, horizonOccluder } from '../../data/iconOrientation.js';
+import {
+  cameraPoseSignature,
+  horizonOccluder,
+} from '../../data/iconOrientation.js';
 import { EVENT_ICON_ANCHORS } from './icons.js';
 import { summarizeCluster } from './model.js';
 import {
@@ -35,7 +38,11 @@ export function createRendering({ state, services, parts }) {
   /** World position of an event: its altitude, or the cached floor plus a lift. */
   function positionFor(event) {
     if (Number.isFinite(event.altitudeM)) {
-      return Cesium.Cartesian3.fromDegrees(event.lon, event.lat, event.altitudeM);
+      return Cesium.Cartesian3.fromDegrees(
+        event.lon,
+        event.lat,
+        event.altitudeM,
+      );
     }
     const floor = cachedGroundFloor(event.lat, event.lon);
     return Cesium.Cartesian3.fromDegrees(
@@ -89,7 +96,10 @@ export function createRendering({ state, services, parts }) {
           id: `${EVENT_CLUSTER_PICK_PREFIX}${summary.kind}:${events.length}`,
           events,
         };
-        cluster.billboard.image = state._icons.cluster(events.length, summary.kind);
+        cluster.billboard.image = state._icons.cluster(
+          events.length,
+          summary.kind,
+        );
         cluster.billboard.width = CLUSTER_SIZE_PX;
         cluster.billboard.height = CLUSTER_SIZE_PX;
         cluster.billboard.verticalOrigin = Cesium.VerticalOrigin.CENTER;

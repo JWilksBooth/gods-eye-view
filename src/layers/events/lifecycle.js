@@ -85,7 +85,8 @@ export function createLifecycle({ state, services, parts }) {
 
   /** One refresh: read adapters, reconcile the globe, cull the horizon. */
   function refreshNow() {
-    if (!state._enabled || !state._viewer || state._viewer.isDestroyed?.()) return;
+    if (!state._enabled || !state._viewer || state._viewer.isDestroyed?.())
+      return;
     const generation = ++state._refreshGeneration;
     let events;
     try {
@@ -137,7 +138,10 @@ export function createLifecycle({ state, services, parts }) {
       state._unsubscribes.push(
         manager.subscribeActivity((change) => {
           if (!state._enabled) return;
-          if (change.type === 'data-updated' && watchedLayerIds().has(change.layerId))
+          if (
+            change.type === 'data-updated' &&
+            watchedLayerIds().has(change.layerId)
+          )
             scheduleRefresh();
           else if (change.type === 'visibility-settled') scheduleRefresh();
         }),
@@ -177,7 +181,8 @@ export function createLifecycle({ state, services, parts }) {
 
   function unsubscribeSources() {
     for (const unsubscribe of state._unsubscribes.splice(0)) unsubscribe();
-    for (const unsubscribe of state._adapterUnsubscribes.values()) unsubscribe();
+    for (const unsubscribe of state._adapterUnsubscribes.values())
+      unsubscribe();
     state._adapterUnsubscribes.clear();
   }
 
@@ -323,7 +328,10 @@ export function createLifecycle({ state, services, parts }) {
       const parsed = parseEventPickId(value);
       if (parsed) return null;
       for (const event of state._events) {
-        if (event.id === value || event.title.toLowerCase() === value.toLowerCase())
+        if (
+          event.id === value ||
+          event.title.toLowerCase() === value.toLowerCase()
+        )
           return describeEvent(event);
       }
       return null;

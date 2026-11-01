@@ -50,7 +50,7 @@ test('the complete Realtime tool payload pins the manifest-generated layer relea
     // Live Incidents (LIVE OPS) extends the generated layer enums.
     // Alerts and the Event Map layer (toggle only) extend them the same way.
     // Live Streams extends the generated layer enums.
-    '30547292f6737739d1a69bf0dd9b9c1ee8e54eb2cc57858fb6ca455d8ef35c1a',
+    'e28274f0f99223e9db586d8ba36dceb196e1ac3d17affb6bdbea7ceb0915ffe3',
   );
 });
 

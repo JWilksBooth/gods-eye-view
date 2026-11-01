@@ -139,7 +139,9 @@ export function rankEvents(events, { center = null, limit = Infinity } = {}) {
       a.km - b.km ||
       a.event.pickId.localeCompare(b.event.pickId),
   );
-  const cap = Number.isFinite(limit) ? Math.max(0, Math.floor(limit)) : scored.length;
+  const cap = Number.isFinite(limit)
+    ? Math.max(0, Math.floor(limit))
+    : scored.length;
   return scored.slice(0, cap).map((entry) => entry.event);
 }
 
@@ -187,7 +189,9 @@ export function nearestEvents(
     if (!Number.isFinite(km) || km > maxKm) continue;
     rows.push({ event, km });
   }
-  rows.sort((a, b) => a.km - b.km || a.event.pickId.localeCompare(b.event.pickId));
+  rows.sort(
+    (a, b) => a.km - b.km || a.event.pickId.localeCompare(b.event.pickId),
+  );
   return rows.slice(0, Math.max(0, Math.floor(limit)));
 }
 
