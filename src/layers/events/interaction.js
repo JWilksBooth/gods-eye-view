@@ -17,8 +17,12 @@ import {
  * ownership so sibling layers leave event icons and clusters alone.
  */
 export function createInteraction({ state, services, parts }) {
-  const { registerPickOwner, unregisterPickOwner, resolvePickId, isOwnedByOtherLayer } =
-    services.picking;
+  const {
+    registerPickOwner,
+    unregisterPickOwner,
+    resolvePickId,
+    isOwnedByOtherLayer,
+  } = services.picking;
 
   /**
    * What a scene pick names: one event, a cluster's members, or nothing.
