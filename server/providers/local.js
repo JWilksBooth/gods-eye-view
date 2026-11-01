@@ -9,6 +9,7 @@ import { militaryInstallationsProxy } from './military-installations.js';
 import { regionalBriefProxy } from './regional/briefing.js';
 import { geocodeProxy } from './regional/place.js';
 import { weatherEffectsProxy } from './regional/weather-effects.js';
+import { liveOpsHeadlinesProxy } from './regional/live-ops.js';
 import { cctvProxy } from './cctv.js';
 import { defaultSourceRoot } from './common/source-root.js';
 import { radioBrowserProxy } from './radio.js';
@@ -29,6 +30,7 @@ import { gnssIntegrityProxy } from './gnssIntegrity.js';
 import { ghostMapsProxy } from './ghostMaps.js';
 import { cycloneProxy } from './cyclones.js';
 import { windProxy } from './wind.js';
+import { incidentsProxy } from './incidents.js';
 import { airNowProxy, alertsProxy } from './alerts.js';
 
 /**
@@ -49,6 +51,7 @@ function localProviderPlugins({ realtime, gemini } = {}) {
     regionalBriefProxy(),
     geocodeProxy(),
     weatherEffectsProxy(),
+    liveOpsHeadlinesProxy(),
     cctvProxy({ sourceRoot: defaultSourceRoot }),
     radioBrowserProxy(),
     gbfsProxy(),
@@ -67,6 +70,7 @@ function localProviderPlugins({ realtime, gemini } = {}) {
     firePerimetersProxy(),
     gnssIntegrityProxy(),
     ghostMapsProxy(),
+    incidentsProxy(),
     alertsProxy(),
     airNowProxy(),
     keySetupEndpoint(),

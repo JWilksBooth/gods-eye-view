@@ -79,7 +79,12 @@ code runs wherever an application routes those paths.
 The `weather`, `regional`, `terrain`, `summary` and `features` services are the
 application request services from `gods-eye-view/application/requests`.
 `situation_brief` and `military_awareness` run each section whose services are supplied and mark the
-others unavailable. `app` is `{ baseUrl }`, the address links open. The `bikeshare` service is `{ systems, getStations }`: the system registry and
+others unavailable. `live_ops_region` does the same for one region of the LIVE OPS
+console: its cameras (`find_cctv_cameras` over the region's box), live
+incidents (`get_incidents` for the region) and headlines (the `liveOps`
+service, `/api/live-ops/headlines`). The regions and their boxes come from
+`src/data/liveOpsRegions.js` (`gods-eye-view/sources/live-ops`); the
+`incidents` service is the incidents layer's source over `/api/incidents`. `app` is `{ baseUrl }`, the address links open. The `bikeshare` service is `{ systems, getStations }`: the system registry and
 the GBFS source. `createGeocodePlaceService` resolves place names through `/api/geocode`;
 `createPlaceSearchService` searches `/api/google/*` and reports when no search key
 is configured; `createRouteService` plans routes through `/api/route`.
@@ -293,6 +298,8 @@ and the development server's internal routes. See SECURITY.md.
 | `get_regional_brief` | `regional` | What and where a location is, its weather and recent headlines |
 | `get_cyclones` | `cyclones` | Active NHC/CPHC tropical cyclones, optionally in an area |
 | `get_fire_perimeters` | `perimeters` | Mapped WFIGS wildfire perimeters in an area, largest first |
+| `get_incidents` | `incidents` | Live police, fire, EMS and traffic incidents from public agency feeds (CHP CAD, DataSF, LAFD, CAL FIRE, Nevada 511) in the LIVE OPS regions, newest first; by region, area and type |
+| `live_ops_region` | `liveOps` | One LIVE OPS region (Los Angeles, Sonoma County, San Francisco Bay Area, Las Vegas): its cameras, live incidents and latest headlines, with the view that opens it |
 | `get_terrain_height` | `terrain` | Ground, geoid and ellipsoid heights at up to 20 points |
 | `find_military_installations` | `installations` | OpenStreetMap military sites in an area of at most 10° per side |
 | `get_map_features` | `features` | Administrative areas, named places or monuments at a location (needs Overpass) |

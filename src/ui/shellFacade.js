@@ -715,6 +715,32 @@ export class ShellFacade {
     return this._visualSettings._setSharpenEnabled(...arguments);
   }
 
+  /** Display → PERFORMANCE: the Quality / Balanced / Performance buttons. */
+  get _performancePresetBtns() {
+    return this._visualSettings._performancePresetBtns;
+  }
+
+  /**
+   * Select a Performance preset (quality, balanced or performance), remember
+   * it in this browser and apply it to the scene and the Display settings.
+   * @param {string} preset
+   * @param {{persist?: boolean}} [options]
+   * @returns {boolean} Whether the preset changed.
+   */
+  setPerformancePreset(preset, options) {
+    return this._visualSettings.setPerformancePreset(...arguments);
+  }
+
+  /** @returns {string} The active Performance preset id. */
+  getPerformancePreset() {
+    return this._visualSettings.getPerformancePreset(...arguments);
+  }
+
+  /** Apply the active preset's sharpen and detection-density settings. */
+  _applyPerformancePresetVisuals() {
+    return this._visualSettings._applyPerformancePresetVisuals(...arguments);
+  }
+
   /**
    * Reads and canonicalizes the five-stop density control. The engine derives
    * Sparse/Balanced/Dense from the same stop.

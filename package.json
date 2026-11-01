@@ -127,6 +127,9 @@
     "./server/providers/regional": {
       "node": "./server/providers/regional.js"
     },
+    "./server/providers/incidents": {
+      "node": "./server/providers/incidents.js"
+    },
     "./server/providers/openai": {
       "node": "./server/providers/openai.js"
     },
@@ -167,6 +170,7 @@
     "./layers/recent-imagery": "./src/layers/recentImagery/index.js",
     "./layers/recent-imagery/source": "./src/layers/recentImagery/source.js",
     "./layers/perimeters": "./src/layers/perimeters/index.js",
+    "./layers/incidents": "./src/layers/incidents/index.js",
     "./layers/gnss": "./src/layers/gnss/index.js",
     "./layers/ghostmaps": "./src/layers/ghostMaps/index.js",
     "./sources/firms-csv": "./src/data/firmsCsv.js",
@@ -236,6 +240,7 @@
     "./sources/radio-browser": "./src/sources/radioBrowser.js",
     "./sources/cctv-types": "./src/sources/cctvTypes.js",
     "./sources/regional": "./src/data/regionalModel.js",
+    "./sources/live-ops": "./src/data/liveOpsRegions.js",
     "./voice/action-schemas": "./src/voice/actionSchemas.js",
     "./voice/session": "./src/voice/session.js",
     "./voice/session-controls": "./src/voice/sessionCommands.js",
@@ -246,6 +251,7 @@
     "./layers/air-quality/source": "./src/layers/airQuality/source.js",
     "./layers/earthquakes/source": "./src/layers/earthquakes/source.js",
     "./layers/perimeters/source": "./src/layers/perimeters/source.js",
+    "./layers/incidents/source": "./src/layers/incidents/source.js",
     "./layers/gnss/source": "./src/layers/gnss/source.js",
     "./layers/ghostmaps/source": "./src/layers/ghostMaps/source.js",
     "./layers/firms/source": "./src/layers/firms/source.js",

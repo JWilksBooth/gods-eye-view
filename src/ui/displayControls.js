@@ -57,6 +57,11 @@ export function bindDisplayControls({ elements, actions }) {
       (el) => (el.dataset.mode === 'all' ? 'all' : 'proximity'),
       'setModelsMode',
     ],
+    [
+      elements.performanceButtons || [],
+      (el) => el.dataset.performance,
+      'setPerformancePreset',
+    ],
   ]) {
     const control = createSegmentedControl({
       buttons,

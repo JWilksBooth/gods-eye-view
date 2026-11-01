@@ -1,0 +1,207 @@
+/* ── LIVE OPS region console ────────────────── */
+#live-ops-panel {
+  --panel-expanded-width: 360px;
+  --live-ops-quiet: rgba(232, 234, 237, 0.62);
+  position: fixed;
+  top: calc(var(--left-stack-top) + (var(--left-stack-gap) * 2));
+  left: var(--left-stack-x);
+  right: auto;
+  bottom: auto;
+  z-index: 100;
+  width: var(--panel-expanded-width);
+  max-height: calc(100vh - 24px);
+}
+
+#live-ops-panel .panel-glow {
+  position: absolute;
+  inset: -18px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 99, 71, 0.16) 0%,
+    transparent 65%
+  );
+  filter: blur(16px);
+  opacity: 0.25;
+  pointer-events: none;
+}
+
+.live-ops-panel-inner {
+  position: relative;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--panel-radius);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 24px);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset,
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+.live-ops-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.live-ops-hint {
+  margin: 0;
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: var(--live-ops-quiet);
+}
+
+.live-ops-regions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.live-ops-region-btn {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+.live-ops-region-btn[aria-pressed='true'] {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.live-ops-status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1.2px;
+  line-height: 1.5;
+  color: var(--live-ops-quiet);
+}
+
+.live-ops-status[data-state='flying'],
+.live-ops-status[data-state='ready'] {
+  color: var(--accent);
+}
+
+.live-ops-status[data-state='error'] {
+  color: #ff6b6b;
+}
+
+.live-ops-feeds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--live-ops-quiet);
+}
+
+.live-ops-feed[data-ok='false'] {
+  color: #ffb347;
+}
+
+.live-ops-headlines-heading {
+  margin: 4px 0 0;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  color: var(--live-ops-quiet);
+}
+
+.live-ops-headlines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.live-ops-headline a {
+  color: inherit;
+  font-size: 11px;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+.live-ops-headline a:hover,
+.live-ops-headline a:focus-visible {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.live-ops-headline-meta {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--live-ops-quiet);
+}
+
+.live-ops-empty {
+  font-size: 10.5px;
+  color: var(--live-ops-quiet);
+}
+
+#live-ops-panel.collapsed .live-ops-body {
+  display: none !important;
+}
+
+#live-ops-panel.collapsed {
+  width: var(--left-collapsed-width);
+}
+
+body.cockpit-mode #left-panel-stack > #live-ops-panel,
+body.recording-mode #live-ops-panel {
+  display: none !important;
+}
+
+/* The phone shell shows the console on the Layers sheet, like Scenes. */
+body.mobile-shell[data-mobile-sheet='layers']
+  #left-panel-stack
+  > #live-ops-panel {
+  display: block;
+}
+
+@media (max-width: 720px) {
+  #left-panel-stack > #live-ops-panel,
+  #left-panel-stack > #live-ops-panel.collapsed {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    width: 100%;
+  }
+}
+
+:root[data-ui-theme='cyber']
+  #left-panel-stack
+  > #live-ops-panel {
+  --panel-expanded-width: var(--cyber-panel-width);
+  width: var(--panel-expanded-width);
+}
+
+:root[data-ui-theme='cyber'] #left-panel-stack > #live-ops-panel.collapsed {
+  width: var(--cyber-panel-collapsed-width);
+}
+
+:root[data-ui-theme='cyber']
+  #left-panel-stack
+  > #live-ops-panel.collapsed
+  .live-ops-panel-inner {
+  box-sizing: border-box;
+  height: 50px;
+  min-height: 50px;
+  overflow: hidden;
+}

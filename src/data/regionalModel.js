@@ -1,6 +1,8 @@
 import { greatCircleMeters } from '../geoDistance.js';
 
 const MAX_ARTICLES = 5;
+/** The most articles a caller may ask for; the LIVE OPS console asks for 8. */
+const MAX_ARTICLES_LIMIT = 10;
 
 function cleanText(value, maxLength = 180) {
   return String(value || '')
@@ -93,7 +95,8 @@ export function normalizeRegionalArticles(payload, limit = MAX_ARTICLES) {
       publishedAt,
       sourceCountry: cleanText(row?.sourcecountry, 60) || null,
     });
-    if (articles.length >= Math.max(1, Math.min(MAX_ARTICLES, limit))) break;
+    if (articles.length >= Math.max(1, Math.min(MAX_ARTICLES_LIMIT, limit)))
+      break;
   }
   return articles;
 }

@@ -6,6 +6,7 @@ import { loadGroundHeights, joinGroundHeights } from './groundHeights.js';
 import { cameraRegion, normalizeSourceItem } from './normalize.js';
 import { loadLithuaniaSources } from './lithuania.js';
 import { loadTaiwanSources } from './taiwan.js';
+import { loadNvroadsSources } from './nvroads.js';
 import {
   loadAustinSourcesFromOpenData,
   loadCaltransSourcesFromOpenData,
@@ -170,6 +171,13 @@ const LIVE_PACKS = [
     name: 'a22',
     enabled: () => envEnabled('CCTV_A22_ENABLED'),
     load: loadA22SourcesFromOpenDataHub,
+  },
+  {
+    // Nevada 511 (Las Vegas valley first). Keyless by default; a developer
+    // key (NVROADS_API_KEY) switches it to the official API.
+    name: 'nvroads',
+    enabled: () => envEnabled('CCTV_NVROADS_ENABLED'),
+    load: loadNvroadsSources,
   },
 ];
 /**

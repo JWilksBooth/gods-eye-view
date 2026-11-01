@@ -1,0 +1,132 @@
+/* ── Phosphor terminal treatment ──────────────────
+   The cyberpunk layer over the Matrix green tokens in foundation.css: static
+   CRT scanlines and a phosphor sheen on every glass surface, a one-pixel
+   neon edge-light on the sharpened panel corners, phosphor glow on accent
+   labels, and a one-shot flicker when a feed state or toggle changes.
+
+   Scope: the default shell only. The Cyber HUD layout (cyber.css) keeps its
+   own slate frame and clip-path geometry and is imported after this sheet.
+   Map imagery and source media are never tinted: every rule here targets
+   application chrome, and nothing covers the globe. */
+
+:root {
+  --matrix-scanline: repeating-linear-gradient(
+    0deg,
+    rgba(0, 255, 65, 0.045) 0 1px,
+    transparent 1px 3px
+  );
+  --matrix-sheen: linear-gradient(
+    180deg,
+    rgba(0, 255, 65, 0.07),
+    rgba(0, 255, 65, 0.015) 38%,
+    transparent 70%
+  );
+  --matrix-edge:
+    0 0 0 1px rgba(0, 255, 65, 0.1) inset,
+    0 1px 0 rgba(180, 255, 196, 0.16) inset, 0 0 0 1px rgba(0, 0, 0, 0.45),
+    0 0 18px rgba(0, 255, 65, 0.1), 0 12px 32px rgba(0, 0, 0, 0.55);
+  --matrix-text-glow: 0 0 6px var(--accent-glow);
+}
+
+/* Shared panel surfaces (panel-surfaces.css) paint their skin on ::before and
+   read the detail image from this token. */
+:root:not([data-ui-theme='cyber']) {
+  --panel-surface-detail: var(--matrix-sheen), var(--matrix-scanline);
+  --panel-surface-shadow: var(--matrix-edge);
+}
+
+/* Legacy glass panels paint their own background; layer the scanlines over
+   the glass colour and swap the soft Apple drop-shadow for the neon edge. */
+:root:not([data-ui-theme='cyber'])
+  :is(
+    .panel-inner,
+    .data-panel-inner,
+    .cctv-panel-inner,
+    .weather-panel-inner,
+    .recent-imagery-panel-inner,
+    .street-level-panel-inner,
+    .scene-panel-inner,
+    .global-context-panel-inner,
+    .location-inner,
+    #pp-toggles:not(.collapsed),
+    #pp-toggles.collapsed > .pp-header-row,
+    #param-slider-panel,
+    #key-setup,
+    #toast,
+    #global-loading-status,
+    #command-dock .dock-popover-content,
+    .locale-picker-popup,
+    .first-run-card
+  ) {
+  background-image: var(--matrix-sheen), var(--matrix-scanline);
+  box-shadow: var(--matrix-edge);
+}
+
+:root:not([data-ui-theme='cyber']) #gev-voice-control {
+  background-image: var(--matrix-sheen), var(--matrix-scanline);
+}
+
+/* Accent labels carry a phosphor afterglow. Readouts that already set a
+   text-shadow (HUD, cockpit, style indicator) keep their own. */
+:root:not([data-ui-theme='cyber'])
+  :is(
+    .panel-title,
+    .pp-header-label,
+    .panel-mini-value,
+    #gev-voice-status,
+    #title-bar .title-accent,
+    .key-setup-kicker,
+    #global-loading-detail
+  ) {
+  text-shadow: var(--matrix-text-glow);
+}
+
+/* Motion: a phosphor breathe on the title glow and a one-shot flicker when a
+   feed badge or display toggle changes state. Both opt in to motion only. */
+@media (prefers-reduced-motion: no-preference) {
+  :root:not([data-ui-theme='cyber']) #title-bar .title-glow {
+    animation: matrix-phosphor-breathe 6s ease-in-out infinite;
+  }
+
+  :root:not([data-ui-theme='cyber'])
+    :is(
+      .data-toggle-btn.feed-loading,
+      .data-toggle-btn.feed-degraded,
+      .data-toggle-btn.feed-stale,
+      .data-toggle-btn.feed-partial,
+      .data-toggle-btn.feed-fallback,
+      .data-toggle-btn.feed-unavailable,
+      .pp-toggle-btn.active,
+      .data-toggle-btn.active
+    ) {
+    animation: matrix-phosphor-flicker 360ms steps(3, end) 1;
+  }
+}
+
+@keyframes matrix-phosphor-breathe {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.72;
+  }
+}
+
+@keyframes matrix-phosphor-flicker {
+  0% {
+    opacity: 1;
+  }
+  30% {
+    opacity: 0.55;
+  }
+  55% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 1;
+  }
+}

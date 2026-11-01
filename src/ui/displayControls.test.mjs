@@ -184,3 +184,21 @@ test('the native Scope checkbox reads checked state on change and disposes its l
     ['feather', 200],
   ]);
 });
+
+test('the Performance preset selector is an owned segmented display action', () => {
+  const buttons = ['quality', 'balanced', 'performance'].map((preset) => {
+    const button = element();
+    button.dataset.performance = preset;
+    return button;
+  });
+  const calls = [];
+  const control = bindDisplayControls({
+    elements: { performanceButtons: buttons },
+    actions: { setPerformancePreset: (value) => calls.push(value) },
+  });
+  buttons[2].dispatchEvent(new Event('click'));
+  buttons[0].dispatchEvent(new Event('click'));
+  control.destroy();
+  buttons[1].dispatchEvent(new Event('click'));
+  assert.deepEqual(calls, ['performance', 'quality']);
+});
