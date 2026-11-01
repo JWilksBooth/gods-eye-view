@@ -153,12 +153,16 @@ function alertRegionFrom(region) {
     nwsAreas: feeds.nwsAreas,
     closureDistricts: feeds.closureDistricts,
     airports: feeds.airports,
-    keywords: feeds.keywords.length ? feeds.keywords : frozenList([region.name]),
+    keywords: feeds.keywords.length
+      ? feeds.keywords
+      : frozenList([region.name]),
   });
 }
 
 /** The regions in LIVE OPS display order. */
-export const ALERT_REGIONS = Object.freeze(LIVE_OPS_REGIONS.map(alertRegionFrom));
+export const ALERT_REGIONS = Object.freeze(
+  LIVE_OPS_REGIONS.map(alertRegionFrom),
+);
 
 /** Every region id, in display order. */
 export const ALERT_REGION_IDS = Object.freeze(

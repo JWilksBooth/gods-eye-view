@@ -117,7 +117,10 @@ export const AIRPORT_STATUS_KINDS = Object.freeze({
     name: 'Ground delay program',
   }),
   delay: Object.freeze({ severity: 'minor', name: 'Delays' }),
-  restriction: Object.freeze({ severity: 'minor', name: 'Airport restriction' }),
+  restriction: Object.freeze({
+    severity: 'minor',
+    name: 'Airport restriction',
+  }),
 });
 
 /** The severity descriptor for an id, or the unknown band. */

@@ -32,6 +32,8 @@ export { createAlertsSource } from './source.js';
 const MARKER_PIXELS = 10;
 /** A region's bulletin marker is a little larger: it stands for a list. */
 const BULLETIN_PIXELS = 14;
+/** Area fills stay light so the imagery under a large zone still reads. */
+const AREA_FILL_ALPHA = 0.12;
 const CARD_SOURCE_ID = `${ALERTS_OVERLAY_SOURCE_ID}-selected`;
 const CARD_HOST_OPTIONS = Object.freeze({
   cohortLimit: 1,
@@ -351,7 +353,7 @@ export function createAlertsLayer({
                   ),
                 ),
                 material: new Cesium.ColorMaterialProperty(
-                  color.withAlpha(0.18),
+                  color.withAlpha(AREA_FILL_ALPHA),
                 ),
               },
               polyline: {
@@ -500,9 +502,7 @@ export function createAlertsLayer({
         );
         _stale =
           asked.length > 0 &&
-          asked.every(
-            (entry) => entry.stale || entry.status === 'unavailable',
-          );
+          asked.every((entry) => entry.stale || entry.status === 'unavailable');
         _partial = asked.some(
           (entry) => entry.status === 'unavailable' || entry.partial,
         );

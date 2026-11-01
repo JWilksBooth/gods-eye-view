@@ -21,11 +21,14 @@ const BULLETIN_LINES = 6;
  */
 export function relativeTime(ms, nowMs) {
   if (!Number.isFinite(ms) || !Number.isFinite(nowMs)) return null;
-  const minutes = Math.round((ms - nowMs) / 60_000);
+  // Round away from now symmetrically: 90 minutes ago reads "2 hours ago",
+  // as 90 minutes ahead reads "in 2 hours".
+  const round = (value) => Math.sign(value) * Math.round(Math.abs(value));
+  const minutes = round((ms - nowMs) / 60_000);
   if (Math.abs(minutes) < 60) return formatRelativeTime(minutes, 'minute');
-  const hours = Math.round(minutes / 60);
+  const hours = round(minutes / 60);
   if (Math.abs(hours) < 48) return formatRelativeTime(hours, 'hour');
-  return formatRelativeTime(Math.round(hours / 24), 'day');
+  return formatRelativeTime(round(hours / 24), 'day');
 }
 
 /** Hour and minute in the viewer's local time and language. */

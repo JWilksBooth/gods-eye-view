@@ -56,7 +56,8 @@ const SEVERITY_SCHEMA = Object.freeze({
 });
 
 const BODY_CHARS = 400;
-const regionNames = () => LIVE_OPS_REGIONS.map((entry) => entry.name).join(', ');
+const regionNames = () =>
+  LIVE_OPS_REGIONS.map((entry) => entry.name).join(', ');
 
 /** Whether an alert lies in an area: its shape or point, or for a bulletin without one, its regions' boxes. */
 export function alertInArea(alert, area) {
@@ -64,7 +65,9 @@ export function alertInArea(alert, area) {
   if (geometry?.type === 'Point') return areaContains(area, alertAnchor(alert));
   if (geometry)
     return polygonsTouchArea(
-      geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates,
+      geometry.type === 'Polygon'
+        ? [geometry.coordinates]
+        : geometry.coordinates,
       area,
     );
   return (alert?.regions || []).some((id) => {
@@ -189,7 +192,7 @@ export const getAlerts = defineTool({
         : []),
       ...(keyless.length
         ? [
-            `${keyless.map((source) => source.label).join(', ')} need a key`,
+            `${keyless.map((source) => source.label).join(', ')} ${keyless.length === 1 ? 'needs' : 'need'} a key`,
           ]
         : []),
     ];
@@ -368,7 +371,8 @@ export const getAirportStatus = defineTool({
       summary = `${countNoun(airports.length, 'airport')} (${label}): no closures, stops or delays reported by the FAA.`;
     else
       summary = `${affected.map(statusPhrase).join('; ')}; ${countNoun(airports.length - affected.length, 'other airport')} normal.`;
-    if (stale) summary = `${summary.replace(/\.$/, '')} (FAA status may be stale).`;
+    if (stale)
+      summary = `${summary.replace(/\.$/, '')} (FAA status may be stale).`;
     return {
       summary,
       data: {
