@@ -478,6 +478,7 @@
     "{n} cyclones",
     "{n} satellites",
     "{rate} msg/s",
+    "{region} · {count} bulletins",
     "{type} · {agency}",
     "{value} KM",
     "{value} KM/H",

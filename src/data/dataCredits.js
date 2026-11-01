@@ -297,6 +297,19 @@ export const DATA_CREDITS = [
       '<a href="https://www.nvroads.com/" target="_blank" rel="noopener">Nevada 511</a> events (courtesy)',
   },
   {
+    key: 'alerts',
+    html:
+      'Alerts: <a href="https://www.weather.gov/alerts" target="_blank" rel="noopener">National Weather Service</a> (public domain); ' +
+      '<a href="https://nasstatus.faa.gov/" target="_blank" rel="noopener">FAA NAS status</a> (public domain); ' +
+      '<a href="https://www.airnow.gov/" target="_blank" rel="noopener">U.S. EPA AirNow</a> (preliminary data); ' +
+      '<a href="https://lcswebreports.dot.ca.gov/" target="_blank" rel="noopener">Caltrans lane closures</a>; ' +
+      '<a href="https://www.fire.ca.gov/incidents" target="_blank" rel="noopener">CAL FIRE</a>; ' +
+      '<a href="https://www.bart.gov/about/developers" target="_blank" rel="noopener">BART</a>; ' +
+      '<a href="https://511.org/open-data" target="_blank" rel="noopener">511 SF Bay</a>; ' +
+      '<a href="https://www.goswift.ly/" target="_blank" rel="noopener">Swiftly</a> (LA Metro, RTC Southern Nevada); ' +
+      'Cal OES, County of Sonoma and LAFD bulletins (courtesy)',
+  },
+  {
     key: 'catalonia-cctv',
     html:
       'CCTV cameras &amp; frames (Catalonia): ' +
