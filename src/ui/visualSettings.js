@@ -252,10 +252,12 @@ export class VisualSettings {
     // first-load baseline runs, so `_applyPerformancePresetVisuals` can land
     // its sharpen and density on that baseline; tools.js applies the same
     // choice to the viewer's scene knobs when the render governor installs.
+    // Tolerates the minimal documents the state-owner tests stub in, which
+    // only provide getElementById.
     this._performancePresetBtns = [
-      ...document.querySelectorAll(
+      ...(document.querySelectorAll?.(
         '#performance-preset-seg [data-performance]',
-      ),
+      ) ?? []),
     ];
     const storedPreset = readStoredPerformancePreset(preferenceStorage());
     if (storedPreset) activatePerformancePreset(storedPreset);
