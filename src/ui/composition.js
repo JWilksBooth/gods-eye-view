@@ -7,6 +7,7 @@ import {
   flyToGlobeView,
   flyToPresetLocation,
   flyToPOI,
+  flyToViewportBounds,
   searchAndFlyTo,
 } from '../locations.js';
 import {
@@ -74,6 +75,7 @@ export class StyleManager extends ApplicationShell {
         flyToGlobeView,
         flyToPresetLocation,
         flyToPOI,
+        flyToViewportBounds,
         searchAndFlyTo,
         interruptCameraMotion,
         interruptGlobeRotation,

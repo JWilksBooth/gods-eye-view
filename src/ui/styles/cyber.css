@@ -203,6 +203,7 @@
     .recent-imagery-panel-inner,
     .street-level-panel-inner,
     .scene-panel-inner,
+    .live-ops-panel-inner,
     .global-context-panel-inner,
     .radio-panel-inner,
     #pp-toggles:not(.collapsed),
@@ -224,6 +225,7 @@
     .recent-imagery-panel-inner,
     .street-level-panel-inner,
     .scene-panel-inner,
+    .live-ops-panel-inner,
     .global-context-panel-inner,
     .radio-panel-inner
   )
@@ -306,6 +308,7 @@
     .recent-imagery-panel-inner,
     .street-level-panel-inner,
     .scene-panel-inner,
+    .live-ops-panel-inner,
     .global-context-panel-inner,
     .radio-panel-inner
   )
@@ -322,6 +325,7 @@
     .recent-imagery-panel-inner,
     .street-level-panel-inner,
     .scene-panel-inner,
+    .live-ops-panel-inner,
     .global-context-panel-inner,
     .radio-panel-inner
   )
@@ -346,6 +350,7 @@
     .recent-imagery-panel-inner,
     .street-level-panel-inner,
     .scene-panel-inner,
+    .live-ops-panel-inner,
     .global-context-panel-inner,
     .radio-panel-inner
   )
@@ -1661,7 +1666,9 @@
   :root[data-ui-theme='cyber']
     body:not(.cockpit-mode)
     #left-panel-stack:has(> [data-panel-id]:not(.collapsed))
-    > :is(#data-panel, #cctv-panel, #scene-panel):not(.collapsed) {
+    > :is(#data-panel, #cctv-panel, #scene-panel, #live-ops-panel):not(
+        .collapsed
+      ) {
     flex: 1 1 auto;
     height: auto;
     max-height: none;

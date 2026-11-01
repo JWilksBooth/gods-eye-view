@@ -1,5 +1,32 @@
 # God's Eye View Current State
 
+## LIVE OPS region console — November 1, 2026
+
+The LIVE OPS panel (left rail, below Cameras) holds one button per region in
+`src/data/liveOpsRegions.js`: Los Angeles, Sonoma County, the San Francisco
+Bay Area and Las Vegas, each with a bounding box, a center, the camera packs
+and incident sources that cover it, and its headline query. One click frames
+the region through the shared navigation policy (Cockpit refuses it; tracking
+is released like any explicit flight), scopes the Live Incidents layer to the
+region, enables Cameras, Live Incidents and Traffic, and loads the region's
+headlines from `/api/live-ops/headlines`. Adding a region is one registry
+entry plus the packs and feeds that cover it.
+
+The Live Incidents layer (`incidents`, token `6`, enabled-only) reads
+`/api/incidents`, which merges keyless agency feeds (CHP CAD, DataSF
+dispatched calls, LAFD alerts, CAL FIRE, Nevada 511 events) into one incident
+shape with per-source freshness. Each source refreshes on its own cadence and
+fails on its own; the layer row reads PARTIAL while any feed is down and STALE
+when none is live and the proxy serves its last snapshot. Points are colored
+by type; the newest incidents carry ambient labels, and a click opens a card
+with the agency's own type, location, details and report time, which opens
+the agency's page when it has one. `get_incidents` and `live_ops_region`
+expose the same data to MCP and voice.
+
+The Nevada 511 camera pack (`nvroads-open-data`) adds Las Vegas cameras,
+keyless by default and through the official developer API with
+`NVROADS_API_KEY`.
+
 Docker Compose mounts the checkout with the shared SELinux `:z` label so
 containers can read it on enforcing SELinux hosts. The separate image-owned
 `node_modules` volume and loopback-only port publishing remain unchanged.

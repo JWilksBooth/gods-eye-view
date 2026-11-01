@@ -126,6 +126,27 @@ export const KEY_SETUP_KEYS = Object.freeze([
     clientExposed: true,
   }),
   Object.freeze({
+    id: 'nvroads',
+    title: 'NEVADA 511', // i18n-ignore: provider product name
+    unlocks: msg(
+      'Las Vegas cameras and road events load keyless from nvroads.com; a free developer key switches them to the official API',
+    ),
+    getUrl: 'https://www.nvroads.com/my511/register',
+    envVars: Object.freeze(['NVROADS_API_KEY']),
+    tier: 'free',
+  }),
+  Object.freeze({
+    id: 'socrata',
+    title: 'SOCRATA', // i18n-ignore: provider product name; row is hidden
+    unlocks: msg(
+      'Optional app token that raises the DataSF dispatched-calls throttle; keyless works',
+    ),
+    getUrl: 'https://data.sfgov.org/profile/edit/developer_settings',
+    envVars: Object.freeze(['SOCRATA_APP_TOKEN']),
+    tier: 'free',
+    hidden: true,
+  }),
+  Object.freeze({
     id: 'launch-library',
     title: 'LAUNCH LIBRARY', // i18n-ignore: provider product name
     unlocks: msg(

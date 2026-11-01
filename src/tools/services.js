@@ -15,6 +15,7 @@ import { createCctvSource } from '../layers/cctv/source.js';
 import { createCycloneSource } from '../layers/cyclones/source.js';
 import { createUsgsEarthquakeSource } from '../layers/earthquakes/source.js';
 import { createFirmsSource } from '../layers/firms/source.js';
+import { createIncidentSource } from '../layers/incidents/source.js';
 import { createInstallationSource } from '../layers/installations/source.js';
 import { createLaunchSource } from '../layers/launches/source.js';
 import { createWfigsPerimeterSource } from '../layers/perimeters/source.js';
@@ -30,6 +31,7 @@ import { createWindSource } from '../layers/wind/source.js';
 import { createApplicationRequestServices } from '../services/requests.js';
 import { createEventPackSource } from '../sources/eventPacks.js';
 import { createInfrastructureSource } from '../sources/infrastructureData.js';
+import { createLiveOpsHeadlineSource } from '../sources/liveOpsHeadlines.js';
 import {
   createMilitarySource,
   createVesselSource,
@@ -82,6 +84,8 @@ export function createToolServices({ fetchImpl, appUrl, panelKey }) {
     features: requests.features,
     cyclones: createCycloneSource({ fetchImpl }),
     perimeters: createWfigsPerimeterSource({ fetchImpl }),
+    incidents: createIncidentSource({ fetchImpl }),
+    liveOps: createLiveOpsHeadlineSource({ fetchImpl }),
     installations: createInstallationSource({
       fetchImpl,
       tileFetchImpl: fetchImpl,
