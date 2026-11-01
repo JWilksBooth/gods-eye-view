@@ -10,4 +10,4 @@
   of switching the Sharpen toggle off, `?quality=<preset>` picks a preset for
   one page load, and a software renderer starts on Performance. OSM stops at
   zoom 19, and ion world terrain no longer downloads vertex normals nothing
-  lights (JWilksBooth).
+  lights (JWilksBooth, #5).
