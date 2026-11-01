@@ -302,7 +302,7 @@ export class IntelHUD {
 
       <div class="hud-corner hud-top-right">
         <div class="hud-content" style="text-align:right">
-          <div class="hud-readout"><div class="hud-rec"><span id="hud-rec-dot">●</span> ${t('REC')}  <span id="hud-timestamp">2026-01-01 00:00:00Z</span></div></div>
+          <div class="hud-readout"><div class="hud-rec"><span id="hud-rec-dot">●</span> ${t('REC')}  <span id="hud-timestamp">----------- --:--:--</span></div></div>
           <div class="hud-readout"><div class="hud-orbital">ORB: ${this._orbitNum}  PASS: DESC-${this._passNum}</div></div>
         </div>
         <div class="hud-bracket">┐</div>
@@ -326,7 +326,7 @@ export class IntelHUD {
       </div>
 
       <div class="hud-edge hud-left-edge">
-        <div class="hud-readout"><div id="hud-coll">COLL: --:--:--Z</div></div>
+        <div class="hud-readout"><div id="hud-coll">COLL: --:--:--</div></div>
         <div class="hud-readout"><div id="hud-ona">ONA: --°</div></div>
       </div>
 
@@ -352,7 +352,7 @@ export class IntelHUD {
     // Timestamp — every second
     this._timestampInterval = setInterval(() => {
       const el = document.getElementById('hud-timestamp');
-      if (el) el.textContent = this._formatUTC();
+      if (el) el.textContent = this._formatLocalTime();
     }, 1000);
 
     // REC blink — every 800ms
@@ -379,18 +379,37 @@ export class IntelHUD {
   }
 
   /**
-   * Format the current wall-clock time as a UTC Zulu string.
-   * @returns {string} Timestamp in `YYYY-MM-DD HH:MM:SSZ` format.
+   * Short name of the viewer's time zone (for example `PDT` or `GMT+2`),
+   * memoized because it only changes with the system clock settings.
+   * @returns {string}
    */
-  _formatUTC() {
+  _localZoneName() {
+    if (this._zoneName === undefined) {
+      try {
+        this._zoneName =
+          new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' })
+            .formatToParts(new Date())
+            .find((part) => part.type === 'timeZoneName')?.value || '';
+      } catch {
+        this._zoneName = '';
+      }
+    }
+    return this._zoneName;
+  }
+
+  /**
+   * Format the current wall-clock time in the viewer's local time zone.
+   * @returns {string} Timestamp in `YYYY-MM-DD HH:MM:SS ZONE` format.
+   */
+  _formatLocalTime() {
     const now = new Date();
-    const y = now.getUTCFullYear();
-    const mo = String(now.getUTCMonth() + 1).padStart(2, '0');
-    const d = String(now.getUTCDate()).padStart(2, '0');
-    const h = String(now.getUTCHours()).padStart(2, '0');
-    const mi = String(now.getUTCMinutes()).padStart(2, '0');
-    const s = String(now.getUTCSeconds()).padStart(2, '0');
-    return `${y}-${mo}-${d} ${h}:${mi}:${s}Z`;
+    const y = now.getFullYear();
+    const mo = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const h = String(now.getHours()).padStart(2, '0');
+    const mi = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    return `${y}-${mo}-${d} ${h}:${mi}:${s} ${this._localZoneName()}`.trim();
   }
 
   /**
@@ -499,11 +518,12 @@ export class IntelHUD {
     const collEl = document.getElementById('hud-coll');
     if (collEl) {
       const now = new Date();
-      const h = String(now.getUTCHours()).padStart(2, '0');
-      const m = String(now.getUTCMinutes()).padStart(2, '0');
-      const s = String(now.getUTCSeconds()).padStart(2, '0');
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
       // i18n-ignore: sensor codes
-      collEl.textContent = `COLL: ${h}:${m}:${s}Z`;
+      collEl.textContent =
+        `COLL: ${h}:${m}:${s} ${this._localZoneName()}`.trim();
     }
 
     // Off-nadir angle (ONA): camera pitch of -90 deg is nadir (straight down),
