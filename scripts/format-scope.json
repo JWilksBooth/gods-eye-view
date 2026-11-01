@@ -311,6 +311,7 @@
   "src/ui/styles/action-button.css",
   "src/ui/styles/cctv.css",
   "src/ui/styles/foundation.css",
+  "src/ui/styles/matrix.css",
   "src/ui/styles/first-run.css",
   "src/ui/styles/scenes.css",
   "src/ui/styles/command-dock.css",

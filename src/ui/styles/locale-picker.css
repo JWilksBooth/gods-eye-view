@@ -34,21 +34,21 @@
   gap: 0.35rem;
   margin: 0;
   padding: 0.45rem 0.6rem;
-  color: rgba(225, 244, 248, 0.92);
+  color: rgba(225, 248, 231, 0.92);
   font-family: var(--font-mono);
   font-size: 0.6rem;
   letter-spacing: 0.09rem;
   line-height: 1;
   background: linear-gradient(
     145deg,
-    rgba(10, 27, 37, 0.92),
-    rgba(7, 13, 22, 0.9)
+    rgba(10, 37, 17, 0.92),
+    rgba(7, 22, 11, 0.9)
   );
-  border: 1px solid rgba(54, 220, 255, 0.38);
+  border: 1px solid rgba(54, 255, 105, 0.38);
   border-radius: 0.42rem;
   box-shadow:
     0 0.4rem 1.6rem rgba(0, 0, 0, 0.5),
-    0 0 1.2rem rgba(0, 212, 255, 0.07);
+    0 0 1.2rem rgba(0, 255, 65, 0.07);
   backdrop-filter: blur(18px) saturate(1.2);
   -webkit-backdrop-filter: blur(18px) saturate(1.2);
   cursor: pointer;
@@ -63,10 +63,10 @@
 .locale-picker.is-open .locale-picker-button {
   background: linear-gradient(
     145deg,
-    rgba(14, 38, 51, 0.95),
-    rgba(9, 18, 28, 0.93)
+    rgba(14, 51, 23, 0.95),
+    rgba(9, 28, 14, 0.93)
   );
-  border-color: rgba(54, 220, 255, 0.7);
+  border-color: rgba(54, 255, 105, 0.7);
   outline: none;
 }
 
@@ -79,7 +79,7 @@
   flex: none;
   width: 0.95rem;
   height: 0.95rem;
-  color: #55dff5;
+  color: #55f57e;
 }
 
 .locale-picker-caret {
@@ -111,13 +111,13 @@
   padding: 0.45rem;
   color: var(--text-primary);
   background:
-    linear-gradient(145deg, rgba(10, 27, 37, 0.97), rgba(7, 13, 22, 0.95)),
-    rgba(7, 17, 25, 0.96);
-  border: 1px solid rgba(54, 220, 255, 0.42);
+    linear-gradient(145deg, rgba(10, 37, 17, 0.97), rgba(7, 22, 11, 0.95)),
+    rgba(7, 25, 12, 0.96);
+  border: 1px solid rgba(54, 255, 105, 0.42);
   border-radius: 0.55rem;
   box-shadow:
     0 1rem 3rem rgba(0, 0, 0, 0.65),
-    0 0 2rem rgba(0, 212, 255, 0.08),
+    0 0 2rem rgba(0, 255, 65, 0.08),
     inset 0 0 0 1px rgba(255, 255, 255, 0.025);
   backdrop-filter: blur(24px) saturate(1.25);
   -webkit-backdrop-filter: blur(24px) saturate(1.25);
@@ -129,7 +129,7 @@
 
 .locale-picker-heading {
   padding: 0.2rem 0.4rem 0.45rem;
-  color: rgba(85, 223, 245, 0.85);
+  color: rgba(85, 245, 126, 0.85);
   font-family: var(--font-mono);
   font-size: 0.55rem;
   letter-spacing: 0.14rem;
@@ -145,13 +145,13 @@
   font-family: var(--font-mono);
   font-size: 0.7rem;
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(54, 220, 255, 0.28);
+  border: 1px solid rgba(54, 255, 105, 0.28);
   border-radius: 0.35rem;
   outline: none;
 }
 
 .locale-picker-search:focus {
-  border-color: rgba(54, 220, 255, 0.7);
+  border-color: rgba(54, 255, 105, 0.7);
 }
 
 .locale-picker-list {
@@ -174,8 +174,8 @@
 }
 
 .locale-picker-option.is-active {
-  background: rgba(54, 220, 255, 0.09);
-  border-color: rgba(54, 220, 255, 0.28);
+  background: rgba(54, 255, 105, 0.09);
+  border-color: rgba(54, 255, 105, 0.28);
 }
 
 /* Keyboard focus lives on the list (aria-activedescendant): show it. */
@@ -183,7 +183,7 @@
 .locale-picker-search:focus
   ~ .locale-picker-list
   .locale-picker-option.is-active {
-  border-color: rgba(54, 220, 255, 0.75);
+  border-color: rgba(54, 255, 105, 0.75);
 }
 
 .locale-picker-text {
@@ -201,14 +201,14 @@
 }
 
 .locale-picker-option[aria-selected='true'] .locale-picker-native {
-  color: #55dff5;
+  color: #55f57e;
 }
 
 .locale-picker-meta {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
-  color: rgba(199, 225, 231, 0.6);
+  color: rgba(199, 231, 207, 0.6);
   font-family: var(--font-mono);
   font-size: 0.55rem;
   letter-spacing: 0.05rem;
@@ -219,13 +219,13 @@
   width: 0.95rem;
   height: 0.95rem;
   margin-inline-start: auto;
-  color: #55dff5;
+  color: #55f57e;
 }
 
 .locale-picker-empty {
   margin: 0;
   padding: 0.5rem;
-  color: rgba(199, 225, 231, 0.62);
+  color: rgba(199, 231, 207, 0.62);
   font-family: var(--font-mono);
   font-size: 0.6rem;
 }

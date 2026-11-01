@@ -469,7 +469,7 @@ test('Cockpit owns a focused shared Display portal and compact Radio controls', 
   );
   assert.match(
     css,
-    /\.cockpit-utility-control\.is-expanded \.cockpit-utility-divider\s*\{[\s\S]*?linear-gradient\(\s*90deg,\s*rgb\(0 212 255 \/ 28%\),\s*rgba\(0, 212, 255, 0\.18\) 58%,\s*transparent\s*\)[\s\S]*?box-shadow:\s*0 0 7px rgba\(0, 212, 255, 0\.22\);/,
+    /\.cockpit-utility-control\.is-expanded \.cockpit-utility-divider\s*\{[\s\S]*?linear-gradient\(\s*90deg,\s*rgb\(0 255 65 \/ 28%\),\s*rgba\(0, 255, 65, 0\.18\) 58%,\s*transparent\s*\)[\s\S]*?box-shadow:\s*0 0 7px rgba\(0, 255, 65, 0\.22\);/,
   );
   assert.match(
     radioBindings,
