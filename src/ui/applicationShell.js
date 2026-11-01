@@ -1539,6 +1539,8 @@ export class StyleManager extends ShellFacade {
         intensityPct: this._sharpenSlider
           ? parseInt(this._sharpenSlider.value, 10)
           : null,
+        // On but not running: the Performance preset withholds the pass.
+        withheld: this._visualSettings.sharpenPermitted === false,
       },
       celestialRing: {
         enabled: this.celestialRingEnabled,

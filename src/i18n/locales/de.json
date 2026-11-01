@@ -2988,9 +2988,6 @@
   "Quality": "Qualität",
   "Balanced": "Ausgewogen",
   "Rendering performance preset": "Voreinstellung für die Render-Leistung",
-  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Volle Auflösung, 4-faches Anti-Aliasing, 60 fps und volle Beschriftungsdichte",
-  "Full resolution with 2× anti-aliasing at 60 fps — the default": "Volle Auflösung mit 2-fachem Anti-Aliasing bei 60 fps – die Standardeinstellung",
-  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Dreiviertel-Auflösung, kein Multisampling, 30 fps, wenige Beschriftungen und langsamere Ebenen-Aktualisierungen",
   "US EPA air-quality readings in the Alerts layer; unhealthy readings become air alerts": "Luftqualitätsmessungen der US-Umweltbehörde EPA in der Ebene Warnungen; ungesunde Werte werden zu Luftwarnungen",
   "Bay Area and Sonoma County transit service alerts in the Alerts layer": "ÖPNV-Störungsmeldungen für die Bay Area und Sonoma County in der Ebene Warnungen",
   "LA Metro and RTC Southern Nevada service alerts in the Alerts layer": "Störungsmeldungen von LA Metro und RTC Southern Nevada in der Ebene Warnungen",
@@ -3022,5 +3019,12 @@
   "Alerts feed rate limited (HTTP 429)": "Warnungs-Feed ratenbegrenzt (HTTP 429)",
   "Malformed alerts snapshot": "Fehlerhafter Warnungs-Snapshot",
   "Malformed airport status": "Fehlerhafter Flughafenstatus",
-  "Alerts": "Warnungen"
+  "Alerts": "Warnungen",
+  "Every screen pixel, 4× anti-aliasing and the sharpest imagery and 3D tiles at 60 fps": "Jedes Bildschirmpixel, 4-faches Anti-Aliasing und die schärfsten Bilddaten und 3D-Kacheln bei 60 fps",
+  "Every pixel on a standard screen, three quarters on HiDPI, 2× anti-aliasing at 60 fps — the default": "Jedes Pixel auf einem Standardbildschirm, drei Viertel auf HiDPI, 2-faches Anti-Aliasing bei 60 fps – die Standardeinstellung",
+  "Fewer pixels, FXAA instead of multisampling, no sharpening, coarser tiles, 30 fps, sparse labels and slower layer updates": "Weniger Pixel, FXAA statt Multisampling, kein Schärfen, gröbere Kacheln, 30 fps, wenige Beschriftungen und langsamere Ebenen-Aktualisierungen",
+  "Sharpening is off in the Performance preset": "Schärfen ist in der Voreinstellung „Leistung“ aus",
+  "{width} × {height} px · MSAA {samples}×": "{width} × {height} px · MSAA {samples}×",
+  "{width} × {height} px · FXAA": "{width} × {height} px · FXAA",
+  "{width} × {height} px": "{width} × {height} px"
 }

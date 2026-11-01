@@ -41,6 +41,9 @@ export class VisualEffects {
     this.startTime = wallNow();
     this.bloomEnabled = false;
     this.sharpenEnabled = false;
+    // The Performance preset withholds sharpen while the browser upscales the
+    // drawing buffer; the operator's toggle and slider keep their values.
+    this.sharpenPermitted = true;
     this.bloomIntensity = BLOOM_INTENSITY_DEFAULT;
     this.sharpenIntensity = 0.49;
     this.bloomStage = null;
@@ -160,14 +163,32 @@ export class VisualEffects {
   }
 
   /**
-   * Sharpen runs only when it is on and its slider is above 0, as the style
-   * stages do: the pass costs the same at any amount (~1.5 ms GPU per frame
-   * on the Arc, 2026-10-24), and `0.1 + value * 2` still sharpened at 0.
+   * Sharpen runs only when it is on, its slider is above 0 and the active
+   * Performance preset permits it, as the style stages do: the pass costs the
+   * same at any amount (~1.5 ms GPU per frame on the Arc, 2026-10-24), and
+   * `0.1 + value * 2` still sharpened at 0.
    */
   syncSharpenEnabled() {
     if (this.stopped || !this.sharpenStage) return;
     this.sharpenStage.enabled =
-      this.sharpenEnabled && this.sharpenIntensity > 0.001;
+      this.sharpenEnabled &&
+      this.sharpenPermitted &&
+      this.sharpenIntensity > 0.001;
+  }
+
+  /**
+   * Whether the active Performance preset lets the sharpen stage run. A
+   * withheld pass keeps the operator's toggle and slider untouched, so the
+   * pass comes back as it was when the preset permits it again.
+   * @param {boolean} permitted
+   */
+  setSharpenPermitted(permitted) {
+    if (this.stopped) return;
+    const next = permitted !== false;
+    if (next === this.sharpenPermitted) return;
+    this.sharpenPermitted = next;
+    this.syncSharpenEnabled();
+    this.requestRender('sharpen');
   }
 
   applySharpenIntensity(value) {

@@ -3128,9 +3128,6 @@
   "Quality": "Якість",
   "Balanced": "Баланс",
   "Rendering performance preset": "Передустановка продуктивності рендерингу",
-  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Повна роздільна здатність, згладжування 4×, 60 к/с і повна щільність підписів",
-  "Full resolution with 2× anti-aliasing at 60 fps — the default": "Повна роздільна здатність зі згладжуванням 2× при 60 к/с — типово",
-  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Роздільна здатність 3/4, без мультисемплінгу, 30 к/с, рідкі підписи та повільніше оновлення шарів",
   "US EPA air-quality readings in the Alerts layer; unhealthy readings become air alerts": "Дані про якість повітря від EPA США в шарі «Сповіщення»; шкідливі значення стають сповіщеннями про повітря",
   "Bay Area and Sonoma County transit service alerts in the Alerts layer": "Сповіщення громадського транспорту Bay Area і Sonoma County в шарі «Сповіщення»",
   "LA Metro and RTC Southern Nevada service alerts in the Alerts layer": "Сповіщення LA Metro і RTC Southern Nevada в шарі «Сповіщення»",
@@ -3166,5 +3163,12 @@
   "Alerts feed rate limited (HTTP 429)": "Стрічку сповіщень обмежено за частотою (HTTP 429)",
   "Malformed alerts snapshot": "Пошкоджений знімок сповіщень",
   "Malformed airport status": "Пошкоджені дані про стан аеропортів",
-  "Alerts": "Сповіщення"
+  "Alerts": "Сповіщення",
+  "Every screen pixel, 4× anti-aliasing and the sharpest imagery and 3D tiles at 60 fps": "Кожен піксель екрана, згладжування 4× і найчіткіші знімки та 3D-тайли при 60 к/с",
+  "Every pixel on a standard screen, three quarters on HiDPI, 2× anti-aliasing at 60 fps — the default": "Кожен піксель на звичайному екрані, три чверті на HiDPI, згладжування 2× при 60 к/с — типово",
+  "Fewer pixels, FXAA instead of multisampling, no sharpening, coarser tiles, 30 fps, sparse labels and slower layer updates": "Менше пікселів, FXAA замість мультисемплінгу, без підвищення різкості, грубіші тайли, 30 к/с, рідкі підписи та повільніше оновлення шарів",
+  "Sharpening is off in the Performance preset": "Підвищення різкості вимкнено в передустановці «Продуктивність»",
+  "{width} × {height} px · MSAA {samples}×": "{width} × {height} пікс. · MSAA {samples}×",
+  "{width} × {height} px · FXAA": "{width} × {height} пікс. · FXAA",
+  "{width} × {height} px": "{width} × {height} пікс."
 }

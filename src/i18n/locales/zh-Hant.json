@@ -2918,9 +2918,6 @@
   "Quality": "畫質",
   "Balanced": "均衡",
   "Rendering performance preset": "渲染效能預設",
-  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "全解析度、4 倍反鋸齒、60 fps，標籤密度最高",
-  "Full resolution with 2× anti-aliasing at 60 fps — the default": "全解析度、2 倍反鋸齒、60 fps（預設）",
-  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "四分之三解析度、無多重取樣、30 fps、標籤稀疏、圖層更新較慢",
   "US EPA air-quality readings in the Alerts layer; unhealthy readings become air alerts": "在「警報」圖層中顯示美國 EPA 空氣品質讀數；不健康的讀數會產生空氣警報",
   "Bay Area and Sonoma County transit service alerts in the Alerts layer": "在「警報」圖層中顯示 Bay Area 和 Sonoma County 的公共交通服務警報",
   "LA Metro and RTC Southern Nevada service alerts in the Alerts layer": "在「警報」圖層中顯示 LA Metro 和 RTC Southern Nevada 的服務警報",
@@ -2950,5 +2947,12 @@
   "Alerts feed rate limited (HTTP 429)": "警報來源已限流 (HTTP 429)",
   "Malformed alerts snapshot": "警報快照格式錯誤",
   "Malformed airport status": "機場狀態格式錯誤",
-  "Alerts": "警報"
+  "Alerts": "警報",
+  "Every screen pixel, 4× anti-aliasing and the sharpest imagery and 3D tiles at 60 fps": "螢幕上的每個像素、4 倍反鋸齒、最清晰的影像和 3D 圖磚，60 fps",
+  "Every pixel on a standard screen, three quarters on HiDPI, 2× anti-aliasing at 60 fps — the default": "標準螢幕上的每個像素、HiDPI 上的四分之三、2 倍反鋸齒、60 fps（預設）",
+  "Fewer pixels, FXAA instead of multisampling, no sharpening, coarser tiles, 30 fps, sparse labels and slower layer updates": "較少的像素、以 FXAA 取代多重取樣、無銳化、較粗的圖磚、30 fps、標籤稀疏、圖層更新較慢",
+  "Sharpening is off in the Performance preset": "「效能」預設下銳化已關閉",
+  "{width} × {height} px · MSAA {samples}×": "{width} × {height} 像素 · MSAA {samples}×",
+  "{width} × {height} px · FXAA": "{width} × {height} 像素 · FXAA",
+  "{width} × {height} px": "{width} × {height} 像素"
 }

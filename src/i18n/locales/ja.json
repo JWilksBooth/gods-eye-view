@@ -2918,9 +2918,6 @@
   "Quality": "画質優先",
   "Balanced": "バランス",
   "Rendering performance preset": "描画パフォーマンスのプリセット",
-  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "フル解像度、4倍アンチエイリアス、60 fps、ラベル密度は最大",
-  "Full resolution with 2× anti-aliasing at 60 fps — the default": "フル解像度、2倍アンチエイリアス、60 fps（既定）",
-  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "解像度 3/4、マルチサンプリングなし、30 fps、ラベルは少なめ、レイヤー更新は低頻度",
   "US EPA air-quality readings in the Alerts layer; unhealthy readings become air alerts": "米国 EPA の大気質測定値をアラートレイヤーに表示します。健康に悪い値は大気アラートになります",
   "Bay Area and Sonoma County transit service alerts in the Alerts layer": "Bay Area と Sonoma County の公共交通の運行情報をアラートレイヤーに表示します",
   "LA Metro and RTC Southern Nevada service alerts in the Alerts layer": "LA Metro と RTC Southern Nevada の運行情報をアラートレイヤーに表示します",
@@ -2950,5 +2947,12 @@
   "Alerts feed rate limited (HTTP 429)": "アラートフィードがレート制限中 (HTTP 429)",
   "Malformed alerts snapshot": "アラートのスナップショットが不正です",
   "Malformed airport status": "空港の状況データが不正です",
-  "Alerts": "アラート"
+  "Alerts": "アラート",
+  "Every screen pixel, 4× anti-aliasing and the sharpest imagery and 3D tiles at 60 fps": "画面のすべてのピクセル、4倍アンチエイリアス、最も鮮明な画像と3Dタイル、60 fps",
+  "Every pixel on a standard screen, three quarters on HiDPI, 2× anti-aliasing at 60 fps — the default": "標準画面ではすべてのピクセル、HiDPIでは4分の3、2倍アンチエイリアス、60 fps（既定）",
+  "Fewer pixels, FXAA instead of multisampling, no sharpening, coarser tiles, 30 fps, sparse labels and slower layer updates": "ピクセル数を削減、マルチサンプリングの代わりにFXAA、シャープ化なし、粗いタイル、30 fps、ラベルは少なめ、レイヤー更新は低頻度",
+  "Sharpening is off in the Performance preset": "パフォーマンスのプリセットではシャープ化はオフです",
+  "{width} × {height} px · MSAA {samples}×": "{width} × {height} px · MSAA {samples}×",
+  "{width} × {height} px · FXAA": "{width} × {height} px · FXAA",
+  "{width} × {height} px": "{width} × {height} px"
 }

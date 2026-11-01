@@ -3058,9 +3058,6 @@
   "Quality": "Qualidade",
   "Balanced": "Equilibrado",
   "Rendering performance preset": "Predefinição de desempenho de renderização",
-  "Full resolution, 4× anti-aliasing, 60 fps and the full label density": "Resolução total, anti-aliasing 4×, 60 fps e densidade total de rótulos",
-  "Full resolution with 2× anti-aliasing at 60 fps — the default": "Resolução total com anti-aliasing 2× a 60 fps: o padrão",
-  "Three-quarter resolution, no multisampling, 30 fps, sparse labels and slower layer updates": "Resolução a três quartos, sem multiamostragem, 30 fps, rótulos esparsos e atualizações de camadas mais lentas",
   "US EPA air-quality readings in the Alerts layer; unhealthy readings become air alerts": "Leituras de qualidade do ar da EPA dos EUA na camada Alertas; leituras insalubres viram alertas de ar",
   "Bay Area and Sonoma County transit service alerts in the Alerts layer": "Alertas de serviço do transporte público da Bay Area e de Sonoma County na camada Alertas",
   "LA Metro and RTC Southern Nevada service alerts in the Alerts layer": "Alertas de serviço da LA Metro e da RTC Southern Nevada na camada Alertas",
@@ -3094,5 +3091,12 @@
   "Alerts feed rate limited (HTTP 429)": "Feed de alertas com limite de taxa (HTTP 429)",
   "Malformed alerts snapshot": "Instantâneo de alertas malformado",
   "Malformed airport status": "Status de aeroportos malformado",
-  "Alerts": "Alertas"
+  "Alerts": "Alertas",
+  "Every screen pixel, 4× anti-aliasing and the sharpest imagery and 3D tiles at 60 fps": "Cada pixel da tela, anti-aliasing 4× e as imagens e os blocos 3D mais nítidos a 60 fps",
+  "Every pixel on a standard screen, three quarters on HiDPI, 2× anti-aliasing at 60 fps — the default": "Cada pixel em uma tela padrão, três quartos em HiDPI, anti-aliasing 2× a 60 fps: o padrão",
+  "Fewer pixels, FXAA instead of multisampling, no sharpening, coarser tiles, 30 fps, sparse labels and slower layer updates": "Menos pixels, FXAA em vez de multiamostragem, sem nitidez, blocos mais grosseiros, 30 fps, rótulos esparsos e atualizações de camadas mais lentas",
+  "Sharpening is off in the Performance preset": "A nitidez fica desativada na predefinição Desempenho",
+  "{width} × {height} px · MSAA {samples}×": "{width} × {height} px · MSAA {samples}×",
+  "{width} × {height} px · FXAA": "{width} × {height} px · FXAA",
+  "{width} × {height} px": "{width} × {height} px"
 }
