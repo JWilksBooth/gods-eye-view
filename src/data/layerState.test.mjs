@@ -253,7 +253,9 @@ test('production registry is exact, canonical, and rejects incomplete contracts'
   );
   const digitsExhausted = {
     ...LAYER_STATE_TOKEN_RESERVATIONS,
-    ...Object.fromEntries([...'789'].map((digit) => [`prior-${digit}`, digit])),
+    ...Object.fromEntries(
+      [...'789'].map((digit) => [`prior-${digit}`, digit]),
+    ),
   };
   assert.equal(nextLayerStateToken(digitsExhausted), '00');
   assert.equal(
@@ -2982,10 +2984,7 @@ test('Clear All cancels a saved restore still waiting to start', async () => {
   gate.resolve();
   const results = await restore;
   for (const id of ['earthquakes', 'flights']) {
-    assert.equal(
-      results.find((result) => result.layerId === id).succeeded,
-      false,
-    );
+    assert.equal(results.find((result) => result.layerId === id).succeeded, false);
   }
   assert.deepEqual([...manager.getEnabledLayerIds()], []);
   assert.equal(enabledLayerParam(sink), '');
