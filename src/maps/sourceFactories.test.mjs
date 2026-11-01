@@ -94,7 +94,8 @@ test('imagery and terrain pass their own ion token without relying on SDK defaul
     assert.equal(calls[0].options.accessToken, 'imagery-token');
     assert.equal(calls[1].options.accessToken, 'terrain-token');
     assert.equal(calls[1].id, 1);
-    assert.equal(calls[2].options.requestVertexNormals, true);
+    // Normals only feed globe lighting, which the app never enables.
+    assert.equal(calls[2].options.requestVertexNormals, false);
     assert.equal(result.provider.id, 'terrain');
     assert.equal(Cesium.Ion.defaultAccessToken, defaultToken);
   } finally {

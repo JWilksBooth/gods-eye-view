@@ -103,8 +103,18 @@ export function installTrackpadPinchZoom(
   };
 }
 
-/** Cesium.Viewer options of the standard globe viewer. */
-export function applicationViewerOptions(creditContainer) {
+/**
+ * Cesium.Viewer options of the standard globe viewer. With a render-quality
+ * preset (app/renderQuality.js) MSAA follows the preset and the drawing buffer
+ * is driven in device pixels, which the preset controller then scales and
+ * clamps. Without one, Cesium's CSS-pixel default and 4x MSAA stand.
+ * @param {Element|string} creditContainer
+ * @param {{renderQuality?: import('./renderQuality.js').RenderQualityPreset|null}} [options]
+ */
+export function applicationViewerOptions(
+  creditContainer,
+  { renderQuality = null } = {},
+) {
   return {
     timeline: false,
     animation: false,
@@ -122,18 +132,27 @@ export function applicationViewerOptions(creditContainer) {
     // which would also stop CesiumWidget from creating the Sun and Moon.
     skyBox: new StarrySky(),
     creditContainer,
-    msaaSamples: 4,
+    msaaSamples: renderQuality?.msaaSamples ?? 4,
+    ...(renderQuality ? { useBrowserRecommendedResolution: false } : {}),
     contextOptions: { webgl: { preserveDrawingBuffer: true } },
   };
 }
 
-/** Create the standard globe viewer in caller-owned, visible containers. */
-export function createApplicationViewer({ container, creditContainer }) {
+/**
+ * Create the standard globe viewer in caller-owned, visible containers. A
+ * render-quality preset shapes the construction-time options; its controller
+ * takes over the viewer afterwards (see app/scene.js).
+ */
+export function createApplicationViewer({
+  container,
+  creditContainer,
+  renderQuality = null,
+}) {
   if (!container || !creditContainer)
     throw new TypeError('Viewer and credit containers are required');
   const viewer = new Cesium.Viewer(
     container,
-    applicationViewerOptions(creditContainer),
+    applicationViewerOptions(creditContainer, { renderQuality }),
   );
   try {
     viewer.targetFrameRate = 60;

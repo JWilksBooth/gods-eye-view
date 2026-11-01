@@ -80,6 +80,7 @@ export class StyleManager extends ShellFacade {
     viewer,
     {
       mapStackController = null,
+      renderQuality = null,
       placeSearch,
       services,
       requestServices,
@@ -138,6 +139,7 @@ export class StyleManager extends ShellFacade {
     });
     this.viewer = viewer;
     this.mapStackController = mapStackController;
+    this.renderQuality = renderQuality;
     this.placeSearch = placeSearch;
 
     this._navigation = new NavigationController({
@@ -177,6 +179,7 @@ export class StyleManager extends ShellFacade {
     this._visualSettings = new VisualSettings({
       viewer,
       mapStackController,
+      renderQuality,
       services: {
         setScopeTerminusOverride: services.setScopeTerminusOverride,
         clampScopeTerminusPct: services.clampScopeTerminusPct,
@@ -203,6 +206,9 @@ export class StyleManager extends ShellFacade {
         _bloomSlider: this._bloomSlider,
         _bloomSliderRow: this._bloomSliderRow,
         _bloomSliderValue: this._bloomSliderValue,
+        _renderQualityBtns: this._renderQualityBtns,
+        _renderQualityRow: this._renderQualityRow,
+        _renderQualityStatus: this._renderQualityStatus,
         _celestialBtn: this._celestialBtn,
         _cockpitDisplayToggleBtn: this._cockpitDisplayToggleBtn,
         _detectionAllocationRow: this._detectionAllocationRow,
@@ -511,6 +517,7 @@ export class StyleManager extends ShellFacade {
 
     this._initStages();
     this._initBloomSharpen();
+    this._initRenderQuality();
     this._displayBindings = new DisplayBindings({
       viewer,
       services: {
@@ -543,6 +550,7 @@ export class StyleManager extends ShellFacade {
         _detectionOpacitySlider: this._detectionOpacitySlider,
         _celestialBtn: this._celestialBtn,
         _models3dBtn: this._models3dBtn,
+        _renderQualityBtns: this._renderQualityBtns,
         _scopeFeatherValue: this._scopeFeatherValue,
         _sharpenSliderValue: this._sharpenSliderValue,
         _detectionDensityValue: this._detectionDensityValue,
@@ -573,6 +581,7 @@ export class StyleManager extends ShellFacade {
         _setModels3dEnabled: (...args) => this._setModels3dEnabled(...args),
         _syncModels3dModeRow: (...args) => this._syncModels3dModeRow(...args),
         _setModels3dMode: (...args) => this._setModels3dMode(...args),
+        setRenderQuality: (...args) => this.setRenderQuality(...args),
       },
       readState: () => ({
         shareLinkManager: this.shareLinkManager,
@@ -1417,6 +1426,17 @@ export class StyleManager extends ShellFacade {
   }
 
   /**
+   * Selects the render-quality preset: drawing-buffer pixels, MSAA/FXAA,
+   * imagery and 3D-tile detail (`quality`, `balanced` or `performance`). The
+   * choice is remembered on this device and is not part of share links.
+   * @param {string} name
+   * @returns {{ok: boolean, renderQuality: object|null, error?: string}}
+   */
+  setRenderQuality(name) {
+    return this._visualSettings.setRenderQuality(...arguments);
+  }
+
+  /**
    * Controls the celestial ring. The Display button uses `focus=true` when the
    * ring is disabled or unavailable at the current zoom, turning the control
    * into a reveal action instead of requiring a separate globe-navigation step.
@@ -1475,6 +1495,7 @@ export class StyleManager extends ShellFacade {
           ? parseInt(this._sharpenSlider.value, 10)
           : null,
       },
+      renderQuality: this._visualSettings.getRenderQualityState(),
       celestialRing: {
         enabled: this.celestialRingEnabled,
         visible: !!this.celestialRing?.visible,

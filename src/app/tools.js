@@ -30,7 +30,13 @@ export function createApplicationTools({
   signal,
   defer,
 }) {
-  const { viewer, tileset, mapStackController, operations } = scene;
+  const {
+    viewer,
+    tileset,
+    mapStackController,
+    operations,
+    renderQuality = null,
+  } = scene;
   const { styleManager, weatherEffects, cockpitCloudEffects } = controls;
   const { dataManager } = data;
   const sceneDirector = new SceneDirector(viewer, styleManager, dataManager, {
@@ -170,6 +176,7 @@ export function createApplicationTools({
     dataManager,
     sceneDirector,
     mapStackController,
+    renderQuality,
     annotations,
     weatherEffects,
     cockpitCloudEffects,

@@ -660,6 +660,16 @@ export class ShellFacade {
   }
 
   /**
+   * Binds the Display rail's Render preset control to the render-quality
+   * controller: paints the active preset, withholds sharpen while the
+   * drawing buffer is upscaled and shows the drawing-buffer size.
+   * @returns {void}
+   */
+  _initRenderQuality() {
+    return this._visualSettings._initRenderQuality(...arguments);
+  }
+
+  /**
    * Reads the current bloom intensity percentage from the effects controller.
    * @returns {number} Clamped bloom intensity (0-200).
    */

@@ -180,6 +180,7 @@ export class VisualSettings {
     elements,
     operations,
     mapStackController,
+    renderQuality = null,
     readHud,
     readCockpit,
     readDataManager,
@@ -193,6 +194,7 @@ export class VisualSettings {
       viewer,
       services,
       mapStackController,
+      renderQuality,
       readHud,
       readCockpit,
       readDataManager,
@@ -459,6 +461,94 @@ export class VisualSettings {
     this._visualEffects.initPostProcess(
       this._sharpenSlider ? parseInt(this._sharpenSlider.value, 10) / 100 : 0.6,
     );
+  }
+
+  /** Bind the Render preset control; a host without a controller hides the row. */
+  _initRenderQuality() {
+    this._renderQualityUnsubscribe?.();
+    this._renderQualityUnsubscribe = null;
+    if (!this.renderQuality) {
+      if (this._renderQualityRow) this._renderQualityRow.hidden = true;
+      return;
+    }
+    this._renderQualityUnsubscribe = this.renderQuality.subscribe(() =>
+      this._syncRenderQualityControl(),
+    );
+    // Cesium resizes the drawing buffer on its next frame; the readout follows.
+    this._lifetime.listen(globalThis.window, 'resize', () =>
+      this._lifetime.frame(() => this._updateRenderQualityStatus()),
+    );
+    this._syncRenderQualityControl();
+  }
+
+  /**
+   * Paint the Render segments, withhold sharpen while the preset upscales the
+   * drawing buffer (the operator's toggle and slider keep their values) and
+   * refresh the drawing-buffer readout.
+   */
+  _syncRenderQualityControl() {
+    const controller = this.renderQuality;
+    if (!controller) return;
+    syncSegmentedControl(this._renderQualityBtns, controller.name, {
+      valueOf: (button) => button.dataset?.renderQuality,
+    });
+    const permitted = controller.getPreset().sharpenPermitted !== false;
+    this._visualEffects.setSharpenPermitted(permitted);
+    if (this._sharpenBtn) {
+      this._sharpenBtn.disabled = !permitted;
+      this._sharpenBtn.classList.toggle('pp-toggle-btn--withheld', !permitted);
+    }
+    this._updateRenderQualityStatus();
+    this._lifetime.frame(() => this._updateRenderQualityStatus());
+  }
+
+  _updateRenderQualityStatus() {
+    if (!this._renderQualityStatus || !this.renderQuality) return;
+    const { drawingBuffer, msaaSamples, fxaa } = this.renderQuality.describe();
+    if (!drawingBuffer?.width || !drawingBuffer?.height) {
+      this._renderQualityStatus.textContent = '';
+      return;
+    }
+    const size = {
+      width: String(drawingBuffer.width),
+      height: String(drawingBuffer.height),
+    };
+    this._renderQualityStatus.textContent =
+      msaaSamples > 1
+        ? t('{width} × {height} px · MSAA {samples}×', {
+            ...size,
+            samples: String(msaaSamples),
+          })
+        : fxaa
+          ? t('{width} × {height} px · FXAA', size)
+          : t('{width} × {height} px', size);
+  }
+
+  /** The active preset and drawing buffer, for voice read-back and QA. */
+  getRenderQualityState() {
+    if (!this.renderQuality) return null;
+    const { name, pixelRatio, drawingBuffer, msaaSamples, fxaa, renderer } =
+      this.renderQuality.describe();
+    return { name, pixelRatio, drawingBuffer, msaaSamples, fxaa, renderer };
+  }
+
+  /**
+   * Select a render-quality preset. The controller validates the name, writes
+   * the viewer and remembers the choice; the subscription repaints this rail.
+   * @param {string} name `quality`, `balanced` or `performance`.
+   * @returns {{ok: boolean, renderQuality: object|null, error?: string}}
+   */
+  setRenderQuality(name) {
+    if (!this.renderQuality)
+      return { ok: false, error: 'Render quality is unavailable', renderQuality: null };
+    const result = this.renderQuality.set(name);
+    if (!result.ok)
+      return {
+        ok: false,
+        error: result.error,
+        renderQuality: this.getRenderQualityState(),
+      };
+    return { ok: true, renderQuality: this.getRenderQualityState() };
   }
 
   _getBloomIntensity() {
@@ -1709,6 +1799,8 @@ export class VisualSettings {
     this._layoutRightPanels();
   }
   stop() {
+    this._renderQualityUnsubscribe?.();
+    this._renderQualityUnsubscribe = null;
     this._lifetime.destroy();
     this._styleParameters?.destroy();
     this._visualEffects.stop();

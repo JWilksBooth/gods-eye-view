@@ -24,6 +24,7 @@
     "exports": ["./application/viewer"],
     "modules": [
       "src/app/viewer.js",
+      "src/app/renderQuality.js",
       "src/app/atmosphereCompat.js",
       "src/sky/starrySky.js",
       "src/sky/stars.js",
@@ -1988,6 +1989,7 @@
       "src/app/surfaceServices.js",
       "src/app/tools.js",
       "src/app/viewer.js",
+      "src/app/renderQuality.js",
       "src/sky/starrySky.js",
       "src/sky/stars.js",
       "src/app/atmosphereCompat.js",

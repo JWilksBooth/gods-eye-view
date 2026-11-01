@@ -557,6 +557,23 @@ export class MapSourceController {
     });
   }
 
+  /**
+   * Rebuild the live imagery layer from the same provider with the current
+   * `createImageryLayer` options (texture filters, anisotropy). Cesium fixes a
+   * tile's sampler when its texture uploads, so only a new layer picks new
+   * options up; the provider, its metadata and the failure watch are kept.
+   * @returns {boolean} Whether a layer was rebuilt.
+   */
+  refreshImageryLayer() {
+    if (this._destroyed || !this._imageryLayer || !this._activeImageryProvider)
+      return false;
+    this.viewer.imageryLayers.remove(this._imageryLayer, true);
+    this._imageryLayer = this._createImageryLayer(this._activeImageryProvider);
+    this.viewer.imageryLayers.add(this._imageryLayer, 0);
+    this._requestRender('map-stack');
+    return true;
+  }
+
   _removeImageryLayer() {
     this._removeImageryErrorListener?.();
     this._removeImageryErrorListener = null;

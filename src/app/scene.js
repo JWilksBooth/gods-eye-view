@@ -13,6 +13,8 @@ import {
   uninstallRenderGovernor,
   governorRequestRender,
 } from '../renderGovernor.js';
+import { createRenderQualityController } from './renderQuality.js';
+import { imageryLayerOptions } from '../maps/imagery.js';
 import { describeError } from './errors.js';
 import { t } from '../i18n/index.js';
 
@@ -49,14 +51,34 @@ export async function createApplicationScene({
   creditContainer.id = 'cesium-credits';
   document.body.appendChild(creditContainer);
   defer(() => creditContainer.remove());
+  // The remembered (or `?quality=`) preset shapes the viewer before its first
+  // frame; the controller then owns resolution, MSAA, globe and tileset knobs.
+  let storage = null;
+  try {
+    storage = window.localStorage;
+  } catch {
+    /* blocked storage: no remembered preset */
+  }
+  const renderQuality = createRenderQualityController({
+    storage,
+    search: window.location?.search ?? '',
+    coarsePointer:
+      globalThis.matchMedia?.('(pointer: coarse)').matches === true,
+  });
   const viewer = createApplicationViewer({
     container: 'cesiumContainer',
     creditContainer,
+    renderQuality: renderQuality.getPreset(),
   });
   defer(() => {
     uninstallRenderGovernor(viewer);
     if (!viewer.isDestroyed()) viewer.destroy();
   });
+  renderQuality.attach(viewer, {
+    requestRender: governorRequestRender,
+    getMaxTextureSize: webglTextureLimit,
+  });
+  defer(() => renderQuality.destroy());
   defer(installTrackpadPinchZoom(viewer));
   registerDataCredits(viewer, credits);
   configureCreditKeyboardAccess(document);
@@ -78,6 +100,7 @@ export async function createApplicationScene({
   });
   signal.throwIfAborted();
   if (tileset) {
+    renderQuality.attachTileset(tileset);
     viewer.scene.primitives.add(tileset);
     // NOTE: Cesium World Terrain intentionally disabled — conflicts with Google 3D Tiles at high zoom.
     // Google Photorealistic 3D Tiles provide their own terrain/elevation.
@@ -105,6 +128,13 @@ export async function createApplicationScene({
 
   const mapStackController = new MapController(viewer, {
     requestRender: governorRequestRender,
+    // Imagery layers take the preset's anisotropy at construction (Cesium
+    // fixes a tile's sampler when its texture uploads).
+    createImageryLayer: (provider) =>
+      new Cesium.ImageryLayer(
+        provider,
+        imageryLayerOptions(renderQuality.getPreset().imagery),
+      ),
     ...mapOptions,
     googleTileset: tileset,
     cesiumToken,
@@ -122,10 +152,27 @@ export async function createApplicationScene({
     onError: (message) => console.warn('[MapStack]', message),
   });
   defer(() => mapStackController.destroy());
+  // A preset with a different anisotropy needs the live layer rebuilt; the
+  // provider and its metadata are kept.
+  defer(
+    renderQuality.subscribe(({ preset, previous }) => {
+      if (preset.imagery.maximumAnisotropy !== previous.imagery.maximumAnisotropy)
+        mapStackController.refreshImageryLayer?.();
+    }),
+  );
   await mapStackController.setStack(tileset ? 'photoreal' : 'esri-imagery', {
     silent: true,
   });
 
   signal.throwIfAborted();
-  return { viewer, tileset, mapStackController, operations };
+  return { viewer, tileset, mapStackController, operations, renderQuality };
+}
+
+/** The smaller of the GPU's texture and renderbuffer side limits, or Infinity before a context exists. */
+function webglTextureLimit() {
+  const limits = [
+    Cesium.ContextLimits.maximumTextureSize,
+    Cesium.ContextLimits.maximumRenderbufferSize,
+  ].filter((limit) => Number.isFinite(limit) && limit > 0);
+  return limits.length ? Math.min(...limits) : Infinity;
 }

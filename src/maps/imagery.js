@@ -4,11 +4,36 @@ import * as Cesium from 'cesium';
 export const ESRI_ATTRIBUTION_HTML =
   '<a href="https://www.esri.com" target="_blank" rel="noopener">Powered by Esri</a>';
 
+/** The deepest zoom tile.openstreetmap.org serves; deeper requests fail and count toward the tile-failure fallback. */
+export const OSM_MAXIMUM_LEVEL = 19;
+
 export function createOsmImagery() {
   return new Cesium.OpenStreetMapImageryProvider({
     url: 'https://tile.openstreetmap.org/',
     credit: '© OpenStreetMap contributors',
+    maximumLevel: OSM_MAXIMUM_LEVEL,
   });
+}
+
+/**
+ * ImageryLayer options for a render-quality preset's imagery settings.
+ *
+ * Both filters stay LINEAR on purpose: Cesium generates mipmaps and applies
+ * anisotropic filtering to power-of-two tiles only when the layer asks for
+ * plain LINEAR filters (`ImageryLayer._finalizeReprojectTexture`); naming a
+ * mipmap filter explicitly skips mipmap generation and samples an incomplete
+ * texture. `maximumAnisotropy` caps the glancing-angle filtering per preset;
+ * Cesium clamps it to what the GPU supports.
+ * @param {{maximumAnisotropy?: number}} [imagery]
+ */
+export function imageryLayerOptions({ maximumAnisotropy } = {}) {
+  return {
+    minificationFilter: Cesium.TextureMinificationFilter.LINEAR,
+    magnificationFilter: Cesium.TextureMagnificationFilter.LINEAR,
+    ...(Number.isFinite(maximumAnisotropy) && maximumAnisotropy >= 1
+      ? { maximumAnisotropy }
+      : {}),
+  };
 }
 
 export function createEsriImagery() {

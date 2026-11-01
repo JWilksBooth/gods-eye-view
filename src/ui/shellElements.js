@@ -14,6 +14,11 @@ export function readShellElements(document = globalThis.document) {
     _sharpenSliderRow: document.getElementById('sharpen-slider-row'),
     _sharpenSlider: document.getElementById('sharpen-intensity-slider'),
     _sharpenSliderValue: document.getElementById('sharpen-intensity-value'),
+    _renderQualityRow: document.getElementById('render-quality-row'),
+    _renderQualityBtns: [
+      ...document.querySelectorAll('[data-render-quality]'),
+    ],
+    _renderQualityStatus: document.getElementById('render-quality-status'),
     _hudBtn: document.getElementById('hud-toggle'),
     _hudLayoutRow: document.getElementById('hud-layout-row'),
     _hudLayoutSelect: document.getElementById('hud-layout-select'),

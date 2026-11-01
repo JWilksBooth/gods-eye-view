@@ -181,6 +181,19 @@
         <span class="pp-slider-value" id="sharpen-intensity-value">49%</span>
       </div>
     </div>
+    <!-- Render-quality preset (src/app/renderQuality.js): drawing-buffer pixels,
+         MSAA/FXAA, imagery and 3D-tile detail. Remembered per device, not shared. -->
+    <div class="pp-toggle-group render-quality-group" id="render-quality-group">
+      <div class="pp-slider-row visible render-quality-row" id="render-quality-row">
+        <span class="pp-slider-mini-label" data-i18n>Render</span>
+        <div class="gev-segmented gev-segmented--stacked pp-mode-seg render-quality-seg" role="radiogroup" aria-label="Render quality preset" data-i18n-aria-label>
+          <button class="gev-segment pp-mode-btn" id="render-quality-quality" data-render-quality="quality" role="radio" aria-checked="false" title="Every device pixel, finest imagery and 3D tiles" data-i18n-title data-i18n>Quality</button>
+          <button class="gev-segment pp-mode-btn" id="render-quality-balanced" data-render-quality="balanced" role="radio" aria-checked="false" title="Native pixels, medium imagery and 3D tile detail" data-i18n-title data-i18n>Balanced</button>
+          <button class="gev-segment pp-mode-btn" id="render-quality-performance" data-render-quality="performance" role="radio" aria-checked="false" title="Fewer pixels, no multisampling, coarser tiles" data-i18n-title data-i18n>Performance</button>
+        </div>
+        <output id="render-quality-status" class="render-quality-status" role="status" data-i18n-runtime></output>
+      </div>
+    </div>
   </div>
   </div>
   <button id="clean-view-exit" title="Return UI controls" data-i18n-title data-i18n>EXIT CLEAN VIEW</button>

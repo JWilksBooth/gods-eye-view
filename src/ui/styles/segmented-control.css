@@ -49,3 +49,12 @@
   opacity: 0.42;
   cursor: not-allowed;
 }
+
+/* Stacked variant: one full-word segment per row inside a narrow rail. */
+.gev-segmented--stacked {
+  flex-direction: column;
+}
+.gev-segmented--stacked .gev-segment + .gev-segment {
+  border-left: 0;
+  border-top: 1px solid var(--glass-border);
+}

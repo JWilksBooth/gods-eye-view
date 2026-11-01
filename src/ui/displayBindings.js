@@ -125,6 +125,7 @@ export class DisplayBindings {
         celestialButton: this._celestialBtn,
         modelsButton: this._models3dBtn,
         modelModeButtons: this._models3dBtn ? this._models3dModeBtns : [],
+        renderQualityButtons: this._renderQualityBtns || [],
       },
       actions: {
         setStyle: (style) => this.setStyle(style, { userInitiated: true }),
@@ -220,6 +221,7 @@ export class DisplayBindings {
           this._syncModels3dModeRow();
         },
         setModelsMode: (mode) => this._setModels3dMode(mode),
+        setRenderQuality: (name) => this.setRenderQuality(name),
       },
     });
   }

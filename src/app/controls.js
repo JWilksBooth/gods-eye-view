@@ -10,7 +10,7 @@ import { t } from '../i18n/index.js';
  * whose address does not carry one.
  */
 export function createApplicationControls({
-  scene: { viewer, mapStackController, operations },
+  scene: { viewer, mapStackController, operations, renderQuality = null },
   loaderStatus,
   Controls = StyleManager,
   services,
@@ -31,6 +31,7 @@ export function createApplicationControls({
     },
     requestServices: operations.requests,
     mapStackController,
+    renderQuality,
     placeSearch,
     // A share code to open at start-up instead of the page's address.
     initialShareCode,

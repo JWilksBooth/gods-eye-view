@@ -41,6 +41,9 @@ export class VisualEffects {
     this.startTime = wallNow();
     this.bloomEnabled = false;
     this.sharpenEnabled = false;
+    // The render-quality preset withdraws sharpen while the drawing buffer is
+    // upscaled; the operator's toggle and slider keep their values meanwhile.
+    this.sharpenPermitted = true;
     this.bloomIntensity = BLOOM_INTENSITY_DEFAULT;
     this.sharpenIntensity = 0.49;
     this.bloomStage = null;
@@ -167,7 +170,17 @@ export class VisualEffects {
   syncSharpenEnabled() {
     if (this.stopped || !this.sharpenStage) return;
     this.sharpenStage.enabled =
-      this.sharpenEnabled && this.sharpenIntensity > 0.001;
+      this.sharpenEnabled &&
+      this.sharpenPermitted &&
+      this.sharpenIntensity > 0.001;
+  }
+
+  /** Whether the active render-quality preset lets the sharpen stage run. */
+  setSharpenPermitted(permitted) {
+    if (this.stopped) return;
+    this.sharpenPermitted = permitted !== false;
+    this.syncSharpenEnabled();
+    this.requestRender('sharpen');
   }
 
   applySharpenIntensity(value) {
