@@ -6,6 +6,43 @@ import { enforceRateLimit, openAiRateLimiter } from './rate-limit.js';
 import { readRequestBody } from '../common/request.js';
 import { OPENAI_HUD_SUMMARY_MODEL_DEFAULT } from './constants.js';
 
+const HUD_SUMMARY_BASE_URL_DEFAULT = 'https://api.openai.com/v1';
+const HUD_SUMMARY_REASONING_EFFORT_DEFAULT = 'minimal';
+
+/**
+ * Where the HUD summary is generated. GEV_HUD_SUMMARY_BASE_URL points the
+ * Responses call at any OpenAI-compatible server (Ollama, LM Studio, a
+ * proxy) without touching the Realtime voice path, which stays on OpenAI.
+ */
+function hudSummaryEndpoint(env = process.env) {
+  const base =
+    String(env.GEV_HUD_SUMMARY_BASE_URL ?? '')
+      .trim()
+      .replace(/\/+$/, '') || HUD_SUMMARY_BASE_URL_DEFAULT;
+  return `${base}/responses`;
+}
+
+/**
+ * Credential for the HUD summary call: its own key, else the OpenAI key. A
+ * local base URL needs none; a placeholder keeps the bearer header well-formed
+ * and the capability probe truthful.
+ */
+function hudSummaryCredential(env = process.env) {
+  const own = String(env.GEV_HUD_SUMMARY_API_KEY ?? '').trim();
+  if (own) return own;
+  const openai = String(env.OPENAI_API_KEY ?? '').trim();
+  if (openai) return openai;
+  return String(env.GEV_HUD_SUMMARY_BASE_URL ?? '').trim() ? 'local' : '';
+}
+
+/** Thinking models need `none` here or they spend the token budget reasoning. */
+function hudSummaryReasoningEffort(env = process.env) {
+  return (
+    String(env.GEV_HUD_SUMMARY_REASONING_EFFORT ?? '').trim() ||
+    HUD_SUMMARY_REASONING_EFFORT_DEFAULT
+  );
+}
+
 function extractOpenAiResponseText(data) {
   if (typeof data?.output_text === 'string' && data.output_text.trim()) {
     return data.output_text.trim();
@@ -37,7 +74,7 @@ async function handleHudSummary(req, res) {
     res.setHeader('Cache-Control', 'no-store');
     res.end(
       JSON.stringify({
-        configured: !keylessHudSummaryResponse(process.env.OPENAI_API_KEY),
+        configured: !keylessHudSummaryResponse(hudSummaryCredential()),
       }),
     );
     return;
@@ -49,7 +86,7 @@ async function handleHudSummary(req, res) {
     return;
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = hudSummaryCredential();
   const keyless = keylessHudSummaryResponse(apiKey);
   if (keyless) {
     res.statusCode = keyless.statusCode;
@@ -67,7 +104,7 @@ async function handleHudSummary(req, res) {
   try {
     const body = await readRequestBody(req, 64 * 1024);
     const context = JSON.parse(body || '{}');
-    const response = await fetch('https://api.openai.com/v1/responses', {
+    const response = await fetch(hudSummaryEndpoint(), {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -79,7 +116,7 @@ async function handleHudSummary(req, res) {
           OPENAI_HUD_SUMMARY_MODEL_DEFAULT,
         instructions: HUD_SUMMARY_INSTRUCTIONS,
         input: JSON.stringify(context),
-        reasoning: { effort: 'minimal' },
+        reasoning: { effort: hudSummaryReasoningEffort() },
         max_output_tokens: 100,
       }),
     });
@@ -110,4 +147,9 @@ async function handleHudSummary(req, res) {
   }
 }
 
-export { handleHudSummary };
+export {
+  handleHudSummary,
+  hudSummaryCredential,
+  hudSummaryEndpoint,
+  hudSummaryReasoningEffort,
+};
