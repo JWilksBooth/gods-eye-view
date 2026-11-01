@@ -28,7 +28,11 @@ export async function fetchStreamsUpstream(
   const deadline = AbortSignal.timeout(timeoutMs);
   const combined = signal ? AbortSignal.any([signal, deadline]) : deadline;
   const response = await fetchImpl(url, {
-    headers: { 'User-Agent': STREAMS_USER_AGENT, Accept: 'application/json', ...headers },
+    headers: {
+      'User-Agent': STREAMS_USER_AGENT,
+      Accept: 'application/json',
+      ...headers,
+    },
     redirect: 'error',
     signal: combined,
   });

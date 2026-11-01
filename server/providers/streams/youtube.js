@@ -30,7 +30,8 @@ export const YOUTUBE_SOURCE = Object.freeze({
   keyEnv: 'YOUTUBE_API_KEY',
   refreshMs: 5 * 60_000,
 });
-export const YOUTUBE_SEARCH_URL = 'https://www.googleapis.com/youtube/v3/search';
+export const YOUTUBE_SEARCH_URL =
+  'https://www.googleapis.com/youtube/v3/search';
 /** One search per region per hour. */
 export const YOUTUBE_REGION_CACHE_MS = 60 * 60_000;
 /** Calls a UTC day may spend of the 100-call `search.list` bucket. */
@@ -46,7 +47,10 @@ const TERMS =
 
 /** The daily budget from the environment: a positive integer, else the default. */
 export function youtubeDailyBudget(env = process.env) {
-  const parsed = Number.parseInt(String(env.YOUTUBE_SEARCH_DAILY_BUDGET ?? ''), 10);
+  const parsed = Number.parseInt(
+    String(env.YOUTUBE_SEARCH_DAILY_BUDGET ?? ''),
+    10,
+  );
   return Number.isFinite(parsed) && parsed > 0
     ? Math.min(parsed, 100)
     : YOUTUBE_DEFAULT_DAILY_BUDGET;
@@ -71,7 +75,10 @@ export function youtubeSearchUrl({
     'locationRadius',
     `${regionRadiusKm(region, { max: YOUTUBE_MAX_RADIUS_KM })}km`,
   );
-  url.searchParams.set('maxResults', String(Math.max(1, Math.min(50, maxResults))));
+  url.searchParams.set(
+    'maxResults',
+    String(Math.max(1, Math.min(50, maxResults))),
+  );
   url.searchParams.set('safeSearch', 'moderate');
   url.searchParams.set('key', key);
   return url.toString();
@@ -106,7 +113,9 @@ export function parseYoutubeSearch(payload, { region, now }) {
       kind: 'youtube',
       videoId,
       poster:
-        thumbnails.high?.url || thumbnails.medium?.url || thumbnails.default?.url,
+        thumbnails.high?.url ||
+        thumbnails.medium?.url ||
+        thumbnails.default?.url,
       owner: snippet.channelTitle,
       terms: TERMS,
       placement: 'region-centre',

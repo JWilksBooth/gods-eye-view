@@ -90,7 +90,8 @@ export function parseWindyWebcams(payload, { region, now }) {
       kind: 'link',
       url: player.live || player.day || urls.detail,
       pageUrl: urls.detail || player.live,
-      poster: webcam?.images?.current?.preview || webcam?.images?.current?.thumbnail,
+      poster:
+        webcam?.images?.current?.preview || webcam?.images?.current?.thumbnail,
       owner: 'windy.com',
       terms: TERMS,
       placement: 'exact',
@@ -111,7 +112,8 @@ export function parseWindyWebcams(payload, { region, now }) {
  * poster removed once its URL may have expired.
  */
 export function presentWindyRows(rows, fetchedAt, at) {
-  const fresh = Number.isFinite(fetchedAt) && at - fetchedAt <= WINDY_IMAGE_FRESH_MS;
+  const fresh =
+    Number.isFinite(fetchedAt) && at - fetchedAt <= WINDY_IMAGE_FRESH_MS;
   return fresh ? rows : rows.map((row) => ({ ...row, poster: null }));
 }
 
@@ -130,10 +132,13 @@ export function createWindyDiscovery({
       const cached = state.get(region.id);
       if (cached && at - cached.fetchedAt < WINDY_REGION_CACHE_MS) continue;
       try {
-        const payload = await fetchStreamsUpstream(windyWebcamsUrl({ region }), {
-          fetchImpl,
-          headers: { 'x-windy-api-key': key },
-        });
+        const payload = await fetchStreamsUpstream(
+          windyWebcamsUrl({ region }),
+          {
+            fetchImpl,
+            headers: { 'x-windy-api-key': key },
+          },
+        );
         state.set(region.id, {
           fetchedAt: at,
           rows: parseWindyWebcams(payload, { region, now: at }),

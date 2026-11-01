@@ -41,7 +41,10 @@ const DEFAULT_ROOT = path.resolve(
  * @param {{warn?: Function, name?: string}} [options]
  * @returns {object[]} Normalized rows.
  */
-export function parseRegistryFile(file, { warn = () => {}, name = 'registry' } = {}) {
+export function parseRegistryFile(
+  file,
+  { warn = () => {}, name = 'registry' } = {},
+) {
   const region = liveOpsRegion(file?.region);
   if (!region) {
     warn(`[streams] ${name}: unknown region ${file?.region}`);
@@ -108,7 +111,9 @@ export async function loadRegistryStreams({
         warn(`[streams] registry ${region.id}: ${error?.message || error}`);
       continue;
     }
-    rows.push(...parseRegistryFile(parsed, { warn, name: `registry ${region.id}` }));
+    rows.push(
+      ...parseRegistryFile(parsed, { warn, name: `registry ${region.id}` }),
+    );
   }
   return rows;
 }

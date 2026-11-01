@@ -22,7 +22,11 @@ export function createStreamSource({
    * each source's own state so a keyless or partial answer is visible.
    * @returns {Promise<{rows: object[], sources: object[], stale: boolean, fetchedAt: number|null, region: string|null}>}
    */
-  async function getSnapshotDetail({ signal, region = null, kind = null } = {}) {
+  async function getSnapshotDetail({
+    signal,
+    region = null,
+    kind = null,
+  } = {}) {
     signal?.throwIfAborted();
     const params = new URLSearchParams();
     if (region) params.set('region', String(region));

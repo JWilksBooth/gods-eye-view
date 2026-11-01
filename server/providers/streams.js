@@ -141,7 +141,11 @@ export function createStreamStore({
   }
 
   /** Refresh every due source (coalesced per source) and return the merged snapshot. */
-  async function snapshot({ region = null, kind = null, source: only = null } = {}) {
+  async function snapshot({
+    region = null,
+    kind = null,
+    source: only = null,
+  } = {}) {
     await Promise.all(
       sources.map((source) => {
         const entry = state.get(source.id);
@@ -171,7 +175,10 @@ export function createStreamStore({
     for (const source of sources) {
       const entry = state.get(source.id);
       const stale =
-        entry.fetchedAt != null && !entry.ok && !entry.keyRequired && entry.rows.length > 0;
+        entry.fetchedAt != null &&
+        !entry.ok &&
+        !entry.keyRequired &&
+        entry.rows.length > 0;
       if (entry.ok) anyLive = true;
       sourceStates.push({
         id: source.id,
@@ -235,7 +242,8 @@ const SOURCES = new Set(STREAM_SOURCES);
 export function streamsProxy(options = {}) {
   const env = options.env ?? process.env;
   const store = createStreamStore({
-    sources: options.sources ?? streamSources({ env, sourceRoot: options.sourceRoot }),
+    sources:
+      options.sources ?? streamSources({ env, sourceRoot: options.sourceRoot }),
     fetchImpl: options.fetchImpl,
     env,
     now: options.now,
