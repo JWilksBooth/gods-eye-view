@@ -37,7 +37,8 @@
  *
  * "baseline" measures whatever the app does with no preset selected (the
  * build's default). With `--gpu` the harness does not force SwiftShader, so a
- * desktop GPU is used when the browser can reach one. `--dpr 2` emulates a
+ * desktop GPU is used when the browser can reach one (the high-performance
+ * one where there are two). `--dpr 2` emulates a
  * HiDPI screen at the same 1600 x 900 CSS viewport, where the presets' device
  * pixel policies differ. `--profile` records a V8 CPU profile of every
  * sampled window and prints the top self-time functions and files, so a slow
@@ -416,8 +417,10 @@ const browser = await puppeteer.launch({
     '--disable-renderer-backgrounding',
     '--disable-background-timer-throttling',
     '--ignore-gpu-blocklist',
+    // On a machine with an integrated and a discrete GPU, headless Chrome
+    // renders on the integrated one unless told otherwise.
     ...(useGpu
-      ? []
+      ? ['--force_high_performance_gpu']
       : [
           '--use-gl=angle',
           '--use-angle=swiftshader',

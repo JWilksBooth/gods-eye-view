@@ -763,7 +763,7 @@ html:not([lang='en']) .pp-slider-row > .pp-slider-mini-label {
   display: none;
 }
 /* Sharpen while the Performance preset withholds the pass. */
-#pp-toggles .pp-toggle-btn:disabled {
+#sharpen-toggle:disabled {
   opacity: 0.42;
   cursor: not-allowed;
 }

@@ -17,10 +17,12 @@
  * Usage:
  *   node scripts/qa-sharpness-crops.mjs --url http://127.0.0.1:4173 --label after
  *     [--presets balanced,quality] [--views sf,lv] [--out docs/media/perf]
- *     [--crop 320x200] [--dpr 1] [--gpu] [--chrome /path/to/chrome]
+ *     [--crop 320x200] [--anchor 0.5,0.4] [--dpr 1] [--gpu] [--chrome /path/to/chrome]
  *     [--full qa-shots/sharpness]
  *
- * Writes `<view>-<preset>-<label>.png` crops to --out, and the full frames
+ * `--anchor` places the crop's centre as fractions of the viewport (the
+ * default sits a little above the middle, clear of the HUD and of the start-up
+ * location pin). Writes `<view>-<preset>-<label>.png` crops to --out, and the full frames
  * plus a JSON record of the render settings each crop was taken at to --full.
  */
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
@@ -52,6 +54,9 @@ const fullDir = path.resolve(arg('--full', 'qa-shots/sharpness'), label);
 const [cropWidth, cropHeight] = arg('--crop', '320x200')
   .split('x')
   .map((n) => Number(n) || 0);
+const [anchorX, anchorY] = arg('--anchor', '0.5,0.4')
+  .split(',')
+  .map((n) => Number(n));
 const deviceScaleFactor = Number(arg('--dpr', '1')) || 1;
 const useGpu = flag('--gpu');
 const VIEWPORT = { width: 1600, height: 900 };
@@ -75,7 +80,8 @@ const VIEWS = {
     name: 'Las Vegas, the Strip looking north',
     lat: 36.0985,
     lon: -115.1735,
-    height: 650,
+    // The valley floor is about 620 m above the ellipsoid.
+    height: 1300,
     heading: 0,
     pitch: -32,
   },
@@ -105,8 +111,10 @@ const browser = await puppeteer.launch({
     '--disable-renderer-backgrounding',
     '--disable-background-timer-throttling',
     '--ignore-gpu-blocklist',
+    // On a machine with an integrated and a discrete GPU, headless Chrome
+    // renders on the integrated one unless told otherwise.
     ...(useGpu
-      ? []
+      ? ['--force_high_performance_gpu']
       : [
           '--use-gl=angle',
           '--use-angle=swiftshader',
@@ -147,7 +155,7 @@ const record = {
   url,
   deviceScaleFactor,
   viewport: VIEWPORT,
-  crop: { width: cropWidth, height: cropHeight },
+  crop: { width: cropWidth, height: cropHeight, anchorX, anchorY },
   captures: [],
 };
 
@@ -182,6 +190,7 @@ try {
             .setEnabled(id, false, { origin: 'programmatic' })
             .catch(() => {});
       gev.styleManager.setCleanView?.(true);
+      gev.styleManager.hud?.setMode?.('off');
       const gl = gev.viewer.scene.context._gl;
       const info = gl.getExtension('WEBGL_debug_renderer_info');
       return {
@@ -239,10 +248,14 @@ try {
       });
       const full = path.join(fullDir, `${id}-${preset}.png`);
       await page.screenshot({ path: full });
-      // The middle of the viewport, at device pixels: a 100% crop.
+      // Around the anchor, at device pixels: a 100% crop.
       const scale = deviceScaleFactor;
-      const left = Math.round(((VIEWPORT.width - cropWidth) / 2) * scale);
-      const top = Math.round(((VIEWPORT.height - cropHeight) / 2) * scale);
+      const left = Math.round(
+        (VIEWPORT.width * anchorX - cropWidth / 2) * scale,
+      );
+      const top = Math.round(
+        (VIEWPORT.height * anchorY - cropHeight / 2) * scale,
+      );
       const crop = path.join(outDir, `${id}-${preset}-${label}.png`);
       await sharp(full)
         .extract({
