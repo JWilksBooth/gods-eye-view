@@ -107,7 +107,110 @@ export function lafdTime(text) {
   });
 }
 
-/** Parse the feed into alerts (not yet placed): `{ id, title, body, time, url, address }`. */
+/** Street-type abbreviations LAFD uses, expanded for the geocoder. */
+const STREET_TYPES = Object.freeze({
+  av: 'Avenue',
+  ave: 'Avenue',
+  bl: 'Boulevard',
+  blvd: 'Boulevard',
+  wy: 'Way',
+  st: 'Street',
+  dr: 'Drive',
+  pl: 'Place',
+  rd: 'Road',
+  ln: 'Lane',
+  ct: 'Court',
+  hy: 'Highway',
+  hwy: 'Highway',
+  fy: 'Freeway',
+  fwy: 'Freeway',
+  pk: 'Park',
+  pkwy: 'Parkway',
+  cr: 'Circle',
+  cir: 'Circle',
+  tr: 'Trail',
+  te: 'Terrace',
+  ter: 'Terrace',
+});
+
+/**
+ * The query the geocoder gets for an LAFD address: the City's quadrant letter
+ * after the house number is dropped ("7930 N Whitsett Av" is on Whitsett
+ * Avenue; the N says which side of the baseline) and the street type is
+ * spelled out, which is what the map data uses.
+ */
+export function lafdGeocodeQuery(address) {
+  const words = String(address || '')
+    .trim()
+    .replace(/^(\d+(?:\s*-\s*\d+)?)\s+[NSEW]\s+/i, '$1 ')
+    .split(/\s+/);
+  const last = words[words.length - 1] || '';
+  const expanded = STREET_TYPES[last.toLowerCase().replace(/\.$/, '')];
+  if (expanded) words[words.length - 1] = expanded;
+  return words.join(' ');
+}
+
+/** The feed's "MAP:" short link, when the alert carries one. */
+export function lafdMapLink(text) {
+  const match = /https:\/\/bit\.ly\/[A-Za-z0-9]+/.exec(String(text || ''));
+  return match ? match[0] : null;
+}
+
+/**
+ * Coordinates from the Google Maps URL an LAFD map link redirects to
+ * ("https://www.google.com/maps/search/?api=1&query=34.21477,-118.40508").
+ * @returns {{lat: number, lon: number}|null}
+ */
+export function parseMapsPoint(location) {
+  let url;
+  try {
+    url = new URL(String(location || ''));
+  } catch {
+    return null;
+  }
+  if (!/(^|\.)google\.com$/i.test(url.hostname)) return null;
+  const fromPath = /@(-?\d+\.\d+),(-?\d+\.\d+)/.exec(url.pathname);
+  const candidate =
+    url.searchParams.get('query') ||
+    url.searchParams.get('q') ||
+    (fromPath ? fromPath[1] + ',' + fromPath[2] : '');
+  const match = /^(-?\d{1,2}\.\d+),\s*(-?\d{1,3}\.\d+)$/.exec(
+    String(candidate || '').trim(),
+  );
+  if (!match) return null;
+  const lat = Number(match[1]);
+  const lon = Number(match[2]);
+  return Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null;
+}
+
+/**
+ * Resolve a map link with one HEAD request, reading only the redirect target;
+ * nothing is followed. Cached per link for the life of the process.
+ */
+export function createLafdLinkResolver({
+  fetchImpl = (...args) => globalThis.fetch(...args),
+} = {}) {
+  const cache = new Map();
+  return async function resolveLink(link, { signal } = {}) {
+    if (cache.has(link)) return cache.get(link);
+    let point = null;
+    try {
+      const response = await fetchImpl(link, {
+        method: 'HEAD',
+        redirect: 'manual',
+        signal,
+      });
+      point = parseMapsPoint(response.headers.get('location'));
+    } catch {
+      return null;
+    }
+    cache.set(link, point);
+    if (cache.size > 500) cache.delete(cache.keys().next().value);
+    return point;
+  };
+}
+
+/** Parse the feed into alerts (not yet placed): `{ id, title, body, time, url, address, mapLink }`. */
 export function parseLafdAlerts(xml) {
   const alerts = [];
   for (const match of String(xml || '').matchAll(
@@ -131,6 +234,7 @@ export function parseLafdAlerts(xml) {
       time: Number.isFinite(time) ? time : null,
       url: link,
       address: lafdAddress(`${title} ${body}`),
+      mapLink: lafdMapLink(body),
     });
     if (alerts.length >= MAX_ALERTS) break;
   }
@@ -148,9 +252,13 @@ export function createLafdGeocoder({ search = fetchNominatimSearch } = {}) {
     if (cache.has(key)) return cache.get(key);
     let point = null;
     try {
-      const payload = await search(`${address}, Los Angeles, CA`, bounds, {
-        signal,
-      });
+      const payload = await search(
+        lafdGeocodeQuery(address) + ', Los Angeles, CA',
+        bounds,
+        {
+          signal,
+        },
+      );
       const location = payload?.results?.[0]?.geometry?.location;
       if (
         location &&
@@ -173,15 +281,33 @@ export function createLafdGeocoder({ search = fetchNominatimSearch } = {}) {
 }
 
 /** Place parsed alerts; returns the rows that geocoded inside the region. */
-export async function placeLafdAlerts(alerts, { geocode, now, signal } = {}) {
+export async function placeLafdAlerts(
+  alerts,
+  { geocode, resolveLink = createLafdLinkResolver(), now, signal } = {},
+) {
   const rows = [];
-  let geocodes = 0;
+  const region = liveOpsRegion('los-angeles');
+  const [west, south, east, north] = region.bbox;
+  const inRegion = (point) =>
+    Boolean(point) &&
+    point.lat >= south &&
+    point.lat <= north &&
+    point.lon >= west &&
+    point.lon <= east;
+  let lookups = 0;
   for (const alert of alerts) {
     if (alert.time != null && now() - alert.time > LAFD_WINDOW_MS) continue;
-    if (!alert.address) continue;
-    if (geocodes >= MAX_GEOCODES_PER_REFRESH) break;
-    geocodes += 1;
-    const point = await geocode(alert.address, { signal });
+    if (!alert.address && !alert.mapLink) continue;
+    if (lookups >= MAX_GEOCODES_PER_REFRESH) break;
+    lookups += 1;
+    // The alert's own map link carries exact coordinates; the geocoder is the
+    // fallback when the link is missing or does not resolve.
+    let point = alert.mapLink
+      ? await resolveLink(alert.mapLink, { signal })
+      : null;
+    if (!inRegion(point)) point = null;
+    if (!point && alert.address)
+      point = await geocode(alert.address, { signal });
     if (!point) continue;
     const row = incidentRecord({
       id: alert.id,
@@ -192,7 +318,7 @@ export async function placeLafdAlerts(alerts, { geocode, now, signal } = {}) {
       typeDetail: alert.title.replace(/\s+\d{1,2}\/\d{1,2}\/\d{4}.*$/, ''),
       lat: point.lat,
       lon: point.lon,
-      location: alert.address,
+      location: alert.address || 'City of Los Angeles',
       area: 'City of Los Angeles',
       time: alert.time,
       description: alert.body.slice(0, 400) || null,
@@ -204,12 +330,16 @@ export async function placeLafdAlerts(alerts, { geocode, now, signal } = {}) {
   return rows;
 }
 
-export function createLafdFetcher({ geocode = createLafdGeocoder() } = {}) {
+export function createLafdFetcher({
+  geocode = createLafdGeocoder(),
+  resolveLink,
+} = {}) {
   return async function fetchLafdAlerts({
     fetchImpl,
     now = () => Date.now(),
     signal,
   } = {}) {
+    const links = resolveLink || createLafdLinkResolver({ fetchImpl });
     const xml = await fetchIncidentUpstream(LAFD_ALERTS_URL, {
       fetchImpl,
       signal,
@@ -219,6 +349,11 @@ export function createLafdFetcher({ geocode = createLafdGeocoder() } = {}) {
     });
     if (!/<rss[\s>]|<feed[\s>]|<item>/i.test(xml))
       throw new Error('not the LAFD alerts feed');
-    return placeLafdAlerts(parseLafdAlerts(xml), { geocode, now, signal });
+    return placeLafdAlerts(parseLafdAlerts(xml), {
+      geocode,
+      resolveLink: links,
+      now,
+      signal,
+    });
   };
 }
