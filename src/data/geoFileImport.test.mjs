@@ -28,6 +28,13 @@ import {
 } from './geoFileImport.js';
 import { createImportImageBudget, importImageSize } from './geoImportImages.js';
 
+/**
+ * How long this process took to load the suite's imports, Cesium included.
+ * `node --test` starts each file in its own process, so this is the cost the
+ * repair child below pays again before any repair runs.
+ */
+const SUITE_LOAD_MS = process.uptime() * 1000;
+
 test('real loader grounds XYZ GeoJSON and strips loader-sensitive metadata before allocation', async () => {
   const previous = Cesium.PinBuilder.prototype.fromColor;
   Cesium.PinBuilder.prototype.fromColor = () => ({
@@ -1194,21 +1201,61 @@ test('KML root namespace repair respects quoted delimiters and preserves the doc
     assert.throws(() => repairKmlRootNamespaces(malformed), GeoImportError);
 });
 
-test('repeated incomplete KML roots finish within an isolated process deadline', () => {
+/**
+ * CPU time the KML root repair may spend on the hostile inputs below. The
+ * three repairs take about 50 ms together; the budget leaves room for a busy
+ * machine and still fails anything super-linear.
+ */
+const KML_ROOT_REPAIR_CPU_BUDGET_MS = 2_000;
+/**
+ * Wall-clock ceiling for the whole repair child. It only has to catch a
+ * repair that never returns, so it is generous: four times what loading the
+ * importer took in this process (6 s on an idle Windows machine, 37 s with
+ * the full suite, a dev server and a browser running), and never under 30 s.
+ */
+const KML_ROOT_REPAIR_HANG_CEILING_MS = Math.max(
+  30_000,
+  Math.ceil(4 * SUITE_LOAD_MS),
+);
+
+test('repeated incomplete KML roots finish within an isolated process deadline', (t) => {
+  // The repair runs in a child process so a scan that never returns cannot
+  // hang the suite, and the child is judged on the CPU time of the repairs
+  // alone: its wall-clock time is dominated by loading Cesium, which on a
+  // busy machine is far longer than any sensible repair deadline.
   const source = `import { repairKmlRootNamespaces } from ${JSON.stringify(new URL('./geoFileImport.js', import.meta.url).href)};
-    try { repairKmlRootNamespaces('<kml '.repeat(1000000)); process.exit(1); }
-    catch (error) { if (error.name !== 'GeoImportError') throw error; }
-    try { repairKmlRootNamespaces('<!DOCTYPE kml [' + ${JSON.stringify("<!-- ' --><?pi ' ?>")}.repeat(100000) + ']><kml '); process.exit(1); }
-    catch (error) { if (error.name !== 'GeoImportError') throw error; }
+    const loadMs = process.uptime() * 1000;
+    const startedCpu = process.cpuUsage();
+    const startedAt = performance.now();
+    const expectInvalid = (text) => {
+      try { repairKmlRootNamespaces(text); }
+      catch (error) { if (error.name === 'GeoImportError') return; throw error; }
+      throw new Error('an unterminated KML root was accepted');
+    };
+    expectInvalid('<kml '.repeat(1000000));
+    expectInvalid('<!DOCTYPE kml [' + ${JSON.stringify("<!-- ' --><?pi ' ?>")}.repeat(100000) + ']><kml ');
     const wide = '<kml' + ${JSON.stringify(` xmlns:gx="a" note='xmlns:gx="b"'`)}.repeat(20000) + '/>';
-    if (repairKmlRootNamespaces(wide).split('xmlns:gx="a"').length !== 2) process.exit(1);`;
+    if (repairKmlRootNamespaces(wide).split('xmlns:gx="a"').length !== 2) throw new Error('the repeated root namespace was kept');
+    const cpu = process.cpuUsage(startedCpu);
+    process.stdout.write(JSON.stringify({ loadMs, repairCpuMs: (cpu.user + cpu.system) / 1000, repairWallMs: performance.now() - startedAt }));`;
   const child = spawnSync(
     process.execPath,
     ['--input-type=module', '-e', source],
-    { timeout: 5000, encoding: 'utf8' },
+    { timeout: KML_ROOT_REPAIR_HANG_CEILING_MS, encoding: 'utf8' },
   );
-  assert.ifError(child.error);
+  assert.ok(
+    !child.error,
+    `the KML root repair child did not finish within ${KML_ROOT_REPAIR_HANG_CEILING_MS} ms (${child.error?.code}): a repair that never returns`,
+  );
   assert.equal(child.status, 0, child.stderr);
+  const timings = JSON.parse(child.stdout);
+  t.diagnostic(
+    `KML root repairs took ${timings.repairCpuMs.toFixed(0)} ms CPU (${timings.repairWallMs.toFixed(0)} ms wall) after ${timings.loadMs.toFixed(0)} ms loading the importer; suite loaded in ${SUITE_LOAD_MS.toFixed(0)} ms, ceiling ${KML_ROOT_REPAIR_HANG_CEILING_MS} ms`,
+  );
+  assert.ok(
+    timings.repairCpuMs < KML_ROOT_REPAIR_CPU_BUDGET_MS,
+    `the KML root repairs spent ${timings.repairCpuMs.toFixed(0)} ms of CPU time on inputs that must scan in linear time (budget ${KML_ROOT_REPAIR_CPU_BUDGET_MS} ms)`,
+  );
 });
 
 test('KML root repair ignores incomplete tag text inside preamble comments', () => {
