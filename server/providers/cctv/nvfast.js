@@ -11,7 +11,10 @@
  * 1,250 rows, 1,150 of them inside the Las Vegas LIVE OPS box on
  * 2026-11-02), and serves each camera's current still at
  * `Snapshots/<id>.jpeg`. About a quarter of the rows also name an NDOT HLS
- * playlist on `d1wse<n>.its.nv.gov`.
+ * playlist on `d1wse<n>.its.nv.gov`; whether those play depends on the day
+ * (every one sampled on 2026-11-02 answered 404), so each catalog load asks
+ * a few of them and registers video only when NDOT answers
+ * (resolveNvfastVideo).
  *
  * Nevada 511 (nvroads.js) publishes roughly a third of these cameras; the
  * catalog drops a Nevada 511 camera that sits on the same pole as a FAST one
@@ -38,6 +41,19 @@ export const NVFAST_IMAGE_ORIGIN = `${NVFAST_ORIGIN}/Snapshots/`;
 export const DEFAULT_NVFAST_MAX_SOURCES = 1200;
 /** The catalog page is about 680 KB. */
 export const NVFAST_MAX_CATALOG_BYTES = 6 * 1024 * 1024;
+/**
+ * The NDOT video probe, when CCTV_NVFAST_VIDEO is unset: up to this many of
+ * the playlists the table names, spread across NDOT's `d1wse<n>` hosts, this
+ * many in flight, this long each. It runs once per catalog load (every 15
+ * minutes), never per request or per frame.
+ */
+export const NVFAST_PROBE_MAX_PLAYLISTS = 6;
+export const NVFAST_PROBE_CONCURRENCY = 3;
+export const NVFAST_PROBE_TIMEOUT_MS = 5000;
+/** A playlist is a few hundred bytes; the probe reads no more than this. */
+export const NVFAST_PROBE_MAX_BYTES = 64 * 1024;
+/** The pack's own identity on every request, catalog page and probe alike. */
+const NVFAST_USER_AGENT = 'osiris-cctv-proxy/1.0';
 /** Prioritization anchors: the Las Vegas valley. */
 export const NVFAST_ANCHORS = [
   { lat: 36.1699, lon: -115.1398 }, // Las Vegas
@@ -204,20 +220,196 @@ export function nvfastRowToSource(row, { video = true } = {}) {
 }
 
 /**
- * Load the FAST cameras: one page request, nearest the valley first, capped
- * by CCTV_NVFAST_MAX_SOURCES. Stills only unless CCTV_NVFAST_VIDEO=1: every
- * one of thirteen NDOT playlists sampled on 2026-11-02 answered 404, so a
- * camera registered as live would show a placeholder where its still works.
- * Fails soft to an empty pack.
+ * The playlists to probe: at most `max` of the distinct NDOT playlists the
+ * rows name, shared round-robin across the `d1wse<n>` hosts and spaced
+ * through each host's list, so one dark host or corridor does not decide
+ * the pack. Hosts alternate in the result, so the requests in flight at any
+ * moment spread across them too. Deterministic, so a load is reproducible.
+ * @param {Array<Array<unknown>>} rows The table rows.
+ * @param {number} [max]
+ * @returns {string[]}
  */
-export async function loadNvfastSources(_options = {}, env = process.env) {
+export function sampleNvfastPlaylists(rows, max = NVFAST_PROBE_MAX_PLAYLISTS) {
+  const byHost = new Map();
+  const seen = new Set();
+  for (const row of Array.isArray(rows) ? rows : []) {
+    const url = Array.isArray(row) ? nvfastStreamUrl(row[5]) : null;
+    if (!url || seen.has(url)) continue;
+    seen.add(url);
+    const host = new URL(url).hostname;
+    if (!byHost.has(host)) byHost.set(host, []);
+    byHost.get(host).push(url);
+  }
+  const hosts = [...byHost.keys()].sort();
+  const shares = new Map(hosts.map((host) => [host, 0]));
+  let wanted = Math.min(Math.max(0, Math.floor(max)) || 0, seen.size);
+  // One per host per round until the sample is full; a host with fewer
+  // playlists than rounds leaves its turn to the others.
+  for (let i = 0; wanted > 0; i = (i + 1) % hosts.length) {
+    const host = hosts[i];
+    if (shares.get(host) < byHost.get(host).length) {
+      shares.set(host, shares.get(host) + 1);
+      wanted -= 1;
+    }
+  }
+  const picks = [];
+  const rounds = Math.max(0, ...shares.values());
+  for (let round = 0; round < rounds; round += 1) {
+    for (const host of hosts) {
+      const share = shares.get(host);
+      if (round >= share) continue;
+      const list = byHost.get(host);
+      picks.push(list[Math.floor((round * list.length) / share)]);
+    }
+  }
+  return picks;
+}
+
+/**
+ * One playlist: does NDOT answer it? `answered` is a 200 whose body starts
+ * `#EXTM3U`, fetched as the pack fetches everything (its User-Agent, no
+ * redirects, a byte cap, a deadline); `refused` is a 403 or 429; anything
+ * else, a timeout or a network error included, is `silent`. Never throws.
+ * @param {string} url
+ * @param {{timeoutMs: number, fetchImpl: typeof fetch}} options
+ * @returns {Promise<{outcome: 'answered'|'refused'|'silent', status: number|null}>}
+ */
+async function probeNvfastPlaylist(url, { timeoutMs, fetchImpl }) {
+  let resp;
+  try {
+    resp = await fetchImpl(url, {
+      headers: {
+        Accept: 'application/vnd.apple.mpegurl, application/x-mpegURL, */*',
+        'User-Agent': NVFAST_USER_AGENT,
+      },
+      redirect: 'manual',
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+  } catch {
+    return { outcome: 'silent', status: null };
+  }
+  const status = Number(resp?.status) || 0;
+  try {
+    if (status === 403 || status === 429) return { outcome: 'refused', status };
+    if (status !== 200) return { outcome: 'silent', status };
+    const body = await readCappedResponseText(resp, NVFAST_PROBE_MAX_BYTES);
+    const text = body.tooLarge ? '' : body.text.replace(/^﻿/, '').trimStart();
+    return {
+      outcome: text.startsWith('#EXTM3U') ? 'answered' : 'silent',
+      status,
+    };
+  } catch {
+    return { outcome: 'silent', status };
+  } finally {
+    if (status !== 200) {
+      try {
+        await resp?.body?.cancel();
+      } catch {
+        /* no-op */
+      }
+    }
+  }
+}
+
+/**
+ * Ask the sampled playlists, `concurrency` at a time, and count the answers.
+ * A refusal (403 or 429) ends the probe, so a host that refuses us hears
+ * nothing more this load; `refused` is that status, or null. Never throws.
+ * @param {string[]} playlists
+ * @param {{concurrency?: number, timeoutMs?: number, fetchImpl?: typeof fetch}} [options]
+ * @returns {Promise<{answered: number, probed: number, refused: number|null}>}
+ */
+export async function probeNvfastVideo(
+  playlists,
+  {
+    concurrency = NVFAST_PROBE_CONCURRENCY,
+    timeoutMs = NVFAST_PROBE_TIMEOUT_MS,
+    fetchImpl = globalThis.fetch,
+  } = {},
+) {
+  const queue = Array.isArray(playlists) ? [...playlists] : [];
+  const result = { answered: 0, probed: 0, refused: null };
+  const worker = async () => {
+    while (queue.length && result.refused === null) {
+      const url = queue.shift();
+      result.probed += 1;
+      const { outcome, status } = await probeNvfastPlaylist(url, {
+        timeoutMs,
+        fetchImpl,
+      });
+      if (outcome === 'answered') result.answered += 1;
+      else if (outcome === 'refused' && result.refused === null)
+        result.refused = status;
+    }
+  };
+  const workers = Math.min(
+    Math.max(1, Math.floor(concurrency) || 1),
+    queue.length,
+  );
+  await Promise.all(Array.from({ length: workers }, worker));
+  return result;
+}
+
+/**
+ * Whether this load registers NDOT video, and why (for the load log line).
+ * `CCTV_NVFAST_VIDEO=1` forces video and `0` forces stills without a
+ * request; unset, the probe decides: video when at least one sampled
+ * playlist answers, stills when none does, when no row names a playlist, or
+ * when the probe itself fails. Once per catalog load, never per request.
+ * @param {Array<Array<unknown>>} rows The table rows.
+ * @param {Record<string, string|undefined>} [env]
+ * @param {object} [probe] probeNvfastVideo options (tests shorten the deadline).
+ * @returns {Promise<{video: boolean, note: string}>}
+ */
+export async function resolveNvfastVideo(rows, env = process.env, probe = {}) {
+  const setting = String(env?.CCTV_NVFAST_VIDEO ?? '').trim();
+  if (setting === '1') {
+    return {
+      video: true,
+      note: 'CCTV_NVFAST_VIDEO=1, registering NDOT video unprobed',
+    };
+  }
+  if (setting === '0') {
+    return { video: false, note: 'CCTV_NVFAST_VIDEO=0, registering stills' };
+  }
+  const playlists = sampleNvfastPlaylists(rows);
+  if (!playlists.length) {
+    return { video: false, note: 'no row names an NDOT playlist' };
+  }
+  let result;
+  try {
+    result = await probeNvfastVideo(playlists, probe ?? {});
+  } catch (error) {
+    return {
+      video: false,
+      note: `probe failed (${error?.message || error}), registering stills`,
+    };
+  }
+  const video = result.answered > 0;
+  const tally = `probe ${result.answered}/${result.probed} playlists answered`;
+  const stopped =
+    result.refused === null ? '' : `, stopped at HTTP ${result.refused}`;
+  return {
+    video,
+    note: `${tally}${stopped}, registering ${video ? 'NDOT video' : 'stills'}`,
+  };
+}
+
+/**
+ * Load the FAST cameras: one page request, nearest the valley first, capped
+ * by CCTV_NVFAST_MAX_SOURCES. Rows that name an NDOT playlist register as
+ * live video, the still as the snapshot fallback, when resolveNvfastVideo
+ * finds NDOT answering (or CCTV_NVFAST_VIDEO=1 says so), as stills
+ * otherwise; `options.probe` tunes that probe (tests). Fails soft to an
+ * empty pack.
+ */
+export async function loadNvfastSources(options = {}, env = process.env) {
   const url = String(env.CCTV_NVFAST_URL || '').trim() || NVFAST_CATALOG_URL;
-  const video = String(env.CCTV_NVFAST_VIDEO ?? '').trim() === '1';
   try {
     const resp = await fetch(url, {
       headers: {
         Accept: 'text/html',
-        'User-Agent': 'osiris-cctv-proxy/1.0',
+        'User-Agent': NVFAST_USER_AGENT,
       },
       redirect: 'manual',
       signal: AbortSignal.timeout(CCTV_SOURCE_FETCH_TIMEOUT_MS),
@@ -239,6 +431,7 @@ export async function loadNvfastSources(_options = {}, env = process.env) {
     const rows = parseNvfastCatalogPage(
       typeof page === 'string' ? page : page?.text,
     );
+    const { video, note } = await resolveNvfastVideo(rows, env, options?.probe);
     const byId = new Map();
     for (const row of rows) {
       const camera = nvfastRowToSource(row, { video });
@@ -256,7 +449,7 @@ export async function loadNvfastSources(_options = {}, env = process.env) {
       (camera) => camera.feedType === 'hls',
     ).length;
     console.log(
-      `[CCTV] Loaded RTC FAST camera sources: ${cameras.length} published (using nearest ${prioritized.length}, ${live} with NDOT video)`,
+      `[CCTV] Loaded RTC FAST camera sources: ${cameras.length} published (using nearest ${prioritized.length}, ${live} with NDOT video; ${note})`,
     );
     return prioritized;
   } catch (error) {

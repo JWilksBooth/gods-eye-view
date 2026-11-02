@@ -65,8 +65,12 @@ a tile activates that camera and closes the wall. The budget model
 (`cameraWallModel.js`) is pure and unit-tested.
 
 Camera packs: the RTC FAST Dashboard (`nvfast-dashboard`, every camera FAST
-operates in the Las Vegas valley, stills; a Nevada 511 camera on the same
-pole is dropped), ALERTCalifornia (`alertcalifornia`, UC San Diego's fire
+operates in the Las Vegas valley; a Nevada 511 camera on the same pole is
+dropped; stills, and live NDOT video for the rows that name a playlist on
+the days NDOT's streams answer: each catalog load probes up to six of them
+across NDOT's hosts and registers video only when one answers, so the Las
+Vegas cameras carry LIVE badges without an env change, `CCTV_NVFAST_VIDEO`
+forcing either way), ALERTCalifornia (`alertcalifornia`, UC San Diego's fire
 cameras with their live pan, tilt and field of view, CC BY-NC-ND 4.0 with
 credit, nearest the California regions first), and Caltrans districts 12, 8
 and 1 join the defaults with a 1,500-camera default cap, and the
