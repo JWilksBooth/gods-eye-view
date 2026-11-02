@@ -80,6 +80,10 @@
 
 .location-pills {
   display: flex;
+  /* Every city stays visible: the row wraps instead of hiding the overflow
+     behind a scrollbar that is itself hidden, which a mouse cannot reach. */
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 6px;
   overflow-x: auto;
   scroll-behavior: smooth;
@@ -136,6 +140,7 @@
 /* ── Expandable POI Row ──────────────────────── */
 .poi-row-container {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   justify-content: center;
   max-height: 0;
@@ -149,7 +154,7 @@
 }
 
 .poi-row-container.expanded {
-  max-height: 50px;
+  max-height: 140px;
   opacity: 1;
   padding: 4px 4px 0;
 }

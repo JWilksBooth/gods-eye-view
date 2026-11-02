@@ -58,6 +58,8 @@
     "Layout",
     "London",
     "Los Angeles",
+    "Las Vegas",
+    "Sonoma County",
     "MIL",
     "MINI",
     "MISSION",
@@ -314,7 +316,8 @@
     "{width} × {height} px · MSAA {samples}×",
     "ΔE",
     "ΔN",
-    "▲ {frp} MW"
+    "▲ {frp} MW",
+    "Las Vegas"
   ],
   "fr": [
     "1090 MHz",
@@ -398,6 +401,7 @@
     "Latitude",
     "Longitude",
     "Los Angeles",
+    "Las Vegas",
     "MIC",
     "MIL",
     "MINI",
@@ -583,6 +587,7 @@
     "Landsat 8/9",
     "Layout",
     "Los Angeles",
+    "Las Vegas",
     "MIC",
     "MIL",
     "MINI",
@@ -816,6 +821,7 @@
     "Layout",
     "Longitude",
     "Los Angeles",
+    "Las Vegas",
     "MIC",
     "MIL",
     "MINI",
