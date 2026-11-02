@@ -6,7 +6,7 @@ import {
   parseStationStatus,
 } from '../../sources/gbfsStations.js';
 import {
-  FEED_STALE_AFTER_MS,
+  feedStaleAfterMs,
   isStaleVehicleFix,
 } from '../../layers/transit/policy.js';
 import { defineTool, ToolError } from '../catalog.js';
@@ -181,10 +181,32 @@ export const getTransitVehicles = defineTool({
         summary: `No supported transit feed covers ${area.label}.`,
         data: { ...capRows([], args.limit), feeds: [] },
       };
+    // A keyed feed without its key is named, not asked: the proxy would only
+    // answer "needs a key", and the useful answer is which variable to set.
+    const keyed = feeds.filter((feed) => feed.keyRequired === true);
+    const askable = feeds.filter((feed) => feed.keyRequired !== true);
+    const keyedFeedRow = (feed) => ({
+      name: feed.name,
+      status: 'key-required',
+      env_var: feed.envVar ?? null,
+      operator: feed.operator ?? null,
+      attribution: feed.attribution ?? null,
+      license: feed.license ?? null,
+    });
+    const needsKeys = keyed
+      .map((feed) => `${feed.name} needs ${feed.envVar}`)
+      .join(', ');
+    if (!askable.length)
+      return {
+        summary:
+          `No transit feed covering ${area.label} has its key configured ` +
+          `(${needsKeys}).`,
+        data: { ...capRows([], args.limit), feeds: keyed.map(keyedFeedRow) },
+      };
     const center = areaCenter(area);
     const now = services.clock?.now() ?? Date.now();
     const results = await Promise.allSettled(
-      feeds.map(async (feed) => {
+      askable.map(async (feed) => {
         const response = await services.transit.requestSnapshot(feed.id, {
           signal,
         });
@@ -205,7 +227,7 @@ export const getTransitVehicles = defineTool({
         );
         const stale =
           response.headers?.get?.('x-gev-cache') === 'STALE-ERROR' ||
-          now - answeredAt > FEED_STALE_AFTER_MS;
+          now - answeredAt > feedStaleAfterMs(feed);
         const vehicles = snapshot.vehicles || [];
         const current = vehicles.filter(
           (vehicle) => !isStaleVehicleFix(vehicle, now, fetchedAt),
@@ -269,6 +291,7 @@ export const getTransitVehicles = defineTool({
             `${countNoun(staleFeeds, 'feed')} stale; positions may be out of date`,
           ]
         : []),
+      ...(keyed.length ? [needsKeys] : []),
       ...skippedNote(skipped, (feed) => feed.name),
     ];
     const what = args.route ? ` on route ${args.route}` : '';
@@ -282,18 +305,21 @@ export const getTransitVehicles = defineTool({
         stale: staleFeeds > 0,
         expired_positions_dropped: expired,
         feeds_not_searched: skipped.map((feed) => feed.name),
-        feeds: feeds.map((feed, index) => ({
-          name: feed.name,
-          status:
-            results[index].status === 'rejected'
-              ? 'unavailable'
-              : results[index].value.stale
-                ? 'stale'
-                : 'current',
-          operator: feed.operator ?? null,
-          attribution: feed.attribution ?? null,
-          license: feed.license ?? null,
-        })),
+        feeds: [
+          ...askable.map((feed, index) => ({
+            name: feed.name,
+            status:
+              results[index].status === 'rejected'
+                ? 'unavailable'
+                : results[index].value.stale
+                  ? 'stale'
+                  : 'current',
+            operator: feed.operator ?? null,
+            attribution: feed.attribution ?? null,
+            license: feed.license ?? null,
+          })),
+          ...keyed.map(keyedFeedRow),
+        ],
       },
     };
   },

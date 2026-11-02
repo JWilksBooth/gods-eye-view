@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { PbfWriter } from 'pbf';
 import {
   TRANSIT_BACKOFF_LADDER_MS,
+  TRANSIT_BUDGET_WINDOW_MS,
   TRANSIT_PROXY_STALE_MAX_MS,
   TRANSIT_PROXY_TTL_MS,
   TransitFeedShapeError,
@@ -11,10 +12,13 @@ import {
   nextTransitBackoffMs,
   repairVehicleTimestamps,
   resolveTransitRoute,
+  transitBudgetDecision,
   transitCacheState,
+  transitKeyRequiredPayload,
   transitRedirectDecision,
   transitResponseHeaders,
   transitUpstreamHeaders,
+  transitUpstreamUrl,
 } from './transitProxy.js';
 import { getTransitFeed } from './transitFeeds.js';
 
@@ -364,4 +368,89 @@ test('client history validates response bounds, epochs and cancellation through 
     }),
     { name: 'AbortError' },
   );
+});
+
+test('a key travels in the header or query the feed names, and only when there is one', () => {
+  const sf511 = getTransitFeed('sf511-bay-area');
+  assert.equal(transitUpstreamUrl(sf511, null), sf511.url);
+  assert.equal(
+    transitUpstreamUrl(sf511, 'abc 123'),
+    'https://api.511.org/transit/vehiclepositions?agency=RG&api_key=abc+123',
+  );
+  assert.equal(
+    transitUpstreamHeaders(sf511, null, 'abc')['Authorization'],
+    undefined,
+  );
+  assert.match(transitUpstreamHeaders(sf511).Accept, /x-google-protobuf/);
+  const swiftly = getTransitFeed('lametro-bus');
+  assert.equal(transitUpstreamUrl(swiftly, 'k'), swiftly.url);
+  assert.equal(transitUpstreamHeaders(swiftly, null, 'k').Authorization, 'k');
+  assert.equal(
+    transitUpstreamHeaders(swiftly, null, null).Authorization,
+    undefined,
+  );
+  assert.equal(
+    transitUpstreamHeaders(getTransitFeed('metrolink'), null, 'm')['X-Api-Key'],
+    'm',
+  );
+  // A keyless feed is untouched by a key it was never given.
+  const octa = getTransitFeed('octa');
+  assert.equal(transitUpstreamUrl(octa, 'k'), octa.url);
+  assert.equal(
+    transitUpstreamHeaders(octa, null, 'k').Authorization,
+    undefined,
+  );
+  assert.equal(transitUpstreamUrl(null), '');
+});
+
+test('the key-required answer names the variable and nothing else', () => {
+  assert.deepEqual(
+    transitKeyRequiredPayload(getTransitFeed('sf511-bay-area')),
+    {
+      error: 'Transit feed needs a key',
+      feedId: 'sf511-bay-area',
+      envVar: 'BAY_AREA_511_API_KEY',
+      keyRequired: true,
+    },
+  );
+});
+
+test('a feed-specific cache window keeps a snapshot fresh for as long as the feed says', () => {
+  const now = 1_700_000_000_000;
+  const entry = { at: now - 60_000 };
+  assert.equal(transitCacheState(entry, now), 'stale');
+  assert.equal(transitCacheState(entry, now, 80_000), 'fresh');
+  assert.equal(transitCacheState({ at: now - 80_000 }, now, 80_000), 'stale');
+  assert.equal(
+    transitResponseHeaders('HIT', 'api.511.org', now, 80_000)['Cache-Control'],
+    'public, max-age=80',
+  );
+  assert.equal(
+    transitResponseHeaders('HIT')['Cache-Control'],
+    `public, max-age=${Math.floor(TRANSIT_PROXY_TTL_MS / 1000)}`,
+  );
+});
+
+test('an hourly budget admits loads until the rolling hour is spent, then says when it frees up', () => {
+  const now = 1_700_000_000_000;
+  assert.deepEqual(transitBudgetDecision(undefined, undefined, now), {
+    ok: true,
+    attempts: [],
+    retryAfterS: 0,
+  });
+  assert.equal(transitBudgetDecision([now - 1], 0, now).ok, true, 'no budget');
+  const spent = [now - 30 * 60_000, now - 20 * 60_000, now - 10 * 60_000];
+  assert.equal(transitBudgetDecision(spent, 4, now).ok, true);
+  const refused = transitBudgetDecision(spent, 3, now);
+  assert.equal(refused.ok, false);
+  assert.equal(
+    refused.retryAfterS,
+    30 * 60,
+    'free when the oldest load ages out',
+  );
+  // Loads older than the window are forgotten, and never block.
+  const aged = [now - TRANSIT_BUDGET_WINDOW_MS - 1, ...spent];
+  const decision = transitBudgetDecision(aged, 4, now);
+  assert.equal(decision.ok, true);
+  assert.deepEqual(decision.attempts, spent);
 });

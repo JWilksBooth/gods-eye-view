@@ -78,6 +78,10 @@ const FEED_ERROR_PATTERNS = [
     ([, feed]) => t('{feed} feed unavailable', { feed: translateKnown(feed) }),
   ],
   [
+    /^(.+) feed needs a key$/,
+    ([, feed]) => t('{feed} feed needs a key', { feed: translateKnown(feed) }),
+  ],
+  [
     /^Source snapshot (\d+) min old$/,
     ([, minutes]) => t('Source snapshot {minutes} min old', { minutes }),
   ],

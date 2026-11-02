@@ -1,7 +1,7 @@
 import {
   ACTIVATION_ALTITUDE_M,
-  FEED_STALE_AFTER_MS,
   aggregateTransitFeedHealth,
+  feedStaleAfterMs,
   transitDetectionClass,
   transitDetectionId,
   transitDetectionMetric,
@@ -261,7 +261,7 @@ export function createQueries({ state, parts }) {
           const quiet =
             status.stale === true ||
             (Number.isFinite(status.upstreamAt) &&
-              now - status.upstreamAt > FEED_STALE_AFTER_MS);
+              now - status.upstreamAt > feedStaleAfterMs(feed));
           const aged =
             quiet && Number.isFinite(status.upstreamAt)
               ? ` (${Math.round((now - status.upstreamAt) / 1000)}s old)`

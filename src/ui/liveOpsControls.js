@@ -20,6 +20,7 @@ const STATUS_KEYS = Object.freeze({
   idle: msg('Pick a region'),
   flying: msg('Flying to {region}…'),
   ready: msg('{region} · cameras, incidents and traffic on'),
+  readyTransit: msg('{region} · cameras, incidents, traffic and transit on'),
   refused: msg('Leave Cockpit to switch regions'),
   error: msg('{region} · headlines unavailable'),
 });
@@ -163,7 +164,7 @@ export class LiveOpsControls {
     }
     this._activeRegionId = region.id;
     this._syncPressed();
-    this._setStatus('ready', region);
+    this._setStatus(region.transit?.length ? 'readyTransit' : 'ready', region);
     this._renderFeeds();
     this._loadHeadlines(region);
     return true;

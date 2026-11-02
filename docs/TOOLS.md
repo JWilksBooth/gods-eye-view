@@ -82,7 +82,9 @@ application request services from `osiris/application/requests`.
 others unavailable. `live_ops_region` does the same for one region of the LIVE OPS
 console: its cameras (`find_cctv_cameras` over the region's box), live
 incidents (`get_incidents` for the region) and headlines (the `liveOps`
-service, `/api/live-ops/headlines`). The regions and their boxes come from
+service, `/api/live-ops/headlines`). The view it suggests turns on cameras,
+incidents, traffic and, for a region with a live vehicle feed (every region
+has one), Transit (`liveOpsRegionLayers`). The regions and their boxes come from
 `src/data/liveOpsRegions.js` (`gods-eye-view/sources/live-ops`); the
 `incidents` service is the incidents layer's source over `/api/incidents`. The `alerts` service is the Alerts layer's source over `/api/alerts` (official alerts for the same regions, narrowed by region, kind and minimum severity) and `/api/alerts/airports` (FAA airport status), which `get_alerts` and `get_airport_status` read. The
 `streams` service is the live-streams layer's source over `/api/streams`, and
@@ -308,7 +310,7 @@ and the development server's internal routes. See SECURITY.md.
 | `get_cyclones` | `cyclones` | Active NHC/CPHC tropical cyclones, optionally in an area |
 | `get_fire_perimeters` | `perimeters` | Mapped WFIGS wildfire perimeters in an area, largest first |
 | `get_incidents` | `incidents` | Live police, fire, EMS and traffic incidents from public agency feeds (CHP CAD, DataSF, LAFD, CAL FIRE, Nevada 511) in the LIVE OPS regions, newest first; by region, area and type |
-| `live_ops_region` | `liveOps` | One LIVE OPS region (Los Angeles, Sonoma County, San Francisco Bay Area, Las Vegas): its cameras, live incidents and latest headlines, with the view that opens it |
+| `live_ops_region` | `liveOps` | One LIVE OPS region (Los Angeles, Sonoma County, San Francisco Bay Area, Las Vegas): its cameras, live incidents and latest headlines, with the view that opens it (cameras, incidents, traffic and live transit on) |
 | `get_alerts` | `alerts` | Official alerts in the LIVE OPS regions, worst first: NWS warnings and advisories, CAL FIRE, Caltrans closures, FAA airport status, AirNow air quality, transit service alerts and agency bulletins; by area or region, kind and minimum severity, with each feed's state |
 | `get_airport_status` | `alerts` | FAA closures and restrictions, ground stops, ground delay programs and delays for airport codes, an area or a region (default: the regions' airports) |
 | `find_live_streams` | `streams` | Public live streams and webcams with a place on the map (curated 24/7 cameras, YouTube live discovery and Windy webcams when keyed, scanner directories as links) in the LIVE OPS regions; by region, area, kind and source |

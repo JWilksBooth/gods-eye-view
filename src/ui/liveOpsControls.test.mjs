@@ -172,7 +172,7 @@ test('clicking a region flies, marks it pressed, lists feeds and loads headlines
   assert.equal(h.buttons()[3].getAttribute('aria-pressed'), 'false');
   assert.equal(
     h.byId('live-ops-status').textContent,
-    'Los Angeles · cameras, incidents and traffic on',
+    'Los Angeles · cameras, incidents, traffic and transit on',
   );
   const feeds = h.byId('live-ops-feeds');
   assert.equal(feeds.hidden, false);

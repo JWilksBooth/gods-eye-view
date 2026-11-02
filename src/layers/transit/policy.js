@@ -53,6 +53,25 @@ export const VEHICLE_MAX_FIX_AGE_MS = 10 * 60_000;
 /** A feed with no successful poll for this long reads as stale in the panel. */
 export const FEED_STALE_AFTER_MS = 90_000;
 /**
+ * Grace past a feed's own proxy cache window before its silence reads as
+ * stale. A feed the proxy refreshes every 80 s is simply between loads at
+ * 90 s, not quiet; one full window plus this is quiet.
+ */
+export const FEED_STALE_GRACE_MS = 60_000;
+
+/**
+ * The silence after which THIS feed reads as stale: the shared threshold, or
+ * the feed's own cache window plus a grace period when that is longer. Reads
+ * the registry entry or a catalog entry alike (both carry `refreshMs`).
+ * @param {{refreshMs?: number}|null|undefined} feed
+ * @returns {number} ms
+ */
+export function feedStaleAfterMs(feed) {
+  const refresh =
+    Number.isFinite(feed?.refreshMs) && feed.refreshMs > 0 ? feed.refreshMs : 0;
+  return Math.max(FEED_STALE_AFTER_MS, refresh + FEED_STALE_GRACE_MS);
+}
+/**
  * A feed with no successful poll for this long has its vehicles dropped. It is
  * deliberately shorter than VEHICLE_MAX_FIX_AGE_MS so a dead feed empties even
  * when its last snapshot carried optimistic timestamps.
@@ -301,11 +320,16 @@ export function aggregateTransitFeedHealth(statuses, nowMs) {
   }
   // Age is measured from when the OPERATOR last answered, never from when this
   // browser last received bytes — the proxy replays its cached copy on a fixed
-  // cadence during an outage, and that cadence is not freshness.
+  // cadence during an outage, and that cadence is not freshness. Each status
+  // carries the threshold its feed earned (`staleAfterMs`), because a feed
+  // polled on an operator's hourly allowance is between loads for longer.
   const isStale = (status) =>
     status.stale === true ||
     (Number.isFinite(status.upstreamAt) &&
-      nowMs - status.upstreamAt > FEED_STALE_AFTER_MS);
+      nowMs - status.upstreamAt >
+        (Number.isFinite(status.staleAfterMs)
+          ? status.staleAfterMs
+          : FEED_STALE_AFTER_MS));
   const staleFeeds = list.filter(isStale).length;
   const failing = list.find((status) => status.error) || null;
   const error = failing?.error || null;

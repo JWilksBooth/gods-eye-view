@@ -9,7 +9,12 @@ import { createTransitHistory } from './transitHistoryStore.js';
 
 import { coalesceProxyRequest, readResponseBytesCapped } from './httpBody.js';
 import { makeRateLimiter } from './rateLimit.js';
-import { publicTransitCatalog } from '../data/transitFeeds.js';
+import {
+  publicTransitCatalog,
+  transitFeedKey,
+  transitFeedKeyMissing,
+  transitFeedRefreshMs,
+} from '../data/transitFeeds.js';
 import {
   TRANSIT_ADMISSION_MAX_GLOBAL,
   TRANSIT_ADMISSION_MAX_PER_FEED,
@@ -17,17 +22,19 @@ import {
   TRANSIT_MAX_REDIRECTS,
   TRANSIT_PROXY_MAX_BODY_BYTES,
   TRANSIT_PROXY_TIMEOUT_MS,
-  TRANSIT_PROXY_TTL_MS,
   TransitFeedShapeError,
   buildTransitSnapshot,
   isAcceptableTransitUpstreamUrl,
   isTransitRedirectStatus,
   nextTransitBackoffMs,
   resolveTransitRoute,
+  transitBudgetDecision,
   transitCacheState,
+  transitKeyRequiredPayload,
   transitRedirectDecision,
   transitResponseHeaders,
   transitUpstreamHeaders,
+  transitUpstreamUrl,
 } from '../data/transitProxy.js';
 
 /**
@@ -39,10 +46,15 @@ import {
  * `redirect: 'manual'` and its `Location` checked against the feed's own https
  * origin first, the rule the CCTV frame proxy applies to camera images.
  *
+ * A keyed feed's key travels in the header or query parameter the registry
+ * names (`transitUpstreamHeaders`, `transitUpstreamUrl`) and nowhere else;
+ * the origin check still reads the registered, keyless URL.
+ *
  * @param {object} feed Registry entry.
  * @param {AbortSignal} signal Abort signal for the whole hop chain.
  * @param {typeof fetch} [fetchImpl] Injected for tests.
  * @param {{etag?: string|null, lastModified?: string|null}} [validators] Cached validators.
+ * @param {string|null} [key] The feed's key, when it has one.
  * @returns {Promise<{response: Response, finalUrl: string}>}
  */
 export async function fetchTransitFeed(
@@ -50,12 +62,13 @@ export async function fetchTransitFeed(
   signal,
   fetchImpl = fetch,
   validators = null,
+  key = null,
 ) {
-  let current = feed.url;
+  let current = transitUpstreamUrl(feed, key);
   for (let hop = 0; hop <= TRANSIT_MAX_REDIRECTS; hop += 1) {
     const response = await fetchImpl(current, {
       signal,
-      headers: transitUpstreamHeaders(feed, validators),
+      headers: transitUpstreamHeaders(feed, validators, key),
       redirect: 'manual',
     });
     // Only a real redirect is followed. A 304 is the successful answer to our
@@ -97,19 +110,32 @@ export async function fetchTransitFeed(
  * serve-stale-on-failure for up to 10 minutes (the launch-library pattern).
  * No disk cache — transit positions are worthless after a few minutes.
  *
- * Two backstops sit in front of every upstream request. A fixed-window
+ * Three backstops sit in front of every upstream request. A fixed-window
  * admission limiter bounds how often this process may ask any one operator,
  * and all of them together, no matter how many browser tabs are open. A
  * per-feed cooldown ladder then keeps a feed that is genuinely down from being
  * re-asked once per poll for a whole session: consecutive failures push the
- * next permitted attempt out to five minutes, and one success resets it.
+ * next permitted attempt out to five minutes, and one success resets it. And
+ * a feed whose token has an hourly allowance (`budgetPerHour`) is never asked
+ * more often than that in any rolling hour, whatever the ladder does.
  *
- * @param {{fetchImpl?: typeof fetch}} [options]
+ * Keyed feeds read their key from `env` on every request, so a key saved in
+ * Provider Settings applies at once; while it is absent the feed answers
+ * 503 `keyRequired` without asking the operator and without noting a failure.
+ * The cache window is per feed (`refreshMs`): an operator that allows a token
+ * sixty requests an hour is polled on those terms.
+ *
+ * @param {{fetchImpl?: typeof fetch, env?: Record<string, string|undefined>}} [options]
  * @returns {{handle: (request: Request) => Promise<Response>, close: () => void}}
  */
-export function createTransitService({ fetchImpl = fetch } = {}) {
+export function createTransitService({
+  fetchImpl = fetch,
+  env = globalThis.process?.env ?? {},
+} = {}) {
   /** @type {Map<string, {at:number, body:string, host:string}>} feedId → snapshot */
   const cache = new Map();
+  /** @type {Map<string, number[]>} feedId → times of upstream loads this hour */
+  const budgets = new Map();
   const history = createTransitHistory();
   const admitHistory = makeRateLimiter({
     windowMs: 60000,
@@ -126,8 +152,6 @@ export function createTransitService({ fetchImpl = fetch } = {}) {
     max: TRANSIT_ADMISSION_MAX_PER_FEED,
     globalMax: TRANSIT_ADMISSION_MAX_GLOBAL,
   });
-  const ttlSeconds = Math.ceil(TRANSIT_PROXY_TTL_MS / 1000);
-
   function reply(status, body, headers) {
     return new Response(body, { status, headers });
   }
@@ -148,7 +172,13 @@ export function createTransitService({ fetchImpl = fetch } = {}) {
       TRANSIT_PROXY_TIMEOUT_MS,
     );
     const previous = cache.get(feed.id);
+    if (feed.budgetPerHour) {
+      budgets.set(feed.id, [...(budgets.get(feed.id) || []), now]);
+    }
     try {
+      // Read at the moment of the request, never earlier: the environment is
+      // the only place the key lives, and it may have been set a second ago.
+      if (transitFeedKeyMissing(feed, env)) throw new Error('feed needs a key');
       const { response, finalUrl } = await fetchTransitFeed(
         feed,
         controller.signal,
@@ -156,6 +186,7 @@ export function createTransitService({ fetchImpl = fetch } = {}) {
         previous
           ? { etag: previous.etag, lastModified: previous.lastModified }
           : null,
+        transitFeedKey(feed, env),
       );
       if (closed) throw new Error('Transit provider closed');
       if (!isAcceptableTransitUpstreamUrl(finalUrl)) {
@@ -240,7 +271,7 @@ export function createTransitService({ fetchImpl = fetch } = {}) {
       });
     }
     if (route.route === 'feeds') {
-      return reply(200, JSON.stringify({ feeds: publicTransitCatalog() }), {
+      return reply(200, JSON.stringify({ feeds: publicTransitCatalog(env) }), {
         'Content-Type': 'application/json; charset=utf-8',
         'Cache-Control': 'public, max-age=3600',
       });
@@ -265,13 +296,26 @@ export function createTransitService({ fetchImpl = fetch } = {}) {
         { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
       );
     }
+    // A keyed feed without its key is answered here, instantly and honestly:
+    // no upstream request, no failure noted, and a body the layer reads as
+    // "needs a key" rather than as an outage.
+    if (transitFeedKeyMissing(feed, env)) {
+      return reply(503, JSON.stringify(transitKeyRequiredPayload(feed)), {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store',
+        'X-GEV-Cache': 'NONE',
+        'X-Transit-Backoff': 'key-required',
+      });
+    }
+    const ttlMs = transitFeedRefreshMs(feed);
+    const ttlSeconds = Math.ceil(ttlMs / 1000);
     const cached = cache.get(feed.id);
-    const state = transitCacheState(cached, now);
+    const state = transitCacheState(cached, now, ttlMs);
     if (state === 'fresh') {
       return reply(
         200,
         cached.body,
-        transitResponseHeaders('HIT', cached.host, cached.contactedAt),
+        transitResponseHeaders('HIT', cached.host, cached.contactedAt, ttlMs),
       );
     }
 
@@ -289,6 +333,7 @@ export function createTransitService({ fetchImpl = fetch } = {}) {
             'STALE-ERROR',
             cached.host,
             cached.contactedAt,
+            ttlMs,
           ),
         );
       }
@@ -319,6 +364,16 @@ export function createTransitService({ fetchImpl = fetch } = {}) {
     if (!inFlight.has(feed.id) && !admit(feed.id)) {
       return answerWithoutUpstream('rate-limited', ttlSeconds);
     }
+    if (!inFlight.has(feed.id) && feed.budgetPerHour) {
+      const budget = transitBudgetDecision(
+        budgets.get(feed.id),
+        feed.budgetPerHour,
+        now,
+      );
+      budgets.set(feed.id, budget.attempts);
+      if (!budget.ok)
+        return answerWithoutUpstream('budget', budget.retryAfterS);
+    }
 
     const request = coalesceProxyRequest(inFlight, feed.id, () =>
       refresh(feed, now),
@@ -332,6 +387,7 @@ export function createTransitService({ fetchImpl = fetch } = {}) {
           request.shared ? 'INFLIGHT' : 'MISS',
           fresh.host,
           fresh.contactedAt,
+          ttlMs,
         ),
       );
     } catch (error) {
@@ -364,6 +420,7 @@ export function createTransitService({ fetchImpl = fetch } = {}) {
             'STALE-ERROR',
             cached.host,
             cached.contactedAt,
+            ttlMs,
           ),
         );
       }
@@ -401,6 +458,7 @@ export function createTransitService({ fetchImpl = fetch } = {}) {
     history.clear();
     cache.clear();
     cooldown.clear();
+    budgets.clear();
   }
   return { handle, close };
 }

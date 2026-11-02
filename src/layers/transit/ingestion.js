@@ -6,9 +6,9 @@ import {
 } from '../../data/contactPlayback.js';
 import {
   FEED_EVICT_AFTER_MS,
-  FEED_STALE_AFTER_MS,
   MAX_VEHICLES_TOTAL,
   MISSED_POLLS_TO_DROP,
+  feedStaleAfterMs,
   isStaleVehicleFix,
   transitVehicleKey,
   vehicleReportTimeMs,
@@ -58,8 +58,10 @@ export function createIngestion({ state, services, parts, source }) {
         upstreamAt: null,
         receivedAt: null,
         error: null,
+        keyRequired: false,
         retryInSec: null,
         stale: false,
+        staleAfterMs: null,
         pollSeq: 0,
         loading: false,
       };
@@ -182,8 +184,12 @@ export function createIngestion({ state, services, parts, source }) {
     status.receivedAt = now;
     status.loading = false;
     status.error = null;
+    status.keyRequired = false;
     status.retryInSec = null;
-    status.stale = stale === true || upstreamAgeMs > FEED_STALE_AFTER_MS;
+    // The feed's own threshold: a feed the proxy refreshes on an operator's
+    // hourly allowance is between loads for longer than the shared 90 s.
+    status.staleAfterMs = feedStaleAfterMs(feed);
+    status.stale = stale === true || upstreamAgeMs > status.staleAfterMs;
 
     // Past the eviction window the answer is bytes, not news. Drawing them
     // would put a five-minute-old fleet on the globe with a fresh-looking row.
@@ -445,11 +451,14 @@ export function createIngestion({ state, services, parts, source }) {
         if (!response.ok) {
           // The proxy says when it will next try the operator; carrying that
           // through means the row can offer a time instead of just a shrug.
+          // A keyed feed without its key says so instead, and that is not an
+          // outage: nothing was asked and nothing is coming until a key is.
           const detail = await response.json().catch(() => null);
           const error = new Error(`transit proxy HTTP ${response.status}`);
           if (Number.isFinite(detail?.retryInSec)) {
             error.retryInSec = detail.retryInSec;
           }
+          if (detail?.keyRequired === true) error.keyRequired = true;
           throw error;
         }
         const snapshot = await response.json();
@@ -471,12 +480,20 @@ export function createIngestion({ state, services, parts, source }) {
       } catch (error) {
         if (error?.name === 'AbortError') return;
         if (generation !== state._generation) return;
-        console.warn(
-          `[Data:Transit] ${feed.id} poll failed:`,
-          error?.message || error,
-        );
-        // i18n-ignore: English data, translated on display (ui/statusText.js)
-        status.error = `${feed.name} feed unavailable`;
+        status.keyRequired = error?.keyRequired === true;
+        if (status.keyRequired) {
+          // Said once per row, not once per poll: the console has nothing to
+          // add to "paste the key into Provider Settings".
+          // i18n-ignore: English data, translated on display (ui/statusText.js)
+          status.error = `${feed.name} feed needs a key`;
+        } else {
+          console.warn(
+            `[Data:Transit] ${feed.id} poll failed:`,
+            error?.message || error,
+          );
+          // i18n-ignore: English data, translated on display (ui/statusText.js)
+          status.error = `${feed.name} feed unavailable`;
+        }
         status.retryInSec = Number.isFinite(error?.retryInSec)
           ? error.retryInSec
           : null;

@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  TRANSIT_DEFAULT_REFRESH_MS,
   TRANSIT_ENABLED_FEEDS,
   TRANSIT_FEED_REGISTRY,
   TRANSIT_FEED_ID_PATTERN,
@@ -10,13 +11,16 @@ import {
   getTransitFeed,
   haversineKm,
   publicTransitCatalog,
+  transitFeedKey,
+  transitFeedKeyMissing,
+  transitFeedRefreshMs,
   transitFeedsInRange,
   transitModeFor,
   transitModeResolved,
   transitRouteLabel,
 } from './transitFeeds.js';
 
-test('every registered feed is keyless, https, licensed, and uniquely identified', () => {
+test('every registered feed is keyless or names its optional key, is https, licensed, and uniquely identified', () => {
   const ids = new Set();
   for (const feed of TRANSIT_FEED_REGISTRY) {
     assert.match(
@@ -29,10 +33,31 @@ test('every registered feed is keyless, https, licensed, and uniquely identified
     const url = new URL(feed.url);
     assert.equal(url.protocol, 'https:', `${feed.id} fetches over https`);
     assert.equal(
-      url.search.includes('key='),
+      /key|token/i.test(url.search),
       false,
       `${feed.id} carries no key in its URL`,
     );
+    if (feed.envVar) {
+      assert.match(
+        feed.envVar,
+        /^[A-Z][A-Z0-9_]+$/,
+        `${feed.id} names its key`,
+      );
+      assert.equal(
+        Boolean(feed.keyHeader) !== Boolean(feed.keyQuery),
+        true,
+        `${feed.id} says where its key goes, in exactly one place`,
+      );
+    } else {
+      assert.equal(feed.keyHeader, undefined, `${feed.id} is keyless`);
+      assert.equal(feed.keyQuery, undefined, `${feed.id} is keyless`);
+    }
+    if (feed.refreshMs !== undefined) {
+      assert.ok(
+        feed.refreshMs >= TRANSIT_DEFAULT_REFRESH_MS,
+        `${feed.id} never polls faster than the default`,
+      );
+    }
     assert.ok(
       feed.license && feed.licenseUrl && feed.attribution,
       `${feed.id} names its license`,
@@ -481,4 +506,151 @@ test('Burlington is live and carries its terms link, which its licence requires'
   assert.equal(bur.defaultEnabled, true);
   assert.match(bur.licenseUrl, /Open%20Data%20Terms%20of%20Use\.pdf$/);
   assert.match(bur.url, /^https:\/\//, 'port 80 has no listener at all');
+});
+
+test('the LIVE OPS region feeds are registered where their regions are, keyed or not', () => {
+  const expected = {
+    'sf511-bay-area': {
+      url: 'https://api.511.org/transit/vehiclepositions?agency=RG',
+      envVar: 'BAY_AREA_511_API_KEY',
+      keyQuery: 'api_key',
+    },
+    'lametro-bus': {
+      url: 'https://api.goswift.ly/real-time/lametro/gtfs-rt-vehicle-positions',
+      envVar: 'SWIFTLY_API_KEY',
+      keyHeader: 'Authorization',
+    },
+    'lametro-rail': {
+      url: 'https://api.goswift.ly/real-time/lametro-rail/gtfs-rt-vehicle-positions',
+      envVar: 'SWIFTLY_API_KEY',
+      keyHeader: 'Authorization',
+    },
+    'rtc-southern-nevada': {
+      url: 'https://api.goswift.ly/real-time/las-vegas-rtc/gtfs-rt-vehicle-positions',
+      envVar: 'SWIFTLY_API_KEY',
+      keyHeader: 'Authorization',
+    },
+    metrolink: {
+      url: 'https://metrolink-gtfsrt.gbsdigital.us/feed/gtfsrt-vehicles',
+      envVar: 'METROLINK_API_KEY',
+      keyHeader: 'X-Api-Key',
+    },
+    octa: {
+      url: 'https://api.octa.net/GTFSRealTime/protoBuf/VehiclePositions.aspx',
+    },
+    'mvgo-mountain-view': {
+      url: 'https://mtma.tripshot.com/v1/gtfs/realtime/feed/mvgo?types=VehiclePosition',
+    },
+  };
+  for (const [id, shape] of Object.entries(expected)) {
+    const feed = getTransitFeed(id);
+    assert.ok(feed, `${id} is routable`);
+    assert.equal(feed.defaultEnabled, true);
+    assert.equal(feed.url, shape.url);
+    assert.equal(feed.envVar, shape.envVar);
+    assert.equal(feed.keyHeader, shape.keyHeader);
+    assert.equal(feed.keyQuery, shape.keyQuery);
+    assert.ok(feed.terms?.quote, `${id} records the terms it ships on`);
+    assert.equal(feed.historyRetention, undefined, `${id} retains nothing`);
+  }
+  // Where each is polled from.
+  const ids = (lat, lon) => transitFeedsInRange(lat, lon).map((f) => f.id);
+  assert.deepEqual(ids(34.0537, -118.2428), [
+    'lametro-bus',
+    'lametro-rail',
+    'metrolink',
+    'octa',
+  ]);
+  assert.deepEqual(ids(33.8366, -117.9143), [
+    'octa',
+    'metrolink',
+    'lametro-bus',
+    'lametro-rail',
+  ]);
+  assert.deepEqual(ids(38.44, -122.71), ['sf511-bay-area']);
+  assert.deepEqual(ids(37.7793, -122.4193), ['sf511-bay-area']);
+  assert.deepEqual(ids(37.3861, -122.0839), [
+    'mvgo-mountain-view',
+    'sf511-bay-area',
+  ]);
+  assert.deepEqual(ids(36.1699, -115.1398), ['rtc-southern-nevada']);
+  // Lake Tahoe and San Diego are outside every regional circle (Sacramento
+  // is not: the Capitol Corridor is a 511 operator, and the circle holds it).
+  assert.deepEqual(ids(39.1, -120.04), []);
+  assert.deepEqual(ids(32.72, -117.16), []);
+  assert.deepEqual(ids(38.58, -121.49), ['sf511-bay-area']);
+});
+
+test('a keyed feed reads its key from the environment at request time and never bakes it in', () => {
+  const sf511 = getTransitFeed('sf511-bay-area');
+  assert.equal(transitFeedKey(sf511, {}), null);
+  assert.equal(transitFeedKey(sf511, { BAY_AREA_511_API_KEY: '  ' }), null);
+  assert.equal(
+    transitFeedKey(sf511, { BAY_AREA_511_API_KEY: ' abc123 ' }),
+    'abc123',
+  );
+  assert.equal(transitFeedKeyMissing(sf511, {}), true);
+  assert.equal(transitFeedKeyMissing(sf511, null), true);
+  assert.equal(
+    transitFeedKeyMissing(sf511, { BAY_AREA_511_API_KEY: 'abc123' }),
+    false,
+  );
+  // Keyless feeds never want one, whatever the environment holds.
+  const octa = getTransitFeed('octa');
+  assert.equal(transitFeedKey(octa, { SWIFTLY_API_KEY: 'x' }), null);
+  assert.equal(transitFeedKeyMissing(octa, {}), false);
+  assert.equal(transitFeedKeyMissing(null, {}), false);
+  // The Swiftly feeds share one key.
+  assert.equal(
+    transitFeedKey(getTransitFeed('rtc-southern-nevada'), {
+      SWIFTLY_API_KEY: 'swift',
+    }),
+    'swift',
+  );
+});
+
+test('each feed polls on its own cache window, and the catalog says who needs a key', () => {
+  assert.equal(
+    transitFeedRefreshMs(getTransitFeed('mbta')),
+    TRANSIT_DEFAULT_REFRESH_MS,
+  );
+  assert.equal(
+    transitFeedRefreshMs(getTransitFeed('octa')),
+    TRANSIT_DEFAULT_REFRESH_MS,
+  );
+  assert.equal(transitFeedRefreshMs(getTransitFeed('sf511-bay-area')), 80_000);
+  assert.equal(transitFeedRefreshMs(getTransitFeed('lametro-bus')), 30_000);
+  assert.equal(
+    transitFeedRefreshMs({ refreshMs: -1 }),
+    TRANSIT_DEFAULT_REFRESH_MS,
+  );
+  assert.equal(transitFeedRefreshMs(null), TRANSIT_DEFAULT_REFRESH_MS);
+  // The 511 token allows 60 requests an hour, shared with the Alerts layer's 15.
+  const sf511 = getTransitFeed('sf511-bay-area');
+  assert.ok(sf511.budgetPerHour + 15 <= 60);
+  assert.ok(Math.ceil(3_600_000 / sf511.refreshMs) <= sf511.budgetPerHour);
+
+  const keyless = Object.fromEntries(
+    publicTransitCatalog().map((entry) => [entry.id, entry]),
+  );
+  assert.equal(keyless['sf511-bay-area'].keyRequired, true);
+  assert.equal(keyless['sf511-bay-area'].envVar, 'BAY_AREA_511_API_KEY');
+  assert.equal(keyless['sf511-bay-area'].refreshMs, 80_000);
+  assert.equal(keyless.metrolink.keyRequired, true);
+  assert.equal(keyless.octa.keyRequired, false);
+  assert.equal(keyless.octa.envVar, null);
+  assert.equal(keyless.mbta.keyRequired, false);
+  const configured = Object.fromEntries(
+    publicTransitCatalog({
+      BAY_AREA_511_API_KEY: 'a',
+      SWIFTLY_API_KEY: 'b',
+    }).map((entry) => [entry.id, entry]),
+  );
+  assert.equal(configured['sf511-bay-area'].keyRequired, false);
+  assert.equal(configured['lametro-rail'].keyRequired, false);
+  assert.equal(configured['rtc-southern-nevada'].keyRequired, false);
+  assert.equal(configured.metrolink.keyRequired, true, 'no Metrolink key');
+  for (const entry of publicTransitCatalog({ BAY_AREA_511_API_KEY: 'a' })) {
+    assert.equal(JSON.stringify(entry).includes('"a"'), false, 'no key leaks');
+  }
 });

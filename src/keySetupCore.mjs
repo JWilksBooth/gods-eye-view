@@ -179,25 +179,31 @@ export const KEY_SETUP_KEYS = Object.freeze([
   }),
   Object.freeze({
     id: 'bay-area-511',
-    title: '511 SF BAY', // i18n-ignore: provider product name; row is hidden
+    title: '511 SF BAY', // i18n-ignore: provider product name
     unlocks: msg(
-      'Bay Area and Sonoma County transit service alerts in the Alerts layer',
+      'Live Bay Area and Sonoma County transit vehicles (BART, Muni, Caltrain, SMART and the rest) in the Transit layer, and their service alerts in the Alerts layer',
     ),
     getUrl: 'https://511.org/open-data/token',
     envVars: Object.freeze(['BAY_AREA_511_API_KEY']),
     tier: 'free',
-    hidden: true,
   }),
   Object.freeze({
     id: 'swiftly',
-    title: 'SWIFTLY', // i18n-ignore: provider product name; row is hidden
+    title: 'SWIFTLY', // i18n-ignore: provider product name
     unlocks: msg(
-      'LA Metro and RTC Southern Nevada service alerts in the Alerts layer',
+      'Live LA Metro bus and rail and RTC Southern Nevada vehicles in the Transit layer, and their service alerts in the Alerts layer',
     ),
     getUrl: 'https://goswift.ly/realtime-api-key',
     envVars: Object.freeze(['SWIFTLY_API_KEY']),
     tier: 'free',
-    hidden: true,
+  }),
+  Object.freeze({
+    id: 'metrolink',
+    title: 'METROLINK', // i18n-ignore: provider product name
+    unlocks: msg('Live Metrolink train positions in the Transit layer'),
+    getUrl: 'https://metrolinktrains.com/about/gtfs/gtfs-rt-access/',
+    envVars: Object.freeze(['METROLINK_API_KEY']),
+    tier: 'free',
   }),
   Object.freeze({
     id: 'launch-library',

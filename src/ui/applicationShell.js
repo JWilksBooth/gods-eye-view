@@ -19,7 +19,7 @@ import { CctvControls } from './cctv.js';
 import { StreetLevelControls } from './streetLevelControls.js';
 import { LiveOpsControls } from './liveOpsControls.js';
 import { createLiveOpsHeadlineSource } from '../sources/liveOpsHeadlines.js';
-import { LIVE_OPS_LAYERS } from '../data/liveOpsRegions.js';
+import { liveOpsRegionLayers } from '../data/liveOpsRegions.js';
 import { RadioControls } from './radio.js';
 import { LocalSdrControls } from './localSdrControls.js';
 import { LocationNavigation } from './locationNavigation.js';
@@ -1217,9 +1217,9 @@ export class StyleManager extends ShellFacade {
             },
           );
           return Promise.all(
-            LIVE_OPS_LAYERS.filter((id) => manager.layers?.has(id)).map((id) =>
-              manager.setEnabled(id, true, { origin: 'user' }),
-            ),
+            liveOpsRegionLayers(region)
+              .filter((id) => manager.layers?.has(id))
+              .map((id) => manager.setEnabled(id, true, { origin: 'user' })),
           ).then(() => true);
         },
         getHeadlines: (regionId, options) =>
