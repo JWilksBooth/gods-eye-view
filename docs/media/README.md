@@ -64,3 +64,18 @@ Earthstar Geographics, and the GIS User Community. Terrain: Re:Earth /
 Mapterhorn, CC BY 4.0. The crops are kept small and only as project
 documentation of rendering behavior; the imagery and terrain remain subject to
 their providers' terms (DATA_SOURCES.md).
+
+## CAMERAS panel captures
+
+`cameras/quick-panel.jpg`, `cameras/search-to-live.jpg` and `cameras/wall.jpg`
+are browser captures of the running app (a 1,400 x 900 viewport scaled to
+800 px) taken for the pull request that added the CAMERAS quick panel and the
+camera wall: the panel listing the 24 cameras nearest downtown Los Angeles,
+the same panel after a search for "110" with the opened camera's live video
+projected on the globe, and the wall of six Caltrans District 7 snapshots.
+Imagery: Powered by Esri — Source: Esri, Maxar, Earthstar Geographics, and
+the GIS User Community. Terrain: Re:Earth / Mapterhorn, CC BY 4.0. Camera
+frames: Caltrans District 7 (cwwp2.dot.ca.gov, public domain) and one Austin
+Transportation & Public Works frame in the CCTV panel. Rendered with CesiumJS.
+They are kept only as project documentation of the panel and the wall; the
+imagery and frames remain subject to their providers' terms (DATA_SOURCES.md).

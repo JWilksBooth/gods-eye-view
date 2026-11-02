@@ -3042,5 +3042,51 @@
   "Live stream feed rate limited (HTTP 429)": "直播串流資料來源已限速 (HTTP 429)",
   "Malformed live stream snapshot": "直播串流快照格式錯誤",
   "Discovers geotagged YouTube live streams for the Live Streams layer; keyless, the layer shows its curated cameras": "為直播串流圖層尋找帶地理標記的 YouTube 直播；沒有金鑰時，圖層會顯示精選攝影機",
-  "Adds Windy.com webcams to the Live Streams layer, credited \"Webcams provided by windy.com\"": "將 Windy.com 網路攝影機加入直播串流圖層，並註明 \"Webcams provided by windy.com\""
+  "Adds Windy.com webcams to the Live Streams layer, credited \"Webcams provided by windy.com\"": "將 Windy.com 網路攝影機加入直播串流圖層，並註明 \"Webcams provided by windy.com\"",
+  "Cameras are off": "攝影機已關閉",
+  "Turning cameras on…": "正在開啟攝影機…",
+  "Loading cameras…": "正在載入攝影機…",
+  "No cameras near this view yet": "此視圖附近尚無攝影機",
+  "No cameras match": "沒有符合的攝影機",
+  "{distance} km": "{distance} 公里",
+  "{distance} m": "{distance} 公尺",
+  "STILL": "靜態",
+  "Open {name} on the globe": "在地球上開啟 {name}",
+  "{count} cameras": {
+    "other": "{count} 部攝影機"
+  },
+  "nearest {count} listed": "列出最近的 {count} 部",
+  "Show cameras everywhere": "顯示所有地區的攝影機",
+  "Stop limiting cameras to {region}": "不再將攝影機限制在{region}",
+  "Camera wall": "攝影機電視牆",
+  "CAMERA WALL": "攝影機電視牆",
+  "Feeds shown": "顯示路數",
+  "{count} feeds": {
+    "other": "{count} 路"
+  },
+  "GLOBE": "地球",
+  "Back to the globe (Esc)": "返回地球 (Esc)",
+  "OPEN ON GLOBE": "在地球上開啟",
+  "Activate this camera on the globe and close the wall": "在地球上啟用此攝影機並關閉電視牆",
+  "No cameras to show": "沒有可顯示的攝影機",
+  "LIVE · PINNED": "實時 · 已固定",
+  "LIVE UNAVAILABLE": "實時無法使用",
+  "LIVE SLOTS FULL": "實時名額已滿",
+  "Hover for live video · click to keep it playing": "懸停播放實時影片 · 點擊保持播放",
+  "Still camera · snapshots only": "靜態攝影機 · 僅快照",
+  "Hover or click a live tile for video": "懸停或點擊實時方塊以播放影片",
+  "{count} live feeds at a time": {
+    "other": "同時 {count} 路實時影片"
+  },
+  "CAMERAS": "攝影機",
+  "The cameras nearest the view, a search and the camera wall": "視圖附近的攝影機、搜尋和攝影機電視牆",
+  "Search cameras: road, place, 101…": "搜尋攝影機：道路、地點、101…",
+  "Search cameras": "搜尋攝影機",
+  "Order": "排序",
+  "NEWEST": "最新",
+  "Live feeds first, then the freshest frames": "實時影片優先，然後是最新畫面",
+  "Closest to the view centre first": "離視圖中心最近的優先",
+  "CAMERAS ON": "開啟攝影機",
+  "WALL": "電視牆",
+  "Show several live feeds at once": "同時顯示多路實時影片"
 }

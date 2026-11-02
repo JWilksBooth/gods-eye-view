@@ -2,6 +2,76 @@ import {
   CCTV_MAX_SOURCES_CEILING,
   DEFAULT_CCTV_MAX_SOURCES,
 } from './constants.js';
+import { haversineKm } from '../common/geo.js';
+
+/**
+ * Drop the cameras one pack publishes from the same poles as another.
+ *
+ * Each rule names the pack whose listing wins (`keep`), the pack whose
+ * duplicates go (`drop`) and the distance under which two cameras count as
+ * one pole (`withinM`). A dropped pack's `sources` and `available` shrink in
+ * place; a rule whose packs are absent or empty changes nothing. Cameras are
+ * bucketed on a grid of `withinM` cells so a 1,200-camera pack checks its
+ * neighbours, not every pair.
+ *
+ * @param {Array<{name:string, sources:Array<object>, available?:number}>} packs
+ * @param {Array<{keep:string, drop:string, withinM:number}>} rules
+ * @returns {Array<{keep:string, drop:string, suppressed:number}>} What changed.
+ */
+export function suppressPackOverlaps(packs, rules) {
+  const changes = [];
+  for (const rule of Array.isArray(rules) ? rules : []) {
+    const withinM = Number(rule?.withinM);
+    const primary = packs.find((pack) => pack?.name === rule?.keep);
+    const secondary = packs.find((pack) => pack?.name === rule?.drop);
+    if (
+      !(withinM > 0) ||
+      !primary?.sources?.length ||
+      !secondary?.sources?.length
+    )
+      continue;
+    const cellDeg = withinM / 111_320;
+    const cellOf = (lat, lon) =>
+      `${Math.floor(lat / cellDeg)}:${Math.floor(lon / cellDeg)}`;
+    const grid = new Map();
+    for (const source of primary.sources) {
+      const lat = Number(source?.lat);
+      const lon = Number(source?.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+      const key = cellOf(lat, lon);
+      if (!grid.has(key)) grid.set(key, []);
+      grid.get(key).push({ lat, lon });
+    }
+    const withinKm = withinM / 1000;
+    const nearPrimary = (lat, lon) => {
+      const row = Math.floor(lat / cellDeg);
+      const col = Math.floor(lon / cellDeg);
+      for (let dr = -1; dr <= 1; dr += 1) {
+        for (let dc = -1; dc <= 1; dc += 1) {
+          for (const point of grid.get(`${row + dr}:${col + dc}`) || []) {
+            if (haversineKm(lat, lon, point.lat, point.lon) <= withinKm)
+              return true;
+          }
+        }
+      }
+      return false;
+    };
+    const before = secondary.sources.length;
+    secondary.sources = secondary.sources.filter((source) => {
+      const lat = Number(source?.lat);
+      const lon = Number(source?.lon);
+      return (
+        !Number.isFinite(lat) || !Number.isFinite(lon) || !nearPrimary(lat, lon)
+      );
+    });
+    const suppressed = before - secondary.sources.length;
+    if (Number.isFinite(secondary.available))
+      secondary.available = Math.max(0, secondary.available - suppressed);
+    if (suppressed > 0)
+      changes.push({ keep: rule.keep, drop: rule.drop, suppressed });
+  }
+  return changes;
+}
 
 /**
  * Resolve the catalog-wide source cap from an env value.

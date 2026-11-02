@@ -1,12 +1,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { DEFAULT_CCTV_SOURCE_FILE, CCTV_SOURCE_CACHE_MS } from './constants.js';
-import { allocateSourceCap, resolveCatalogCap } from './cap.js';
+import {
+  allocateSourceCap,
+  resolveCatalogCap,
+  suppressPackOverlaps,
+} from './cap.js';
 import { loadGroundHeights, joinGroundHeights } from './groundHeights.js';
 import { cameraRegion, normalizeSourceItem } from './normalize.js';
 import { loadLithuaniaSources } from './lithuania.js';
 import { loadTaiwanSources } from './taiwan.js';
 import { loadNvroadsSources } from './nvroads.js';
+import { loadAlertCaliforniaSources } from './alertcalifornia.js';
+import { loadNvfastSources } from './nvfast.js';
 import {
   loadAustinSourcesFromOpenData,
   loadCaltransSourcesFromOpenData,
@@ -179,7 +185,29 @@ const LIVE_PACKS = [
     enabled: () => envEnabled('CCTV_NVROADS_ENABLED'),
     load: loadNvroadsSources,
   },
+  {
+    // RTC FAST Dashboard (Las Vegas valley): keyless stills for every FAST
+    // camera; the Nevada 511 cameras on the same poles are dropped below.
+    name: 'nvfast',
+    enabled: () => envEnabled('CCTV_NVFAST_ENABLED'),
+    load: loadNvfastSources,
+  },
+  {
+    // ALERTCalifornia fire cameras (UC San Diego): keyless stills, CC
+    // BY-NC-ND 4.0 with credit, nearest the California LIVE OPS regions first.
+    name: 'alertcalifornia',
+    enabled: () => envEnabled('CCTV_ALERTCA_ENABLED'),
+    load: loadAlertCaliforniaSources,
+  },
 ];
+
+/**
+ * Packs that publish the same poles: a camera of `drop` within `withinM`
+ * metres of a camera of `keep` is the same camera listed twice, and the
+ * richer listing wins. Nevada 511 carries about a third of the valley's FAST
+ * cameras, at slightly different coordinates.
+ */
+const PACK_OVERLAPS = [{ keep: 'nvfast', drop: 'nvroads', withinM: 120 }];
 /**
  * Load CCTV sources from a local JSON file (CCTV_SOURCES_FILE env or default).
  *
@@ -341,6 +369,11 @@ export function createCctvCatalog({ sourceRoot = process.cwd() } = {}) {
       normalizePack('file', fromFile),
       normalizePack('env', fromEnv),
     ];
+    for (const overlap of suppressPackOverlaps(packs, PACK_OVERLAPS)) {
+      console.log(
+        `[CCTV] ${overlap.drop}: ${overlap.suppressed} cameras also published by ${overlap.keep} (same pole) left to that pack`,
+      );
+    }
     const maxCount = resolveCatalogCap(process.env.CCTV_MAX_SOURCES);
     const allocation = allocateSourceCap(packs, maxCount);
     // Shipped ground heights (src/data/local_data/cctv_ground_heights/, produced by

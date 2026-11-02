@@ -8,10 +8,12 @@ export const DEFAULT_AUSTIN_MAX_SOURCES = 250;
  * Catalog-wide safety ceiling on served cameras. Each pack already caps
  * itself (nearest-to-anchor first); this bound only matters when the packs
  * together exceed it, and it is then filled round-robin across packs (see
- * cap.js) so no region is silently dropped. The default per-pack caps
- * together can exceed it, so a default install may be thinned evenly here.
+ * cap.js) so no region is silently dropped. The original packs' default
+ * caps (Caltrans at 1,500 for the LIVE OPS regions included) sum to just
+ * under this; the packs added since can exceed it, so an install with every
+ * pack on may be thinned evenly here.
  */
-export const DEFAULT_CCTV_MAX_SOURCES = 4000;
+export const DEFAULT_CCTV_MAX_SOURCES = 5000;
 /** Hard upper bound for CCTV_MAX_SOURCES; also sizes the health map. */
 export const CCTV_MAX_SOURCES_CEILING = 5000;
 /** Reference point for Austin camera prioritization (Congress & 6th). */
@@ -103,9 +105,22 @@ export const TXDOT_DISTRICT_ELEVATION_M = Object.freeze({
 export const TXDOT_DEFAULT_ELEVATION_M = 150;
 export const CALTRANS_CCTV_URL = (district) =>
   `https://cwwp2.dot.ca.gov/data/d${district}/cctv/cctvStatusD${String(district).padStart(2, '0')}.json`;
-/** Districts fetched by default: SF Bay (4), LA (7), San Diego (11), Sacramento (3). */
-export const DEFAULT_CALTRANS_DISTRICTS = '4,7,11,3';
-export const DEFAULT_CALTRANS_MAX_SOURCES = 300;
+/**
+ * Districts fetched by default: SF Bay (4), LA (7), Orange County (12) and
+ * the Inland Empire (8), both inside the Los Angeles LIVE OPS box, the north
+ * coast (1, whose southern cameras reach the Sonoma County box), San Diego
+ * (11) and Sacramento (3). Verified 2026-11-02: D12 publishes 287 in-service
+ * cameras inside the Los Angeles box (190 with HLS) and D8 another 37.
+ */
+export const DEFAULT_CALTRANS_DISTRICTS = '4,7,12,8,1,11,3';
+/**
+ * Enough for the four focus districts in full (D4 about 770, D7 about 490,
+ * D12 about 375, D8 about 500 in service statewide; the nearest-first order
+ * keeps the LIVE OPS regions ahead of the rest). CCTV_CALTRANS_MAX_SOURCES
+ * overrides it, clamped to 8–2500.
+ */
+export const DEFAULT_CALTRANS_MAX_SOURCES = 1500;
+export const CALTRANS_MAX_SOURCES_CEILING = 2500;
 /** Prioritization anchors: the metros this fork focuses on. */
 export const CALTRANS_ANCHORS = [
   { lat: 37.7793, lon: -122.4193 }, // San Francisco

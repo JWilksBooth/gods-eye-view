@@ -45,6 +45,12 @@ const PROVIDER_STATIC_REFRESH_MS = Object.freeze({
   // Autobrennero (A22) refreshes its stills about once a minute (Last-Modified
   // tracks the minute); 3 min matches the other highway packs.
   'autostrada del brennero': 3 * 60 * 1000,
+  // ALERTCalifornia publishes a new frame about once a minute (the catalog's
+  // last_frame_ts was ~1 min old on every sampled camera, 2026-11-02).
+  alertcalifornia: 2 * 60 * 1000,
+  // The FAST Dashboard rewrites its snapshots continuously (Last-Modified a
+  // few seconds old on every sampled still, 2026-11-02).
+  'rtc of southern nevada fast': 2 * 60 * 1000,
 });
 
 /**

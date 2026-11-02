@@ -6,6 +6,15 @@ import {
   parseHlsMedia,
   HLS_LIMITS,
 } from '../../server/providers/cctv/stream.js';
+import {
+  CCTV_HLS_LEASES_PER_SESSION,
+  CCTV_HLS_SESSION_LIMIT,
+} from '../sources/cctvStreamBudget.js';
+
+test('the proxy enforces the session budget the browser plans against', () => {
+  assert.equal(HLS_LIMITS.sessions, CCTV_HLS_SESSION_LIMIT);
+  assert.equal(HLS_LIMITS.leasesPerSession, CCTV_HLS_LEASES_PER_SESSION);
+});
 const playlist =
   '#EXTM3U\n#EXT-X-MEDIA-SEQUENCE:12\n#EXTINF:2,\na.ts\n#EXTINF:2,\nb.ts\n#EXTINF:2,\nc.ts\n';
 const base = 'https://camera.example/live/list.m3u8';

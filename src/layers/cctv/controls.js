@@ -273,6 +273,39 @@ export function createControls({ state: layerState, services, parts, source }) {
     },
 
     /**
+     * A light copy of the whole catalog (id, name, city, provider, position,
+     * pose and feed type), the same array until the catalog changes. The
+     * CAMERAS quick panel ranks and searches it; `getUIState().cameras`
+     * builds the full per-camera state and is too heavy for a list.
+     * @returns {Array<object>}
+     */
+    getCameraCatalog() {
+      return parts.presentation.cameraCatalog();
+    },
+
+    /**
+     * The registered frame URL for a catalog entry, bucketed to `refreshMs`
+     * so a surface that re-reads it on that cadence sees a new frame only
+     * when the bucket turns over.
+     * @param {object} camera A catalog entry or public camera state.
+     * @param {number} [refreshMs]
+     * @returns {string}
+     */
+    getFrameUrl(camera, refreshMs) {
+      return parts.frames.frameUrlFor(camera, refreshMs);
+    },
+
+    /**
+     * The registered media URL for a catalog entry (the proxy's HLS or
+     * progressive route; the client playback adds its own lease).
+     * @param {object} camera
+     * @returns {string}
+     */
+    getMediaUrl(camera) {
+      return parts.frames.mediaUrlFor(camera);
+    },
+
+    /**
      * Opts the active camera into or out of protected thumbnail publication.
      * The default is false: the monitor plane remains the sole active-camera
      * representation while ambient and hover-pinned cards continue unchanged.

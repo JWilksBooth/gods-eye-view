@@ -32,8 +32,8 @@ export const LIVE_OPS_REGIONS = Object.freeze([
     bbox: Object.freeze([-118.95, 33.6, -117.65, 34.45]),
     center: Object.freeze({ lat: 34.0537, lon: -118.2428 }),
     cameras: Object.freeze({
-      caltransDistricts: Object.freeze([7]),
-      packs: Object.freeze(['caltrans-open-data']),
+      caltransDistricts: Object.freeze([7, 12, 8]),
+      packs: Object.freeze(['caltrans-open-data', 'alertcalifornia']),
     }),
     incidents: Object.freeze(['chp', 'lafd-alerts']),
     chpCenters: Object.freeze(['LACC']),
@@ -51,8 +51,8 @@ export const LIVE_OPS_REGIONS = Object.freeze([
     bbox: Object.freeze([-123.55, 38.1, -122.35, 38.86]),
     center: Object.freeze({ lat: 38.44, lon: -122.71 }),
     cameras: Object.freeze({
-      caltransDistricts: Object.freeze([4]),
-      packs: Object.freeze(['caltrans-open-data']),
+      caltransDistricts: Object.freeze([4, 1]),
+      packs: Object.freeze(['caltrans-open-data', 'alertcalifornia']),
     }),
     incidents: Object.freeze(['chp', 'calfire']),
     chpCenters: Object.freeze(['GGCC']),
@@ -66,7 +66,7 @@ export const LIVE_OPS_REGIONS = Object.freeze([
     center: Object.freeze({ lat: 37.7793, lon: -122.4193 }),
     cameras: Object.freeze({
       caltransDistricts: Object.freeze([4]),
-      packs: Object.freeze(['caltrans-open-data']),
+      packs: Object.freeze(['caltrans-open-data', 'alertcalifornia']),
     }),
     incidents: Object.freeze(['chp', 'datasf-police', 'datasf-fire']),
     chpCenters: Object.freeze(['GGCC']),
@@ -80,7 +80,7 @@ export const LIVE_OPS_REGIONS = Object.freeze([
     center: Object.freeze({ lat: 36.1699, lon: -115.1398 }),
     cameras: Object.freeze({
       caltransDistricts: Object.freeze([]),
-      packs: Object.freeze(['nvroads-open-data']),
+      packs: Object.freeze(['nvfast-dashboard', 'nvroads-open-data']),
     }),
     incidents: Object.freeze(['nvroads']),
     chpCenters: Object.freeze([]),

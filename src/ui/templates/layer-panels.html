@@ -12,6 +12,34 @@
     </div>
   </div>
 
+  <!-- CAMERAS quick panel: the nearest cameras, a search box and the wall -->
+  <section id="camera-quick-panel" class="panel-collapsible collapsed" data-panel-id="camera-quick-panel">
+    <div class="panel-glow"></div>
+    <div class="camera-quick-panel-inner" data-panel-surface>
+      <header class="panel-header" data-panel-header>
+        <span class="panel-title panel-surface-title" title="The cameras nearest the view, a search and the camera wall" data-i18n data-i18n-title>CAMERAS</span>
+        <span class="panel-divider"></span>
+        <button class="panel-collapse-btn" data-collapse-target="camera-quick-panel" title="Collapse panel" data-i18n-title>+</button>
+      </header>
+      <div class="camera-quick-body" data-panel-body data-rail-scroller>
+        <div class="camera-quick-toolbar">
+          <input id="camera-quick-search" class="gev-field camera-quick-search" type="search" autocomplete="off" spellcheck="false" placeholder="Search cameras: road, place, 101…" aria-label="Search cameras" role="combobox" aria-autocomplete="list" aria-expanded="true" aria-controls="camera-quick-list" data-i18n-placeholder data-i18n-aria-label />
+          <div class="camera-quick-chips">
+            <div class="gev-segmented camera-quick-order" role="radiogroup" aria-label="Order" data-i18n-aria-label>
+              <button id="camera-quick-order-newest" type="button" class="gev-segment" data-quick-order="newest" role="radio" aria-checked="true" title="Live feeds first, then the freshest frames" data-i18n-title data-i18n>NEWEST</button>
+              <button id="camera-quick-order-nearest" type="button" class="gev-segment" data-quick-order="nearest" role="radio" aria-checked="false" tabindex="-1" title="Closest to the view centre first" data-i18n-title data-i18n>NEAREST</button>
+            </div>
+            <button id="camera-quick-region" type="button" class="gev-action-button scene-btn camera-quick-region" hidden data-i18n-runtime></button>
+            <button id="camera-quick-enable" type="button" class="gev-action-button scene-btn" hidden data-i18n>CAMERAS ON</button>
+            <button id="camera-quick-wall" type="button" class="gev-action-button scene-btn camera-quick-wall-btn" title="Show several live feeds at once" disabled data-i18n-title data-i18n>WALL</button>
+          </div>
+        </div>
+        <div id="camera-quick-status" class="camera-quick-status" role="status" aria-live="polite" data-i18n-runtime></div>
+        <ul id="camera-quick-list" class="camera-quick-list" role="listbox" aria-label="Nearest cameras" data-i18n-aria-label></ul>
+      </div>
+    </div>
+  </section>
+
   <!-- CCTV Coverage Panel -->
   <div id="cctv-panel" class="panel-collapsible collapsed" data-panel-id="cctv-panel">
     <div class="panel-glow"></div>

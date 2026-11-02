@@ -287,6 +287,19 @@ export const DATA_CREDITS = [
       '<a href="https://www.nvroads.com/" target="_blank" rel="noopener">Nevada 511 (nvroads.com)</a> (courtesy)',
   },
   {
+    key: 'nvfast-cctv',
+    html:
+      'Traffic cameras (Las Vegas valley): ' +
+      '<a href="https://bugatti.nvfast.org/" target="_blank" rel="noopener">RTC of Southern Nevada FAST Dashboard</a> (courtesy)',
+  },
+  {
+    key: 'alertcalifornia-cctv',
+    html:
+      'Fire cameras (California): ' +
+      '<a href="https://alertcalifornia.org/" target="_blank" rel="noopener">ALERTCalifornia | UC San Diego</a> ' +
+      '(<a href="https://creativecommons.org/licenses/by-nc-nd/4.0/" target="_blank" rel="noopener">CC BY-NC-ND 4.0</a>; frames shown as served, non-commercial use)',
+  },
+  {
     key: 'incidents',
     html:
       'Live incidents: California Highway Patrol ' +

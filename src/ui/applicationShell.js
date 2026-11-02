@@ -16,6 +16,9 @@ import { readShellElements } from './shellElements.js';
 import { CockpitCoordinator } from './cockpitCoordinator.js';
 import { ContextControls } from './context.js';
 import { CctvControls } from './cctv.js';
+import { CameraQuickControls } from './cameraQuickControls.js';
+import { createCameraWall } from './cameraWall.js';
+import { viewCentre } from '../layers/streetLevel/view.js';
 import { StreetLevelControls } from './streetLevelControls.js';
 import {
   LiveOpsControls,
@@ -127,6 +130,8 @@ export class StyleManager extends ShellFacade {
       operations: {
         _syncCctvPanelViewport: (...args) =>
           this._syncCctvPanelViewport(...args),
+        _onCameraQuickDisclosure: (...args) =>
+          this._cameraQuickControls?.onDisclosure(...args),
         _showToast: (...args) => this._showToast(...args),
       },
       readHud: () => this.hud,
@@ -611,6 +616,7 @@ export class StyleManager extends ShellFacade {
     this._initRightPanelAdaptiveLayout();
     this._initRadioPanel();
     this._initCctvPanel();
+    this._initCameraQuickPanel();
     this._initStreetLevelPanel();
     this._initLiveOpsPanel();
     this._initGlobalContextPanel();
@@ -1209,6 +1215,9 @@ export class StyleManager extends ShellFacade {
             ),
           );
           if (flown === false) return false;
+          // The CAMERAS quick panel opens on the region's cameras while the
+          // flight is still under way.
+          this._cameraQuickControls?.showRegion(region);
           const manager = this._dataManager;
           if (!manager) return true;
           return enableLiveOpsRegionLayers(manager, region).then(() => true);
@@ -1270,6 +1279,73 @@ export class StyleManager extends ShellFacade {
         setSplitFlapText,
       },
     });
+  }
+
+  /**
+   * Compose the CAMERAS quick panel and the camera wall. A row (or a wall
+   * tile's OPEN ON GLOBE) opens through the same explicit camera activation
+   * and flight the CCTV picker uses, so the CCTV panel and its single video
+   * decoder show the camera; the wall plays its tiles through the same proxy
+   * leases. The LIVE OPS console hands the panel its region.
+   */
+  _initCameraQuickPanel() {
+    const { cctvLayer } = this.services;
+    this._cameraWall?.destroy();
+    this._cameraWall = null;
+    this._cameraQuickControls?.destroy();
+    this._cameraQuickControls = null;
+    if (!this._cameraQuickPanel || !cctvLayer) return;
+    const openCamera = async (cameraId) => {
+      if (this._disposed) return false;
+      if (!(await this._toggleCctvEnabled(true))) return false;
+      if (this._disposed || !this._dataManager?.isEnabled('cctv')) return false;
+      const focused = this._runExplicitCctvFocus(
+        () => (cctvLayer.selectCamera(cameraId) ? cameraId : null),
+        (selectedId) => cctvLayer.focusCamera(selectedId, 2.0),
+      );
+      this._dataManager?.setLayerParams(
+        'cctv',
+        { selectedCameraId: cameraId },
+        { origin: 'user' },
+      );
+      return focused !== false;
+    };
+    this._cameraWall = createCameraWall({
+      cctv: cctvLayer,
+      actions: {
+        openOnGlobe: (cameraId) => {
+          void openCamera(cameraId);
+        },
+      },
+    });
+    this._cameraQuickControls = new CameraQuickControls({
+      root: this._cameraQuickPanel,
+      cctv: cctvLayer,
+      actions: {
+        isEnabled: () => this._dataManager?.isEnabled('cctv'),
+        // A quiet switch-on: no flight, but the nearest camera becomes the
+        // active one so the CCTV panel does not open on the catalog's first
+        // record, which may be on another continent.
+        enableLayer: async () => {
+          await this._dataManager?.setEnabled('cctv', true, {
+            origin: 'user',
+          });
+          if (!this._disposed && this._dataManager?.isEnabled('cctv'))
+            cctvLayer.focusNearest?.({ focus: false });
+        },
+        openCamera,
+        readViewCenter: () => viewCentre(this.viewer),
+        subscribeViewSettled: (listener) => {
+          const camera = this.viewer?.camera;
+          if (!camera?.moveEnd?.addEventListener) return null;
+          camera.moveEnd.addEventListener(listener);
+          return () => camera.moveEnd.removeEventListener(listener);
+        },
+        setPanelCollapsed: (...args) => this.setPanelCollapsed(...args),
+        openWall: (options) => this._cameraWall?.open(options),
+      },
+    });
+    this._cameraQuickControls.connect();
   }
 
   /**
@@ -1846,6 +1922,8 @@ export class StyleManager extends ShellFacade {
     this._cameraOrientationControls?.destroy();
     this._clearLayersControl?.destroy();
     this._cctvControls?.destroy();
+    this._cameraWall?.destroy();
+    this._cameraQuickControls?.destroy();
     this.services?.streetLevelLayer?.attachNavigation?.(null);
     this._streetLevelControls?.destroy();
     this._liveOpsControls?.destroy();

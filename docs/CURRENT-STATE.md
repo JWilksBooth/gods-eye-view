@@ -31,6 +31,49 @@ markers are claimed for picking (deixis kind `alert`); area polygons are not,
 so sibling cards stay clickable over them. `get_alerts` and
 `get_airport_status` expose the same data to MCP and voice.
 
+## CAMERAS quick panel and camera wall — November 2, 2026
+
+The CAMERAS panel (left rail, under Data Layers; `src/ui/cameraQuickControls.js`,
+a panel-surface panel) is the fastest route to a camera. It lists the 24
+cameras nearest the view centre from the CCTV layer's light catalog
+(`getCameraCatalog()`, one array per catalog), each with a thumbnail, the
+camera's name and city, its distance and a LIVE or STILL badge. NEWEST (the
+default) puts live feeds first, then the freshest stills; NEAREST is distance
+alone. The search box narrows the list by name, city or provider ("101",
+"Bay Bridge", "Strip"); arrows move the highlight, Enter opens the
+highlighted row or the first match, Escape clears the search and then
+collapses the panel. Opening a row activates the camera through the same
+explicit activation and flight the CCTV picker uses, so the CCTV panel and
+its single video decoder show it. A LIVE OPS region button hands the panel
+its region: the list is limited to the region's box until the chip clears
+it. Thumbnails are paced (two frame requests in flight, each row on its
+provider's cadence, nothing while the panel is collapsed or the page is
+hidden); an explicit expand turns the camera layer on, quietly, when it is
+off. The model (`cameraQuickModel.js`) is pure and unit-tested.
+
+WALL opens the camera wall (`src/ui/cameraWall.js`, a modal
+`dialog[data-panel-surface]`): 4, 6 or 9 tiles for the panel's current list,
+each a snapshot on its provider's cadence. A live tile upgrades to video
+while hovered and stays on when clicked (pinned), through the same proxy
+leases as the CCTV layer, and never beyond the proxy's session budget
+(`src/sources/cctvStreamBudget.js`, shared with
+`server/providers/cctv/stream.js`): the layer's own live camera holds a slot
+unless the wall shows it too, a new pin evicts the oldest, a hover never
+evicts a pin, and a refused stream falls back to its still for twenty
+seconds. GLOBE, Escape or the backdrop return to the globe; OPEN ON GLOBE on
+a tile activates that camera and closes the wall. The budget model
+(`cameraWallModel.js`) is pure and unit-tested.
+
+Camera packs: the RTC FAST Dashboard (`nvfast-dashboard`, every camera FAST
+operates in the Las Vegas valley, stills; a Nevada 511 camera on the same
+pole is dropped), ALERTCalifornia (`alertcalifornia`, UC San Diego's fire
+cameras with their live pan, tilt and field of view, CC BY-NC-ND 4.0 with
+credit, nearest the California regions first), and Caltrans districts 12, 8
+and 1 join the defaults with a 1,500-camera default cap, and the
+catalog-wide default cap rises to 5,000 (its ceiling) so the original packs
+still load whole. The sources verified and left out are listed in
+DATA_SOURCES.md.
+
 ## LIVE OPS region console — November 1, 2026
 
 The LIVE OPS panel (left rail, below Cameras) holds one button per region in

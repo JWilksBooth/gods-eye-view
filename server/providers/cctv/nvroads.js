@@ -16,8 +16,10 @@
  * refreshes every 15 minutes, far under the throttle) and the keyless table
  * otherwise. Both routes name the same official still endpoint, which is
  * host-pinned before a camera registers. Stills are fetched at request time
- * and never stored. RTC of Southern Nevada's FAST cameras are published
- * through this same NDOT feed; RTC runs no separate public camera API.
+ * and never stored. This feed carries about a third of the Las Vegas
+ * valley's cameras; RTC of Southern Nevada's FAST Dashboard (nvfast.js)
+ * publishes the whole set, and a camera here that shares a pole with a FAST
+ * camera is left to that pack (catalog.js, PACK_OVERLAPS).
  */
 import { CCTV_SOURCE_FETCH_TIMEOUT_MS } from './constants.js';
 import {

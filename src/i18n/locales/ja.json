@@ -3042,5 +3042,51 @@
   "Live stream feed rate limited (HTTP 429)": "ライブ配信フィードがレート制限中 (HTTP 429)",
   "Malformed live stream snapshot": "ライブ配信スナップショットの形式が不正です",
   "Discovers geotagged YouTube live streams for the Live Streams layer; keyless, the layer shows its curated cameras": "ライブ配信レイヤー向けに位置情報付きの YouTube ライブ配信を探します。キーがない場合、レイヤーは厳選したカメラを表示します",
-  "Adds Windy.com webcams to the Live Streams layer, credited \"Webcams provided by windy.com\"": "Windy.com のウェブカメラをライブ配信レイヤーに追加します（クレジット \"Webcams provided by windy.com\"）"
+  "Adds Windy.com webcams to the Live Streams layer, credited \"Webcams provided by windy.com\"": "Windy.com のウェブカメラをライブ配信レイヤーに追加します（クレジット \"Webcams provided by windy.com\"）",
+  "Cameras are off": "カメラはオフです",
+  "Turning cameras on…": "カメラをオンにしています…",
+  "Loading cameras…": "カメラを読み込んでいます…",
+  "No cameras near this view yet": "この表示範囲の近くにまだカメラはありません",
+  "No cameras match": "一致するカメラがありません",
+  "STILL": "静止画",
+  "Open {name} on the globe": "{name} を地球儀で開く",
+  "{count} cameras": {
+    "other": "{count} 台のカメラ"
+  },
+  "nearest {count} listed": "近い順に{count}件を表示",
+  "Show cameras everywhere": "すべての地域のカメラを表示",
+  "Stop limiting cameras to {region}": "カメラを{region}に限定しない",
+  "Camera wall": "カメラウォール",
+  "CAMERA WALL": "カメラウォール",
+  "Feeds shown": "表示する画面数",
+  "{count} feeds": {
+    "other": "{count} 画面"
+  },
+  "GLOBE": "地球儀",
+  "Back to the globe (Esc)": "地球儀に戻る (Esc)",
+  "OPEN ON GLOBE": "地球儀で開く",
+  "Activate this camera on the globe and close the wall": "このカメラを地球儀で有効にしてウォールを閉じる",
+  "No cameras to show": "表示するカメラがありません",
+  "LIVE · PINNED": "ライブ · 固定",
+  "LIVE UNAVAILABLE": "ライブ利用不可",
+  "LIVE SLOTS FULL": "ライブ枠が満杯",
+  "Hover for live video · click to keep it playing": "ホバーでライブ映像 · クリックで再生を維持",
+  "Still camera · snapshots only": "静止画カメラ · スナップショットのみ",
+  "Hover or click a live tile for video": "ライブのタイルにホバーまたはクリックで映像",
+  "{count} live feeds at a time": {
+    "other": "同時に{count}本のライブ映像"
+  },
+  "CAMERAS": "カメラ",
+  "The cameras nearest the view, a search and the camera wall": "表示範囲に近いカメラ、検索、カメラウォール",
+  "Search cameras: road, place, 101…": "カメラを検索: 道路、地名、101…",
+  "Search cameras": "カメラを検索",
+  "Order": "並び順",
+  "NEWEST": "最新順",
+  "Live feeds first, then the freshest frames": "ライブ映像を先に、次に最新のフレーム",
+  "Closest to the view centre first": "表示中心に近い順",
+  "CAMERAS ON": "カメラをオン",
+  "WALL": "ウォール",
+  "Show several live feeds at once": "複数のライブ映像を同時に表示",
+  "{distance} km": "{distance} km",
+  "{distance} m": "{distance} m"
 }
