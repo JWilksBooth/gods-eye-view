@@ -9,6 +9,7 @@
  * Service alerts carry no geometry, so these alerts have no area and are
  * listed under their regions as bulletins.
  */
+import { SF511_AGENCY_NAMES } from '../../../src/data/sf511Operators.js';
 import { createAlert } from '../../../src/layers/alerts/model.js';
 import { ALERT_FEEDS } from './feeds.js';
 import { decodeGtfsAlertFeed, normalizeGtfsAlertFeed } from './gtfsrt.js';
@@ -24,35 +25,11 @@ const MAX_BYTES = 6 * 1024 * 1024;
 const LOOKAHEAD_MS = 24 * 60 * 60_000;
 
 /**
- * 511 SF Bay operator ids and the names alerts show. An operator not listed
- * is shown by its id.
+ * 511 SF Bay operator ids and the names alerts show, shared with the Transit
+ * layer's regional vehicle feed (src/data/sf511Operators.js). An operator
+ * not listed is shown by its id.
  */
-export const SF511_AGENCY_NAMES = Object.freeze({
-  AC: 'AC Transit',
-  AM: 'Capitol Corridor',
-  BA: 'BART',
-  CC: 'County Connection',
-  CE: 'ACE',
-  CM: 'Commute.org Shuttles',
-  CT: 'Caltrain',
-  DE: 'Dumbarton Express',
-  EM: 'Emery Go-Round',
-  FS: 'FAST',
-  GF: 'Golden Gate Ferry',
-  GG: 'Golden Gate Transit',
-  MA: 'Marin Transit',
-  SA: 'SMART',
-  SB: 'San Francisco Bay Ferry',
-  SC: 'Sonoma County Transit',
-  SF: 'San Francisco Muni',
-  SI: 'SFO AirTrain',
-  SM: 'SamTrans',
-  ST: 'SolTrans',
-  TD: 'Tri Delta Transit',
-  UC: 'Union City Transit',
-  VT: 'VTA',
-  WC: 'WestCAT',
-});
+export { SF511_AGENCY_NAMES };
 /** 511 operator ids that serve Sonoma County; their alerts belong to it too. */
 const SONOMA_AGENCIES = new Set(['SC', 'SA', 'SR', 'PE']);
 
@@ -92,7 +69,7 @@ export const TRANSIT_ALERT_FEEDS = Object.freeze([
   Object.freeze({
     ...ALERT_FEEDS.rtc,
     agency: 'RTC Southern Nevada',
-    url: () => 'https://api.goswift.ly/real-time/rtcsnv/gtfs-rt-alerts',
+    url: () => 'https://api.goswift.ly/real-time/las-vegas-rtc/gtfs-rt-alerts',
     format: 'protobuf',
     keyHeader: 'Authorization',
   }),

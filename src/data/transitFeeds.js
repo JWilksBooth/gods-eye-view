@@ -1,4 +1,5 @@
 import { greatCircleKm } from '../geoDistance.js';
+import { sf511RouteLabel, sf511RouteMode } from './sf511Operators.js';
 
 /**
  * @module transitFeeds
@@ -11,11 +12,22 @@ import { greatCircleKm } from '../geoDistance.js';
  * a DATA_SOURCES.md row with its license, and a credit in dataCredits.js.
  *
  * Admission rules for a feed:
- *  - No key, token, or registration required (identify-yourself headers are
- *    fine — Entur asks for `ET-Client-Name`, OVapi for a User-Agent).
+ *  - Keyless, or keyed by a free key the owner may leave unset. A keyless feed
+ *    needs no key, token, or registration (identify-yourself headers are
+ *    fine — Entur asks for `ET-Client-Name`, OVapi for a User-Agent). A keyed
+ *    feed names the environment variable that holds its key (`envVar`) and
+ *    where the proxy puts it (`keyHeader` or `keyQuery`); the registered
+ *    `url` never carries the key, the browser never sees it, and while the
+ *    variable is unset the proxy answers "needs a key" without asking the
+ *    operator. The keyless feeds are unaffected by any key being absent.
  *  - An open license that permits display with attribution.
  *  - Real coordinates in VehiclePosition.position — NYCT subway, for example,
  *    publishes stop-relative positions only and is deliberately absent.
+ *
+ * A feed whose operator limits requests names its own proxy cache window
+ * (`refreshMs`, default `TRANSIT_DEFAULT_REFRESH_MS`) and, where a token has
+ * an hourly allowance, the most upstream loads the proxy may make in any
+ * rolling hour (`budgetPerHour`).
  *
  * `defaultEnabled` is separate from being registered. A feed ships switched ON
  * only when its operator's own published terms were READ and plainly cover this
@@ -377,12 +389,155 @@ function burlingtonRouteLabel(routeId) {
 }
 
 /**
+ * LA Metro joins a bus route's number to the timetable it runs on: `2-13201`
+ * is Line 2 on timetable 13201, and the suffix changes at every shake-up, so
+ * it is removed by rule rather than looked up. The rail feed uses stable
+ * three-digit codes whose names and kinds are from Metro's own published
+ * `gtfs_rail.zip` (`routes.txt`): the A, C, E and K Lines are light rail
+ * (`route_type` 0), the B and D Lines the subway (`route_type` 1). The two
+ * bus rapid transit lines in the bus feed are named the same way riders see
+ * them on the map.
+ */
+const LAMETRO_RAIL_LINES = Object.freeze({
+  801: Object.freeze({ name: 'A Line', mode: 'tram' }),
+  802: Object.freeze({ name: 'B Line', mode: 'subway' }),
+  803: Object.freeze({ name: 'C Line', mode: 'tram' }),
+  804: Object.freeze({ name: 'E Line', mode: 'tram' }),
+  805: Object.freeze({ name: 'D Line', mode: 'subway' }),
+  807: Object.freeze({ name: 'K Line', mode: 'tram' }),
+});
+const LAMETRO_BUS_LINES = Object.freeze({ 901: 'G Line', 910: 'J Line' });
+
+/** An LA Metro route id without its timetable suffix. */
+function lametroBaseRoute(routeId) {
+  return routeId ? String(routeId).replace(/-\d+$/, '') : '';
+}
+
+/**
+ * LA Metro bus route id to the number on the bus.
+ * @param {string|null} routeId
+ * @returns {string|null}
+ */
+function lametroBusRouteLabel(routeId) {
+  if (!routeId) return routeId;
+  const base = lametroBaseRoute(routeId);
+  return LAMETRO_BUS_LINES[base] || base;
+}
+
+/**
+ * LA Metro rail route id to the line's name.
+ * @param {string|null} routeId
+ * @returns {string|null}
+ */
+function lametroRailRouteLabel(routeId) {
+  return LAMETRO_RAIL_LINES[lametroBaseRoute(routeId)]?.name || routeId;
+}
+
+/**
+ * LA Metro rail lines are light rail except the two subway lines.
+ * @param {string|null} routeId
+ * @returns {string}
+ */
+function lametroRailRouteMode(routeId) {
+  return LAMETRO_RAIL_LINES[lametroBaseRoute(routeId)]?.mode || 'unknown';
+}
+
+/**
+ * RTC Southern Nevada publishes an internal key for every route (`4778` is
+ * the Deuce on the Strip), so the feed would read "Route 4778" city-wide
+ * without this table. Ids and the names on the buses are from RTC's own
+ * published `google_transit.zip` (`routes.txt`); an id missing here renders
+ * unchanged rather than blank.
+ */
+const RTC_ROUTE_NAMES = Object.freeze({
+  4741: '101',
+  4742: '105',
+  4743: '106',
+  4744: '113',
+  4745: '115',
+  4746: '208',
+  4747: '214',
+  4748: '215',
+  4749: '219',
+  4750: '102',
+  4751: '103',
+  4752: '104',
+  4753: '117',
+  4754: '122',
+  4755: '217',
+  4756: 'BHX',
+  4757: 'DVX',
+  4758: 'CX',
+  4759: '108',
+  4760: 'RED LINE',
+  4761: '110',
+  4762: '212',
+  4763: '111',
+  4764: '203',
+  4765: '119',
+  4766: '120',
+  4767: '121',
+  4768: '201',
+  4769: '202',
+  4770: '206',
+  4771: 'SX',
+  4772: '207',
+  4773: '209',
+  4774: '210',
+  4775: '218',
+  4776: '220',
+  4777: '221',
+  4778: 'DEUCE',
+  4779: '401',
+});
+
+/**
+ * RTC route id to the number a rider would say.
+ * @param {string|null} routeId
+ * @returns {string|null}
+ */
+function rtcRouteLabel(routeId) {
+  return RTC_ROUTE_NAMES[routeId] || routeId;
+}
+
+/**
+ * MVgo's shuttle routes are lettered A to D with a morning and an afternoon
+ * pattern each, published under internal ids. Names are from MVgo's own
+ * `gtfs.zip` (`routes.txt`), under the same ODC-BY licence as the feed.
+ */
+const MVGO_ROUTE_NAMES = Object.freeze({
+  5783: 'A - AM',
+  5784: 'B - AM',
+  5785: 'B - PM',
+  5786: 'A - PM',
+  5787: 'C - AM',
+  5788: 'C - PM',
+  5789: 'D - AM',
+  5790: 'D - PM',
+  5791: 'D - PM Concert',
+  5792: 'B - PM Concert',
+});
+
+/**
+ * MVgo route id to the route's published name.
+ * @param {string|null} routeId
+ * @returns {string|null}
+ */
+function mvgoRouteLabel(routeId) {
+  return MVGO_ROUTE_NAMES[routeId] || routeId;
+}
+
+/**
  * Registry of feeds. Order is presentation order in the stats/credit text.
  * `loadRadiusKm` is the distance from `center` inside which the feed is polled.
+ * A keyed feed names `envVar` and either `keyHeader` (the request header that
+ * carries the key) or `keyQuery` (the query parameter the proxy appends).
  * @type {ReadonlyArray<Readonly<{
  *   id: string, name: string, operator: string, region: string,
  *   center: {lat: number, lon: number}, loadRadiusKm: number,
  *   url: string, headers?: Record<string, string>,
+ *   envVar?: string, keyHeader?: string, keyQuery?: string,
+ *   refreshMs?: number, budgetPerHour?: number,
  *   license: string, licenseUrl: string, attribution: string,
  *   defaultMode: string, routeMode?: (routeId: string|null) => string,
  * }>>}
@@ -729,6 +884,185 @@ export const TRANSIT_FEED_REGISTRY = Object.freeze([
     defaultMode: 'bus',
     routeLabel: burlingtonRouteLabel,
   }),
+  Object.freeze({
+    id: 'sf511-bay-area',
+    name: '511 SF Bay',
+    operator:
+      'Metropolitan Transportation Commission (511 SF Bay), for the Bay Area transit operators',
+    region: 'San Francisco Bay Area',
+    // A circle that holds San Francisco, San Jose and Santa Rosa: the
+    // regional feed carries the whole Bay Area and Sonoma County at once.
+    center: Object.freeze({ lat: 37.8, lon: -122.3 }),
+    loadRadiusKm: 120,
+    url: 'https://api.511.org/transit/vehiclepositions?agency=RG',
+    envVar: 'BAY_AREA_511_API_KEY',
+    keyQuery: 'api_key',
+    // 511 answers protobuf only to one of these two Accept values (or to a
+    // `format` parameter); the proxy's default Accept lists neither first.
+    headers: Object.freeze({
+      Accept: 'application/x-google-protobuf, application/octet-stream;q=0.9',
+    }),
+    // A token is allowed 60 requests an hour and the Alerts layer spends up
+    // to 15 of them. An 80 s window lands on every sixth 15 s poll, so the
+    // feed costs the token at most 40 loads an hour however many tabs poll;
+    // the budget is the backstop should the failure ladder retry faster.
+    refreshMs: 80_000,
+    budgetPerHour: 45,
+    license: '511 SF Bay Data Disseminator Agreement',
+    licenseUrl: 'https://511.org/open-data/transit',
+    attribution: 'data provided by 511.org',
+    defaultEnabled: true,
+    terms: Object.freeze({
+      quote:
+        'MTC hereby grants to Registered Data Disseminator a nonexclusive, royalty-free, worldwide, non-transferable license to use, sublicense, copy, distribute, and store (electronically or otherwise) the Provided Data; to create derivative works from the Provided Data; to display (publicly or otherwise) the Provided Data ... MUST acknowledge the source of the Provided Data with the tag line "powered by 511.org," or "data provided by 511.org," or a variant approved in writing by MTC, and a link to http://www.511.org.',
+      note: 'One entry, not thirty: the regional feed (`agency=RG`) carries every operator 511 monitors (Muni, BART, Caltrain, AC Transit, VTA, SamTrans, Golden Gate Transit and Ferry, SMART, Marin Transit, Sonoma County Transit, Santa Rosa CityBus, Petaluma Transit and the rest) in one message, and one token is allowed 60 requests an hour. The token is free and issued on email verification (511.org/open-data/token); the agreement read on 2026-11-01 also asks the holder to show MTC the product within thirty days of launch (section 2.g) and keeps the operators’ logos off the application (sections 2.e and 5.d), so the credit is the prescribed tag line as text with a link to 511.org. BART publishes no vehicle positions of its own (its GTFS-Realtime page lists trip updates and alerts only), so this feed is where BART trains come from. Route and vehicle ids are expected to carry the operator prefix 511 uses across its APIs (`SF:14`), which is what the mode and label rules read; an unprefixed id degrades to the raw id and the bus default. Not exercised live where this was built: no token was configured.',
+    }),
+    defaultMode: 'bus',
+    routeMode: sf511RouteMode,
+    routeLabel: sf511RouteLabel,
+  }),
+  Object.freeze({
+    id: 'lametro-bus',
+    name: 'LA Metro',
+    operator:
+      'Los Angeles County Metropolitan Transportation Authority (LA Metro), via Swiftly',
+    region: 'Los Angeles, CA',
+    center: Object.freeze({ lat: 34.0537, lon: -118.2428 }),
+    loadRadiusKm: 60,
+    url: 'https://api.goswift.ly/real-time/lametro/gtfs-rt-vehicle-positions',
+    envVar: 'SWIFTLY_API_KEY',
+    keyHeader: 'Authorization',
+    // Swiftly refreshes vehicle positions every 5 s and asks for a reasonable
+    // request volume; 30 s is two bus reports and 120 loads an hour.
+    refreshMs: 30_000,
+    license: 'Swiftly API License Agreement, under LA Metro’s developer terms',
+    licenseUrl: 'https://www.goswift.ly/api-license-agreement',
+    attribution:
+      'Transport information provided by LA Metro, through the Swiftly real-time API',
+    defaultEnabled: true,
+    terms: Object.freeze({
+      quote:
+        'a limited, non-exclusive, non-sublicensable, non-transferable, non-assignable license ... distribute or allow access to Licensee’s integration of the APIs within the Application ... Licensee has no right to distribute or allow access to the stand-alone APIs.',
+      note: 'LA Metro points developers to Swiftly for its GTFS-Realtime feeds (developer.metro.net/api: agency keys `lametro` for bus and `lametro-rail` for rail, protobuf, refreshed every 5 seconds). The key is free for named agencies through Swiftly’s request form (goswift.ly/realtime-api-key); Swiftly’s agreement, read on 2026-11-01, licenses display inside the holder’s own application and forbids re-serving the API itself. Metro’s own developer terms ask that Metro be acknowledged as the provider of the transport information and forbid redistribution of the feeds, which the credit and the registered-feeds-only proxy satisfy. Not exercised live where this was built: no key was configured.',
+    }),
+    defaultMode: 'bus',
+    routeLabel: lametroBusRouteLabel,
+  }),
+  Object.freeze({
+    id: 'lametro-rail',
+    name: 'LA Metro Rail',
+    operator:
+      'Los Angeles County Metropolitan Transportation Authority (LA Metro), via Swiftly',
+    region: 'Los Angeles, CA',
+    center: Object.freeze({ lat: 34.0537, lon: -118.2428 }),
+    loadRadiusKm: 60,
+    url: 'https://api.goswift.ly/real-time/lametro-rail/gtfs-rt-vehicle-positions',
+    envVar: 'SWIFTLY_API_KEY',
+    keyHeader: 'Authorization',
+    refreshMs: 30_000,
+    license: 'Swiftly API License Agreement, under LA Metro’s developer terms',
+    licenseUrl: 'https://www.goswift.ly/api-license-agreement',
+    attribution:
+      'Transport information provided by LA Metro, through the Swiftly real-time API',
+    defaultEnabled: true,
+    terms: Object.freeze({
+      quote:
+        'a limited, non-exclusive, non-sublicensable, non-transferable, non-assignable license ... distribute or allow access to Licensee’s integration of the APIs within the Application ... Licensee has no right to distribute or allow access to the stand-alone APIs.',
+      note: 'The rail half of the LA Metro entry above, on the same key and terms. Four of the six lines are light rail and two are the subway, so the default mode is tram and the route table settles the rest; the subway is drawn at street level like every other feed without depth.',
+    }),
+    defaultMode: 'tram',
+    routeMode: lametroRailRouteMode,
+    routeLabel: lametroRailRouteLabel,
+  }),
+  Object.freeze({
+    id: 'metrolink',
+    name: 'Metrolink',
+    operator: 'Southern California Regional Rail Authority (Metrolink)',
+    region: 'Southern California',
+    // Union Station; the network reaches Lancaster, Ventura, San Bernardino
+    // and Oceanside, so the circle is wide and the feed is small.
+    center: Object.freeze({ lat: 34.0561, lon: -118.2365 }),
+    loadRadiusKm: 120,
+    url: 'https://metrolink-gtfsrt.gbsdigital.us/feed/gtfsrt-vehicles',
+    envVar: 'METROLINK_API_KEY',
+    keyHeader: 'X-Api-Key',
+    refreshMs: 30_000,
+    license: 'Metrolink GTFS-RT End-User License Agreement',
+    licenseUrl:
+      'https://metrolinktrains.com/about/gtfs/gtfs-rt-terms-and-conditions/',
+    attribution: 'Metrolink (Southern California Regional Rail Authority)',
+    defaultEnabled: true,
+    terms: Object.freeze({
+      quote:
+        'Metrolink grants you a non-exclusive, non-transferable license to use the API Access solely for your own internal business purposes ... You may not copy, modify, distribute, sell, or transfer the API Access or any part thereof without the prior written consent of Metrolink.',
+      note: 'A key is emailed on request from the GTFS-RT access page (metrolinktrains.com/about/gtfs/gtfs-rt-access) and travels in the `X-Api-Key` header, which the MobilityData catalogue records for this producer; the API answers 429 past a per-key rate limit, which the 30 s window keeps clear of. The licence read on 2026-11-01 covers the key holder’s own internal use, which is what a private console is, and not re-serving the feed to the public, so a shared deployment should leave METROLINK_API_KEY unset. Trains only, so the default mode is rail. Not exercised live where this was built: no key was configured.',
+    }),
+    defaultMode: 'rail',
+  }),
+  Object.freeze({
+    id: 'rtc-southern-nevada',
+    name: 'RTC Southern Nevada',
+    operator:
+      'Regional Transportation Commission of Southern Nevada (RTC), via Swiftly',
+    region: 'Las Vegas, NV',
+    center: Object.freeze({ lat: 36.1699, lon: -115.1398 }),
+    loadRadiusKm: 45,
+    url: 'https://api.goswift.ly/real-time/las-vegas-rtc/gtfs-rt-vehicle-positions',
+    envVar: 'SWIFTLY_API_KEY',
+    keyHeader: 'Authorization',
+    refreshMs: 30_000,
+    license: 'Swiftly API License Agreement',
+    licenseUrl: 'https://www.goswift.ly/api-license-agreement',
+    attribution: 'RTC of Southern Nevada, through the Swiftly real-time API',
+    defaultEnabled: true,
+    terms: Object.freeze({
+      quote:
+        'a limited, non-exclusive, non-sublicensable, non-transferable, non-assignable license ... distribute or allow access to Licensee’s integration of the APIs within the Application ... Licensee has no right to distribute or allow access to the stand-alone APIs.',
+      note: 'RTC publishes its real-time feeds through Swiftly; its own site refuses automated readers, so the producer address is the one RTC submitted to the MobilityData catalogue, agency key `las-vegas-rtc` (the Alerts layer had carried an unconfirmed `rtcsnv`). Same key and agreement as the LA Metro entries. Route ids are internal keys translated from RTC’s published routes.txt. Not exercised live where this was built: no key was configured.',
+    }),
+    defaultMode: 'bus',
+    routeLabel: rtcRouteLabel,
+  }),
+  Object.freeze({
+    id: 'octa',
+    name: 'OCTA',
+    operator: 'Orange County Transportation Authority',
+    region: 'Orange County, CA',
+    center: Object.freeze({ lat: 33.75, lon: -117.87 }),
+    loadRadiusKm: 50,
+    url: 'https://api.octa.net/GTFSRealTime/protoBuf/VehiclePositions.aspx',
+    license: 'OCTA open data: free developer data feeds',
+    licenseUrl: 'https://www.octa.net/news-and-resources/open-data/overview/',
+    attribution: 'Orange County Transportation Authority (OCTA)',
+    defaultEnabled: true,
+    terms: Object.freeze({
+      quote:
+        'OCTA publically offers free data feeds to developers. These resources are to encourage community building and contributions by having developers utilize our transit information for the production of useful web services.',
+      note: 'Keyless. The open-data page read on 2026-11-01 keeps ownership with OCTA ("At all times, OCTA maintains the rights and ownership of the open data we offer") and disclaims warranties; it prescribes no attribution wording, so the credit names the authority. The catalogue prints the endpoint as plain http://, but the https address answers, labelling the protobuf text/html; the proxy decodes bytes, not labels. Orange County is the south-eastern corner of the Los Angeles region box: 150 of 160 buses were inside it on the Sunday evening this was registered, every one with a bearing, a speed and its own timestamp. No ETag or Last-Modified, so conditional requests fall through to the cache window.',
+    }),
+    defaultMode: 'bus',
+  }),
+  Object.freeze({
+    id: 'mvgo-mountain-view',
+    name: 'MVgo',
+    operator: 'Mountain View Transportation Management Association (MVgo)',
+    region: 'Mountain View, CA',
+    center: Object.freeze({ lat: 37.4, lon: -122.07 }),
+    loadRadiusKm: 12,
+    url: 'https://mtma.tripshot.com/v1/gtfs/realtime/feed/mvgo?types=VehiclePosition',
+    license: 'ODC-BY',
+    licenseUrl: 'https://mvgo.org/developers/',
+    attribution:
+      'MVgo — Mountain View Transportation Management Association (ODC-BY)',
+    defaultEnabled: true,
+    terms: Object.freeze({
+      quote:
+        'MVgo’s GTFS and GTFS Realtime data is available under the ODC-BY license.',
+      note: 'Keyless, and the only keyless vehicle feed inside the Bay Area region box that publishes licence text. A weekday commuter shuttle network of a few vehicles around Mountain View, empty outside service hours (zero vehicles on the Sunday it was registered). Route ids are internal keys translated from the published routes.txt.',
+    }),
+    defaultMode: 'bus',
+    routeLabel: mvgoRouteLabel,
+  }),
 ]);
 
 /**
@@ -749,6 +1083,50 @@ const ANY_FEED_BY_ID = new Map(
 
 /** Feed ids are path segments: lowercase letters, digits, hyphens only. */
 export const TRANSIT_FEED_ID_PATTERN = /^[a-z0-9][a-z0-9-]{1,63}$/;
+
+/** Proxy cache window for a feed that does not name its own (ms). */
+export const TRANSIT_DEFAULT_REFRESH_MS = 15_000;
+
+/**
+ * How long the proxy serves one snapshot of a feed before asking again: the
+ * feed's own `refreshMs`, else the default. An operator that allows a token
+ * sixty requests an hour is polled on its terms, not the layer's.
+ * @param {object|null} feed Registry entry.
+ * @returns {number}
+ */
+export function transitFeedRefreshMs(feed) {
+  const value = feed?.refreshMs;
+  return Number.isFinite(value) && value > 0
+    ? value
+    : TRANSIT_DEFAULT_REFRESH_MS;
+}
+
+/**
+ * The key a feed needs, read from an environment, or null: for a keyless
+ * feed, or a keyed one whose variable is unset or blank. Read at request
+ * time, never cached, so a key saved in Provider Settings applies without a
+ * restart. The value is handed to the proxy's request and nowhere else.
+ * @param {object|null} feed Registry entry.
+ * @param {Record<string, string|undefined>|null} env Environment variables.
+ * @returns {string|null}
+ */
+export function transitFeedKey(feed, env) {
+  if (!feed?.envVar) return null;
+  const value = env ? env[feed.envVar] : undefined;
+  const text = typeof value === 'string' ? value.trim() : '';
+  return text || null;
+}
+
+/**
+ * True when the feed needs a key the environment does not hold. A keyless
+ * feed never needs one.
+ * @param {object|null} feed Registry entry.
+ * @param {Record<string, string|undefined>|null} env Environment variables.
+ * @returns {boolean}
+ */
+export function transitFeedKeyMissing(feed, env) {
+  return Boolean(feed?.envVar) && transitFeedKey(feed, env) === null;
+}
 
 /**
  * Look up a POLLABLE feed by id. Unknown ids, malformed ids, and feeds that are
@@ -874,9 +1252,13 @@ export function transitRouteLabel(feed, routeId) {
 /**
  * Public catalog shape served by `/api/transit/feeds` — everything the browser
  * needs to gate polling and credit the source, and nothing it could misuse.
+ * A keyed feed says which variable it reads (`envVar`) and whether that key
+ * is currently missing (`keyRequired`); the key itself never appears.
+ * @param {Record<string, string|undefined>|null} [env] Environment the proxy
+ *   reads keys from; without one every keyed feed reports its key missing.
  * @returns {object[]}
  */
-export function publicTransitCatalog() {
+export function publicTransitCatalog(env = null) {
   return TRANSIT_ENABLED_FEEDS.map((feed) => ({
     id: feed.id,
     name: feed.name,
@@ -888,5 +1270,8 @@ export function publicTransitCatalog() {
     licenseUrl: feed.licenseUrl,
     attribution: feed.attribution,
     historyRetention: feed.historyRetention === true,
+    refreshMs: transitFeedRefreshMs(feed),
+    envVar: feed.envVar || null,
+    keyRequired: transitFeedKeyMissing(feed, env),
   }));
 }

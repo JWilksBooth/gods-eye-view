@@ -21,6 +21,9 @@
  *   `server/providers/incidents` registers.
  * - `chpCenters`: the CHP communications centers whose logs cover the region.
  * - `news`: the Google News / GDELT search query for the region's headlines.
+ * - `transit`: the Transit layer feeds (ids from `src/data/transitFeeds.js`)
+ *   whose live vehicles cover the region. A region with at least one turns
+ *   the Transit layer on with its other layers (`liveOpsRegionLayers`).
  */
 export const LIVE_OPS_REGIONS = Object.freeze([
   Object.freeze({
@@ -35,6 +38,12 @@ export const LIVE_OPS_REGIONS = Object.freeze([
     incidents: Object.freeze(['chp', 'lafd-alerts']),
     chpCenters: Object.freeze(['LACC']),
     news: 'Los Angeles',
+    transit: Object.freeze([
+      'lametro-bus',
+      'lametro-rail',
+      'metrolink',
+      'octa',
+    ]),
   }),
   Object.freeze({
     id: 'sonoma-county',
@@ -48,6 +57,7 @@ export const LIVE_OPS_REGIONS = Object.freeze([
     incidents: Object.freeze(['chp', 'calfire']),
     chpCenters: Object.freeze(['GGCC']),
     news: 'Sonoma County',
+    transit: Object.freeze(['sf511-bay-area']),
   }),
   Object.freeze({
     id: 'sf-bay-area',
@@ -61,6 +71,7 @@ export const LIVE_OPS_REGIONS = Object.freeze([
     incidents: Object.freeze(['chp', 'datasf-police', 'datasf-fire']),
     chpCenters: Object.freeze(['GGCC']),
     news: 'San Francisco Bay Area',
+    transit: Object.freeze(['sf511-bay-area', 'mvgo-mountain-view']),
   }),
   Object.freeze({
     id: 'las-vegas',
@@ -74,11 +85,25 @@ export const LIVE_OPS_REGIONS = Object.freeze([
     incidents: Object.freeze(['nvroads']),
     chpCenters: Object.freeze([]),
     news: 'Las Vegas',
+    transit: Object.freeze(['rtc-southern-nevada']),
   }),
 ]);
 
-/** The layers the console turns on for a region: cameras, incidents, traffic. */
+/** The layers the console turns on for every region: cameras, incidents, traffic. */
 export const LIVE_OPS_LAYERS = Object.freeze(['cctv', 'incidents', 'traffic']);
+
+/**
+ * The layers the console turns on for one region: the shared three, plus
+ * Transit where the region has a live vehicle feed to show.
+ * @param {{transit?: ReadonlyArray<string>}|null|undefined} region
+ * @returns {string[]}
+ */
+export function liveOpsRegionLayers(region) {
+  const layers = [...LIVE_OPS_LAYERS];
+  if (Array.isArray(region?.transit) && region.transit.length > 0)
+    layers.push('transit');
+  return layers;
+}
 
 const BY_ID = new Map(LIVE_OPS_REGIONS.map((region) => [region.id, region]));
 

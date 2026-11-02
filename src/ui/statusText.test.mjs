@@ -75,3 +75,23 @@ for (const locale of ['es', 'ru']) {
     });
   });
 }
+
+test('a keyed transit feed without its key reads as a key problem in every locale', () => {
+  setLocale('en');
+  assert.equal(
+    translateFeedError('511 SF Bay feed needs a key'),
+    '511 SF Bay feed needs a key',
+  );
+  inLocale('de', () => {
+    assert.equal(
+      translateFeedError('511 SF Bay feed needs a key'),
+      'Feed 511 SF Bay benötigt einen Schlüssel',
+    );
+  });
+  inLocale('ja', () => {
+    assert.equal(
+      translateFeedError('Metrolink feed needs a key'),
+      'Metrolinkフィードにはキーが必要です',
+    );
+  });
+});

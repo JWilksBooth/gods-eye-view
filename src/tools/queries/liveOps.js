@@ -12,10 +12,10 @@ import {
   isoTime,
 } from '../results.js';
 import {
-  LIVE_OPS_LAYERS,
   LIVE_OPS_REGIONS,
   LIVE_OPS_REGION_IDS,
   liveOpsRegion,
+  liveOpsRegionLayers,
   regionArea,
 } from '../../data/liveOpsRegions.js';
 import {
@@ -155,7 +155,8 @@ export const liveOpsRegionTool = defineTool({
   description:
     'Everything the LIVE OPS console shows for one region in one call: its ' +
     'public cameras, live incidents and latest headlines, plus the view that ' +
-    'opens the region with cameras, incidents and traffic on. Regions: ' +
+    'opens the region with cameras, incidents, traffic and live transit on. ' +
+    'Regions: ' +
     LIVE_OPS_REGIONS.map((region) => `${region.id} (${region.name})`).join(
       ', ',
     ) +
@@ -204,7 +205,10 @@ export const liveOpsRegionTool = defineTool({
       name: region.name,
       bbox: [...region.bbox],
       center: { ...region.center },
-      view: suggestView(services, { area, layers: [...LIVE_OPS_LAYERS] }),
+      view: suggestView(services, {
+        area,
+        layers: liveOpsRegionLayers(region),
+      }),
     };
     const lines = [];
     sections.forEach((section, index) => {

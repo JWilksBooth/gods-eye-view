@@ -1,0 +1,212 @@
+{
+  "note": "One sample VehiclePosition per shape each LIVE OPS region feed publishes. OCTA entities are copied from the live feed on 2026-11-01; the keyed feeds could not be read without a key, so their entities follow each operator's published GTFS ids (LA Metro gtfs_bus/gtfs_rail, RTC google_transit.zip, Metrolink gtfs.zip) and 511's operator-prefixed id convention. Timestamps are epoch seconds; the test encodes these as protobuf and decodes them through the proxy.",
+  "headerTimestamp": 1793575988,
+  "feeds": {
+    "octa": [
+      {
+        "entityId": "1793575988_0_1201",
+        "vehicleId": "1201",
+        "label": "1201",
+        "routeId": "50",
+        "tripId": "13033204",
+        "lat": 33.803089,
+        "lon": -118.033455,
+        "bearing": 270,
+        "speed": 0,
+        "timestamp": 1793575945
+      },
+      {
+        "entityId": "1793575988_1_1211",
+        "vehicleId": "1211",
+        "label": "1211",
+        "routeId": "53",
+        "tripId": "12903795",
+        "lat": 33.741913,
+        "lon": -117.867645,
+        "bearing": 0,
+        "speed": 0,
+        "timestamp": 1793575969
+      }
+    ],
+    "mvgo-mountain-view": [
+      {
+        "entityId": "v-7701",
+        "vehicleId": "7701",
+        "label": "7701",
+        "routeId": "5783",
+        "tripId": "t-a-am-1",
+        "lat": 37.4005,
+        "lon": -122.0631,
+        "bearing": 95,
+        "speed": 8.2,
+        "timestamp": 1793575980
+      }
+    ],
+    "sf511-bay-area": [
+      {
+        "entityId": "SF:1234",
+        "vehicleId": "SF:1234",
+        "label": "1234",
+        "routeId": "SF:14",
+        "tripId": "SF:11836500",
+        "lat": 37.7536,
+        "lon": -122.4188,
+        "bearing": 215,
+        "speed": 6.5,
+        "timestamp": 1793575982
+      },
+      {
+        "entityId": "SF:2041",
+        "vehicleId": "SF:2041",
+        "label": "2041",
+        "routeId": "SF:N",
+        "tripId": "SF:11840001",
+        "lat": 37.7612,
+        "lon": -122.4328,
+        "bearing": 270,
+        "speed": 11,
+        "timestamp": 1793575985
+      },
+      {
+        "entityId": "BA:1403",
+        "vehicleId": "BA:1403",
+        "label": "1403",
+        "routeId": "BA:Yellow-N",
+        "tripId": "BA:1234567",
+        "lat": 37.7799,
+        "lon": -122.4141,
+        "bearing": 300,
+        "speed": 22,
+        "timestamp": 1793575986
+      },
+      {
+        "entityId": "CT:128",
+        "vehicleId": "CT:128",
+        "label": "128",
+        "routeId": "CT:Local Weekday",
+        "tripId": "CT:128",
+        "lat": 37.5205,
+        "lon": -122.2755,
+        "bearing": 150,
+        "speed": 30,
+        "timestamp": 1793575970
+      },
+      {
+        "entityId": "SA:104",
+        "vehicleId": "SA:104",
+        "label": "104",
+        "routeId": "SA:SMART",
+        "tripId": "SA:2201",
+        "lat": 38.4369,
+        "lon": -122.7159,
+        "bearing": 5,
+        "speed": 25,
+        "timestamp": 1793575975
+      },
+      {
+        "entityId": "SC:8521",
+        "vehicleId": "SC:8521",
+        "label": "8521",
+        "routeId": "SC:60",
+        "tripId": "SC:60-3",
+        "lat": 38.4411,
+        "lon": -122.7141,
+        "bearing": 180,
+        "speed": 9,
+        "timestamp": 1793575979
+      }
+    ],
+    "lametro-bus": [
+      {
+        "entityId": "6502",
+        "vehicleId": "6502",
+        "label": "6502",
+        "routeId": "2-13201",
+        "tripId": "60201001",
+        "lat": 34.0908,
+        "lon": -118.3253,
+        "bearing": 90,
+        "speed": 7.1,
+        "timestamp": 1793575984
+      },
+      {
+        "entityId": "9710",
+        "vehicleId": "9710",
+        "label": "9710",
+        "routeId": "910-13201",
+        "tripId": "91001001",
+        "lat": 33.9602,
+        "lon": -118.2821,
+        "bearing": 180,
+        "speed": 20.5,
+        "timestamp": 1793575987
+      }
+    ],
+    "lametro-rail": [
+      {
+        "entityId": "A-1",
+        "vehicleId": "A-1",
+        "label": "A-1",
+        "routeId": "801",
+        "tripId": "80101001",
+        "lat": 33.9418,
+        "lon": -118.2017,
+        "bearing": 10,
+        "speed": 18,
+        "timestamp": 1793575986
+      },
+      {
+        "entityId": "B-7",
+        "vehicleId": "B-7",
+        "label": "B-7",
+        "routeId": "802",
+        "tripId": "80201001",
+        "lat": 34.0624,
+        "lon": -118.3073,
+        "bearing": 280,
+        "speed": 15,
+        "timestamp": 1793575987
+      }
+    ],
+    "metrolink": [
+      {
+        "entityId": "M-603",
+        "vehicleId": "603",
+        "label": "603",
+        "routeId": "San Bernardino Line",
+        "tripId": "603",
+        "lat": 34.0812,
+        "lon": -118.0243,
+        "bearing": 85,
+        "speed": 31,
+        "timestamp": 1793575980
+      }
+    ],
+    "rtc-southern-nevada": [
+      {
+        "entityId": "2024",
+        "vehicleId": "2024",
+        "label": "2024",
+        "routeId": "4778",
+        "tripId": "4778-12",
+        "lat": 36.1147,
+        "lon": -115.1728,
+        "bearing": 0,
+        "speed": 5.5,
+        "timestamp": 1793575983
+      },
+      {
+        "entityId": "3310",
+        "vehicleId": "3310",
+        "label": "3310",
+        "routeId": "4760",
+        "tripId": "4760-4",
+        "lat": 36.1032,
+        "lon": -115.1365,
+        "bearing": 180,
+        "speed": 12,
+        "timestamp": 1793575981
+      }
+    ]
+  }
+}

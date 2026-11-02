@@ -209,12 +209,12 @@ test('transit alerts drop what is over or far ahead and name 511 operators', () 
       informed: [
         { agencyId: 'SF', routeId: null, stopId: null },
         { agencyId: 'SA', routeId: null, stopId: null },
-        { agencyId: 'PE', routeId: null, stopId: null },
+        { agencyId: 'ZZ', routeId: null, stopId: null },
       ],
     }),
     { now: NOW },
   );
-  assert.equal(regional.agency, 'San Francisco Muni · SMART · 511 operator PE');
+  assert.equal(regional.agency, 'San Francisco Muni · SMART · 511 operator ZZ');
   assert.deepEqual(regional.regions, ['sf-bay-area', 'sonoma-county']);
 });
 

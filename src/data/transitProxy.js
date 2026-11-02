@@ -18,10 +18,16 @@ import {
   GTFS_INCREMENTALITY_FULL_DATASET,
   decodeVehiclePositions,
 } from './gtfsRealtime.js';
-import { getTransitFeed } from './transitFeeds.js';
+import { TRANSIT_DEFAULT_REFRESH_MS, getTransitFeed } from './transitFeeds.js';
 
-/** Fresh window: a snapshot younger than this is served without refetching. */
-export const TRANSIT_PROXY_TTL_MS = 15_000;
+/**
+ * Fresh window: a snapshot younger than this is served without refetching.
+ * A feed may name a longer window of its own (`refreshMs` in the registry);
+ * this is the default and the floor.
+ */
+export const TRANSIT_PROXY_TTL_MS = TRANSIT_DEFAULT_REFRESH_MS;
+/** The rolling window an hourly feed budget counts upstream loads in. */
+export const TRANSIT_BUDGET_WINDOW_MS = 60 * 60_000;
 /** Serve-stale window: after an upstream failure, a snapshot this old still ships (marked stale). */
 export const TRANSIT_PROXY_STALE_MAX_MS = 10 * 60_000;
 /** Upstream fetch timeout. National feeds (Entur ≈ 1.4 MB) need headroom. */
@@ -106,11 +112,16 @@ export function resolveTransitRoute(url) {
  * where it is not asked for, and it spares each operator a full body whenever
  * nothing has changed.
  *
+ * A keyed feed that carries its key in a header (`keyHeader`) gets it here,
+ * and only here: the key is read at request time and never stored with the
+ * snapshot, logged, or echoed.
+ *
  * @param {object} feed Registry entry.
  * @param {{etag?: string|null, lastModified?: string|null}} [validators] From the cached snapshot.
+ * @param {string|null} [key] The feed's key, when it has one.
  * @returns {Record<string, string>}
  */
-export function transitUpstreamHeaders(feed, validators = null) {
+export function transitUpstreamHeaders(feed, validators = null, key = null) {
   return {
     'User-Agent':
       'osiris-transit-proxy/1.0 (+https://github.com/JWilksBooth/gods-eye-view)',
@@ -121,6 +132,71 @@ export function transitUpstreamHeaders(feed, validators = null) {
       ? { 'If-Modified-Since': validators.lastModified }
       : {}),
     ...(feed?.headers || {}),
+    ...(feed?.keyHeader && key ? { [feed.keyHeader]: key } : {}),
+  };
+}
+
+/**
+ * The address one upstream fetch starts from: the registered URL, plus the
+ * key as a query parameter for a feed that takes it that way (`keyQuery`).
+ * The registered URL itself never carries a key, so the catalog, the logs and
+ * the redirect-origin check all see the keyless form.
+ * @param {object} feed Registry entry.
+ * @param {string|null} [key] The feed's key, when it has one.
+ * @returns {string}
+ */
+export function transitUpstreamUrl(feed, key = null) {
+  if (!feed?.keyQuery || !key) return feed?.url ?? '';
+  const url = new URL(feed.url);
+  url.searchParams.set(feed.keyQuery, key);
+  return url.toString();
+}
+
+/**
+ * The answer for a keyed feed whose key is not configured: honest, instant,
+ * and never a request to the operator. The browser shows it as "needs a key"
+ * rather than as an outage, and the proxy notes no failure for it.
+ * @param {object} feed Registry entry.
+ * @returns {{error: string, feedId: string, envVar: string, keyRequired: true}}
+ */
+export function transitKeyRequiredPayload(feed) {
+  return {
+    error: 'Transit feed needs a key',
+    feedId: feed.id,
+    envVar: feed.envVar,
+    keyRequired: true,
+  };
+}
+
+/**
+ * Whether one more upstream load fits a feed's hourly allowance. `attempts`
+ * are the times of earlier loads; the returned list is the same list pruned
+ * to the rolling window, for the caller to keep. A feed without a budget is
+ * always admitted.
+ * @param {number[]|undefined} attempts Times (ms) of earlier upstream loads.
+ * @param {number|undefined} budgetPerHour Most loads in any rolling hour.
+ * @param {number} now
+ * @returns {{ ok: boolean, attempts: number[], retryAfterS: number }}
+ */
+export function transitBudgetDecision(attempts, budgetPerHour, now) {
+  const recent = (attempts || []).filter(
+    (at) => Number.isFinite(at) && now - at < TRANSIT_BUDGET_WINDOW_MS,
+  );
+  if (
+    !Number.isFinite(budgetPerHour) ||
+    budgetPerHour <= 0 ||
+    recent.length < budgetPerHour
+  ) {
+    return { ok: true, attempts: recent, retryAfterS: 0 };
+  }
+  const oldest = Math.min(...recent);
+  return {
+    ok: false,
+    attempts: recent,
+    retryAfterS: Math.max(
+      1,
+      Math.ceil((oldest + TRANSIT_BUDGET_WINDOW_MS - now) / 1000),
+    ),
   };
 }
 
@@ -268,13 +344,14 @@ export function buildTransitSnapshot(feed, bytes, now = Date.now()) {
  * Classify a cache entry for the request policy.
  * @param {{ at: number }|null|undefined} entry Cached snapshot (`at` = fetch ms).
  * @param {number} now
+ * @param {number} [ttlMs] The feed's fresh window (its `refreshMs`, else the default).
  * @returns {'none'|'fresh'|'stale'|'expired'}
  */
-export function transitCacheState(entry, now) {
+export function transitCacheState(entry, now, ttlMs = TRANSIT_PROXY_TTL_MS) {
   if (!entry || !Number.isFinite(entry.at)) return 'none';
   const age = now - entry.at;
   if (age < 0) return 'fresh';
-  if (age < TRANSIT_PROXY_TTL_MS) return 'fresh';
+  if (age < ttlMs) return 'fresh';
   if (age < TRANSIT_PROXY_STALE_MAX_MS) return 'stale';
   return 'expired';
 }
@@ -284,19 +361,22 @@ export function transitCacheState(entry, now) {
  * (HIT / MISS / INFLIGHT / STALE-ERROR) so the layer can surface staleness.
  * @param {'HIT'|'MISS'|'INFLIGHT'|'STALE-ERROR'} cacheState
  * @param {string} [upstreamHost]
+ * @param {number|null} [contactedAt]
+ * @param {number} [ttlMs] The feed's fresh window, for `max-age`.
  * @returns {Record<string, string>}
  */
 export function transitResponseHeaders(
   cacheState,
   upstreamHost = '',
   contactedAt = null,
+  ttlMs = TRANSIT_PROXY_TTL_MS,
 ) {
   return {
     'Content-Type': 'application/json; charset=utf-8',
     'Cache-Control':
       cacheState === 'STALE-ERROR'
         ? 'no-store'
-        : `public, max-age=${Math.floor(TRANSIT_PROXY_TTL_MS / 1000)}`,
+        : `public, max-age=${Math.floor(ttlMs / 1000)}`,
     'X-GEV-Cache': cacheState,
     ...(upstreamHost ? { 'X-Transit-Upstream': upstreamHost } : {}),
     // When the operator last ANSWERED, which is not when the body was fetched.

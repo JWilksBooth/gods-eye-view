@@ -144,7 +144,7 @@ test('live_ops_region combines cameras, incidents and headlines for one region',
     'Los Angeles LIVE OPS: 1 public camera in the requested box. 1 live incident in Los Angeles; most by type: traffic (1). 1 headline for Los Angeles.',
   );
   assert.equal(result.data.name, 'Los Angeles');
-  assert.deepEqual(result.data.view.layers, ['cctv', 'incidents', 'traffic']);
+  assert.deepEqual(result.data.view.layers, ['cctv', 'incidents', 'traffic', 'transit']);
   assert.match(result.data.view.url, /^http:\/\/localhost:4173\//);
   assert.equal(result.data.cameras.rows[0].id, 'ca-d7-tv1');
   assert.equal(result.data.incidents.rows[0].id, 'chp:1');

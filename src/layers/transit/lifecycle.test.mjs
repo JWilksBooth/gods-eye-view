@@ -3982,3 +3982,40 @@ test('parked transit reprojects held and reported courses at the bounded camera 
     'selected unknown course also stays screen-up',
   );
 });
+
+test('a keyed feed without its key reads as a key problem on the row, not an outage', async (t) => {
+  const app = harness(t);
+  app.serve('mbta', () => ({
+    status: 503,
+    body: {
+      error: 'Transit feed needs a key',
+      feedId: 'mbta',
+      envVar: 'EXAMPLE_KEY',
+      keyRequired: true,
+    },
+  }));
+  app.layer.enable(app.viewer);
+  await app.layer.update();
+  const stats = app.layer.getStats();
+  assert.equal(stats.count, 0);
+  assert.equal(stats.error, 'MBTA feed needs a key');
+  assert.equal(stats.retryInSec, undefined, 'nothing is coming until a key is');
+  assert.equal(app.state()._feedStatus.get('mbta').keyRequired, true);
+
+  // The key arrives: the next poll clears the row like any recovery.
+  app.serve('mbta', () => ({
+    status: 200,
+    body: snapshot(
+      'mbta',
+      'MBTA',
+      [vehicle('bus-1', 42.36, -71.06, Date.now() / 1000)],
+      { fetchedAt: Date.now() },
+    ),
+  }));
+  app.advance(TRANSIT_POLL_MS);
+  await app.layer.update();
+  const recovered = app.layer.getStats();
+  assert.equal(recovered.count, 1);
+  assert.equal(recovered.error, null);
+  assert.equal(app.state()._feedStatus.get('mbta').keyRequired, false);
+});

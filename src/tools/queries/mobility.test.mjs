@@ -650,3 +650,42 @@ test('a whole-world bike-share search names every system it skipped', async () =
   const named = [...result.data.systems, ...result.data.systems_not_searched];
   assert.equal(named.length, GBFS_CITY_REGISTRY.length);
 });
+
+test('transit names a keyed feed whose key is missing instead of asking it', async () => {
+  const keyed = {
+    ...feed,
+    id: 'keyed',
+    name: 'Keyed Feed',
+    keyRequired: true,
+    envVar: 'EXAMPLE_KEY',
+  };
+  const source = transit();
+  source.getFeeds = async () => [keyed, feed];
+  const catalog = composeCatalog({
+    tools: coreTools,
+    services: { transit: source, clock },
+  });
+  const result = await catalog.call('get_transit_vehicles', { area: downtown });
+  assert.deepEqual(
+    source.requested,
+    ['capmetro'],
+    'the keyed feed is not asked',
+  );
+  assert.match(result.summary, /Keyed Feed needs EXAMPLE_KEY/);
+  assert.equal(result.data.rows.length, 2);
+  const row = result.data.feeds.find((entry) => entry.name === 'Keyed Feed');
+  assert.equal(row.status, 'key-required');
+  assert.equal(row.env_var, 'EXAMPLE_KEY');
+
+  // When every covering feed needs a key, the answer is which key to set.
+  source.getFeeds = async () => [keyed];
+  source.requested.length = 0;
+  const only = await catalog.call('get_transit_vehicles', { area: downtown });
+  assert.deepEqual(source.requested, []);
+  assert.equal(
+    only.summary,
+    'No transit feed covering 2 km around 30.267, -97.743 has its key configured (Keyed Feed needs EXAMPLE_KEY).',
+  );
+  assert.equal(only.data.rows.length, 0);
+  assert.equal(only.data.feeds[0].status, 'key-required');
+});
