@@ -4,18 +4,22 @@
  * Pure: no DOM, no Cesium, no catalogs, so the panel's policy is unit-tested
  * without a browser. The panel (cameraQuickControls.js) renders what this
  * returns; the camera wall (cameraWall.js) takes the same ranked entries.
+ * Whether a stream answers comes from the proxy's stream health
+ * (src/sources/cctvStreamHealth.js), never from the catalog alone.
  */
 import { greatCircleKm } from '../geoDistance.js';
 import { regionContains } from '../data/liveOpsRegions.js';
+import { streamHealthState } from '../sources/cctvStreamHealth.js';
 import { isVideoFeedType } from '../sources/cctvTypes.js';
 
 /** Rows the panel lists: the nearest cameras, enough to scan without paging. */
 export const CAMERA_QUICK_LIST_LIMIT = 24;
 
 /**
- * `newest`: live feeds first, then stills by the age of their last frame,
- * then cameras with no frame yet, nearest first within each. `nearest`:
- * distance to the view centre alone.
+ * `newest`: streams the proxy has seen answer first, then streams nobody
+ * has checked, then stills and streams known to be down by the age of
+ * their last frame, then cameras with no frame yet, nearest first within
+ * each. `nearest`: distance to the view centre alone.
  */
 export const CAMERA_QUICK_ORDERS = Object.freeze(['newest', 'nearest']);
 export const DEFAULT_CAMERA_QUICK_ORDER = 'newest';
@@ -71,12 +75,46 @@ export function cameraMatchesQuery(camera, tokens) {
   return tokens.every((token) => text.includes(token));
 }
 
-/** Whether a catalog entry carries moving pictures (HLS, MP4, WebM, MJPEG). */
+/**
+ * Whether a catalog entry carries moving pictures (HLS, MP4, WebM, MJPEG):
+ * what the catalog says, not whether the stream answers (cameraStreamState).
+ */
 export function cameraIsLive(camera) {
   if (camera?.isVideo === true) return true;
   const feedType = String(camera?.feedType || '').toLowerCase();
   return isVideoFeedType(feedType) || feedType === 'mjpeg';
 }
+
+/** A camera's stream: answering, unchecked, down, or none (a still). */
+export const CAMERA_STREAM_STATES = Object.freeze([
+  'ok',
+  'unknown',
+  'down',
+  'none',
+]);
+
+/**
+ * What a camera's stream is doing, from the catalog and the proxy's stream
+ * health (`Map<id, {ok, fail}>`, src/sources/cctvStreamHealth.js): `none`
+ * for a still camera; otherwise `ok` when its playlist answered recently,
+ * `down` when it failed recently with no success since, and `unknown` when
+ * nobody has checked, or not for a while. Only `ok` earns the LIVE badge.
+ * @param {object} camera A catalog entry (`id`, `feedType`, `isVideo`).
+ * @param {Map<string, {ok?: number, fail?: number}>|null} [streamHealth]
+ * @param {number} [now]
+ * @returns {'ok'|'unknown'|'down'|'none'}
+ */
+export function cameraStreamState(
+  camera,
+  streamHealth = null,
+  now = Date.now(),
+) {
+  if (!cameraIsLive(camera)) return 'none';
+  return streamHealthState(streamHealth?.get?.(camera.id) ?? null, now);
+}
+
+/** NEWEST: answering streams, then unchecked ones, then stills and down streams together. */
+const STREAM_RANK = Object.freeze({ ok: 0, unknown: 1, down: 2, none: 2 });
 
 function byDistance(a, b) {
   if (a.distanceKm !== b.distanceKm) return a.distanceKm - b.distanceKm;
@@ -84,7 +122,8 @@ function byDistance(a, b) {
 }
 
 function byNewest(a, b) {
-  if (a.live !== b.live) return a.live ? -1 : 1;
+  const rank = STREAM_RANK[a.stream] - STREAM_RANK[b.stream];
+  if (rank) return rank;
   if (a.frameStamp !== b.frameStamp) return b.frameStamp - a.frameStamp;
   return byDistance(a, b);
 }
@@ -94,11 +133,17 @@ function byNewest(a, b) {
  *
  * Candidates are the catalog narrowed by the region box and the query; the
  * `limit` nearest to `center` are kept, so the set is always the nearest
- * cameras whatever the order. `newest` then sorts that set by the age of the
- * frames `frames` holds (`Map<id, {stamp}>`, the panel's thumbnail slots):
- * live feeds first, since they are continuously new, then the freshest
- * stills, then cameras with no frame yet; `nearest` keeps distance order.
- * Without a centre, every distance is infinite and catalog order breaks ties.
+ * cameras whatever the order. `newest` then sorts that set by what the
+ * proxy's stream health says (`streamHealth`, `Map<id, {ok, fail}>`) and by
+ * the age of the frames `frames` holds (`Map<id, {stamp}>`, the panel's
+ * thumbnail slots): streams seen answering first, since they are
+ * continuously new, then streams nobody has checked, then the freshest
+ * stills (a stream known to be down is a still for now), then cameras with
+ * no frame yet; `nearest` keeps distance order. Without a centre, every
+ * distance is infinite and catalog order breaks ties.
+ *
+ * Each row carries `stream` (cameraStreamState) and `live`, true for a
+ * stream not known to be down: one the proxy may be asked to play.
  *
  * @param {object} options
  * @param {Array<object>} options.cameras Catalog entries (`id`, `name`,
@@ -109,7 +154,10 @@ function byNewest(a, b) {
  * @param {'newest'|'nearest'} [options.order]
  * @param {number} [options.limit]
  * @param {Map<string, {stamp?: number}>|null} [options.frames]
- * @returns {Array<{camera: object, distanceKm: number, live: boolean, frameStamp: number}>}
+ * @param {Map<string, {ok?: number, fail?: number}>|null} [options.streamHealth]
+ * @param {number} [options.now]
+ * @returns {Array<{camera: object, distanceKm: number, live: boolean,
+ *   stream: 'ok'|'unknown'|'down'|'none', frameStamp: number}>}
  */
 export function rankQuickCameras({
   cameras,
@@ -119,6 +167,8 @@ export function rankQuickCameras({
   order = DEFAULT_CAMERA_QUICK_ORDER,
   limit = CAMERA_QUICK_LIST_LIMIT,
   frames = null,
+  streamHealth = null,
+  now = Date.now(),
 } = {}) {
   const tokens = normalizeCameraQuery(query);
   const hasCenter =
@@ -130,10 +180,12 @@ export function rankQuickCameras({
     if (region && !regionContains(region, camera)) continue;
     if (tokens.length && !cameraMatchesQuery(camera, tokens)) continue;
     const stamp = Number(frames?.get?.(camera.id)?.stamp);
+    const stream = cameraStreamState(camera, streamHealth, now);
     entries.push({
       camera,
       distanceKm: hasCenter ? greatCircleKm(center, camera) : Infinity,
-      live: cameraIsLive(camera),
+      stream,
+      live: stream === 'ok' || stream === 'unknown',
       frameStamp: Number.isFinite(stamp) && stamp > 0 ? stamp : 0,
     });
   }

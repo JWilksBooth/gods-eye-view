@@ -64,6 +64,31 @@ seconds. GLOBE, Escape or the backdrop return to the globe; OPEN ON GLOBE on
 a tile activates that camera and closes the wall. The budget model
 (`cameraWallModel.js`) is pure and unit-tested.
 
+The LIVE badge means the camera's stream answered recently, not that the
+catalog lists a stream. The camera proxy keeps per-camera stream health in
+memory (`server/providers/cctv/streamHealth.js`: last success, last failure
+and the failure count, bounded to the catalog ceiling, nothing on disk),
+learned from the HLS puller's verdicts (a poll that brings segments is a
+success, three failed polls in a row a failure; a viewer leaving is neither)
+and from a bounded probe of playlists: eight per video-capable provider
+when the catalog first loads (four in flight, five seconds each, the
+proxy's own User-Agent, redirects kept on the registered origin), then the
+cameras the CAMERAS panel lists whose verdict is unknown
+(`GET /api/cctv/stream-probe?id=…`, at most 24 per request, never a camera
+with a fresh verdict, one request at a time from the panel a moment after
+its list settles; `CCTV_STREAM_PROBE=0` turns both off, and playback alone
+teaches the record). `GET /api/cctv/health` carries the record as
+`streams: { [id]: { ok, fail } }` for the cameras that have one; the layer
+reads it with its existing health poll (`getStreamHealth()`), replacing the
+map only when a verdict changed. The policy is shared with the browser
+(`src/sources/cctvStreamHealth.js`): a failure in the last ten minutes with
+no success since is `down`, a success in the last hour with no failure
+since is `ok`, anything else `unknown`. NEWEST lists `ok` streams first
+(LIVE), then `unknown` ones (LIVE?), then stills and `down` streams (STREAM
+DOWN) by frame freshness. The wall never hovers, pins or spends a proxy
+session on a `down` camera, badges it STREAM DOWN, evicts a pin that goes
+down, and offers the camera again once a later verdict is a success.
+
 Camera packs: the RTC FAST Dashboard (`nvfast-dashboard`, every camera FAST
 operates in the Las Vegas valley, stills; a Nevada 511 camera on the same
 pole is dropped), ALERTCalifornia (`alertcalifornia`, UC San Diego's fire

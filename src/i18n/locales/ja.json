@@ -3072,6 +3072,9 @@
   "LIVE SLOTS FULL": "ライブ枠が満杯",
   "Hover for live video · click to keep it playing": "ホバーでライブ映像 · クリックで再生を維持",
   "Still camera · snapshots only": "静止画カメラ · スナップショットのみ",
+  "LIVE?": "ライブ?",
+  "STREAM DOWN": "配信停止",
+  "Stream down · snapshots only": "配信停止 · スナップショットのみ",
   "Hover or click a live tile for video": "ライブのタイルにホバーまたはクリックで映像",
   "{count} live feeds at a time": {
     "other": "同時に{count}本のライブ映像"

@@ -196,3 +196,30 @@ test('frame provenance admits the proxy kinds and leaves missing or unknown head
     assert.equal(frame.sourceKind, kind === 'other' ? null : kind);
   }
 });
+
+test('a stream probe names its cameras one by one and returns the proxy record', async () => {
+  const calls = [];
+  const source = createCctvSource({
+    fetchImpl: async (path, options) => {
+      calls.push({ path, options });
+      return new Response(
+        JSON.stringify({ probed: 1, streams: { 'a b': { ok: 5, fail: 0 } } }),
+      );
+    },
+  });
+  const payload = await source.probeStreams(['a b', 'c']);
+  assert.deepEqual(payload, {
+    probed: 1,
+    streams: { 'a b': { ok: 5, fail: 0 } },
+  });
+  assert.equal(calls[0].path, '/api/cctv/stream-probe?id=a+b&id=c');
+  assert.equal(calls[0].options.cache, 'no-store');
+  const malformed = createCctvSource({
+    fetchImpl: async () => new Response('{"streams":[]}'),
+  });
+  await assert.rejects(malformed.probeStreams(['a']), /Malformed camera/);
+  const denied = createCctvSource({
+    fetchImpl: async () => new Response('', { status: 503 }),
+  });
+  await assert.rejects(denied.probeStreams(['a']), /HTTP 503/);
+});

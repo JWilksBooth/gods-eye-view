@@ -9,8 +9,11 @@
  *
  * Video goes through the same HLS proxy and client playback as the CCTV
  * layer (`/api/cctv/media/<id>?lease=…`, src/layers/cctv/videoPlayback.js),
- * each tile with its own lease. Nothing here runs per frame: `<video>`
- * elements decode on their own, snapshots are `<img>` elements on a timer.
+ * each tile with its own lease. A camera whose stream the proxy knows to be
+ * down (`cctv.getStreamHealth()`, src/sources/cctvStreamHealth.js) is a
+ * still for now: no hover, no pin, no session spent on it, until a later
+ * verdict says it answers. Nothing here runs per frame: `<video>` elements
+ * decode on their own, snapshots are `<img>` elements on a timer.
  *
  * @param {object} options
  * @param {Document} [options.documentRef]
@@ -31,6 +34,7 @@ import {
   frameFetchDue,
 } from '../data/cctvCards.js';
 import { attachCctvVideo } from '../layers/cctv/videoPlayback.js';
+import { streamHealthState } from '../sources/cctvStreamHealth.js';
 import { isVideoFeedType } from '../sources/cctvTypes.js';
 import { CCTV_HLS_SESSION_LIMIT } from '../sources/cctvStreamBudget.js';
 import {
@@ -103,9 +107,33 @@ export function createCameraWall({
   };
 
   const entryOf = (id) => entries.find((entry) => entry.camera.id === id);
-  const canPlay = (entry) =>
+  const hasStream = (entry) =>
     Boolean(entry) &&
     isVideoFeedType(String(entry.camera?.feedType || '').toLowerCase());
+  /**
+   * What the camera's stream is doing: the layer's stream health when it
+   * has one, else the verdict the quick panel ranked the row with.
+   * @returns {'ok'|'unknown'|'down'|'none'}
+   */
+  const streamStateOf = (entry) => {
+    if (!hasStream(entry)) return 'none';
+    const health = cctv?.getStreamHealth?.();
+    if (health?.get)
+      return streamHealthState(health.get(entry.camera.id), now());
+    return entry.stream === 'ok' || entry.stream === 'down'
+      ? entry.stream
+      : 'unknown';
+  };
+  /** A known-dead stream never costs a proxy session: it is a still for now. */
+  const canPlay = (entry) =>
+    hasStream(entry) && streamStateOf(entry) !== 'down';
+  const deadIds = () =>
+    [...tiles.values()]
+      .filter((tile) => hasStream(tile.entry) && !canPlay(tile.entry))
+      .map((tile) => tile.entry.camera.id);
+  const streamSignature = () =>
+    [...tiles.values()].map((tile) => streamStateOf(tile.entry)).join(',');
+  let streamsSeen = '';
   const refusedIds = () => {
     const at = now();
     for (const [id, until] of refused) if (until <= at) refused.delete(id);
@@ -372,31 +400,36 @@ export function createCameraWall({
 
   function tileState(id, plan) {
     const tile = tiles.get(id);
-    if (!tile) return 'still';
-    if (!canPlay(tile.entry)) return 'still';
+    if (!tile || !hasStream(tile.entry)) return 'still';
     if (players.has(id)) return pinned.includes(id) ? 'pinned' : 'playing';
+    const stream = streamStateOf(tile.entry);
+    if (stream === 'down') return 'down';
     if (refused.has(id)) return 'refused';
     if (plan?.hoverRefused && hover === id) return 'full';
-    return 'live';
+    return stream === 'ok' ? 'live' : 'unverified';
   }
 
   const BADGES = {
     still: () => t('STILL'),
     live: () => t('LIVE'),
+    unverified: () => t('LIVE?'),
     playing: () => t('LIVE'),
     pinned: () => t('LIVE · PINNED'),
+    down: () => t('STREAM DOWN'),
     refused: () => t('LIVE UNAVAILABLE'),
     full: () => t('LIVE SLOTS FULL'),
   };
 
   function replan() {
     if (!nodes || destroyed) return;
+    streamsSeen = streamSignature();
     const plan = planWallVideo({
       limit,
       pinned,
       hover,
       external: externalId ? [externalId] : [],
       refused: refusedIds(),
+      dead: deadIds(),
     });
     lastPlan = plan;
     if (plan.evicted.length)
@@ -417,7 +450,9 @@ export function createCameraWall({
       setText(tile.badge, BADGES[state]());
       tile.figure.title = canPlay(tile.entry)
         ? t('Hover for live video · click to keep it playing')
-        : t('Still camera · snapshots only');
+        : state === 'down'
+          ? t('Stream down · snapshots only')
+          : t('Still camera · snapshots only');
     }
     const capacity = wallLiveCapacity({
       limit,
@@ -553,8 +588,10 @@ export function createCameraWall({
     unsubscribeCctv?.();
     unsubscribeCctv =
       cctv?.subscribe?.((state) => {
+        // The layer notifies on every health poll: replan when its own live
+        // camera or a tile's stream verdict changed, and otherwise not.
         const next = readExternal(state);
-        if (next === externalId) return;
+        if (next === externalId && streamSignature() === streamsSeen) return;
         externalId = next;
         if (dialog?.open) replan();
       }) || null;

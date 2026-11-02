@@ -92,3 +92,21 @@ test('duplicate pins and blank ids are ignored', () => {
   const plan = planWallVideo({ limit: 3, pinned: ['a', '', 'a', null, 'b'] });
   assert.deepEqual(plan.video, ['b', 'a']);
 });
+
+test('a camera whose stream is known to be down never gets a session: no hover, no pin, and a pin that goes down is evicted', () => {
+  const plan = planWallVideo({
+    limit: 2,
+    pinned: ['a', 'b'],
+    hover: 'c',
+    dead: ['b', 'c'],
+  });
+  assert.deepEqual(plan.video, ['a']);
+  assert.deepEqual(plan.evicted, ['b']);
+  assert.equal(plan.hoverRefused, true);
+  // The slot a dead pin gives up goes to a live hover.
+  assert.deepEqual(
+    planWallVideo({ limit: 2, pinned: ['a', 'b'], hover: 'c', dead: ['b'] })
+      .video,
+    ['a', 'c'],
+  );
+});

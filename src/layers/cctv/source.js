@@ -2,6 +2,7 @@ import {
   ACTIVE_FRAME_REFRESH_MS,
   FRAME_ENDPOINT,
   MEDIA_ENDPOINT,
+  STREAM_PROBE_ENDPOINT,
 } from './sourcePolicy.js';
 const FRAME_SOURCE_KINDS = new Set([
   'upstream-image',
@@ -54,6 +55,33 @@ export function createCctvSource({
     },
     getHealth(options) {
       return read('/api/cctv/health', 'cameras', options);
+    },
+    /**
+     * Ask the proxy what these cameras' playlists answer: it probes the live
+     * ones whose verdict is unknown (bounded, never one with a fresh
+     * verdict) and returns `{ probed, streams: { [id]: { ok, fail } } }`.
+     * @param {string[]} cameraIds
+     * @param {{signal?: AbortSignal}} [options]
+     */
+    async probeStreams(cameraIds, { signal } = {}) {
+      signal?.throwIfAborted();
+      const params = new URLSearchParams();
+      for (const id of cameraIds) params.append('id', String(id));
+      const response = await fetchImpl(`${STREAM_PROBE_ENDPOINT}?${params}`, {
+        cache: 'no-store',
+        signal,
+      });
+      if (!response.ok)
+        throw new Error('Camera source HTTP ' + response.status);
+      const payload = await response.json();
+      signal?.throwIfAborted();
+      if (
+        !payload?.streams ||
+        typeof payload.streams !== 'object' ||
+        Array.isArray(payload.streams)
+      )
+        throw new Error('Malformed camera streams snapshot');
+      return payload;
     },
     getFrameUrl: frameUrlFor,
     getMediaUrl: mediaUrlFor,

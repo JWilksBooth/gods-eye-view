@@ -60,6 +60,11 @@ export function createState({ services }) {
 
   layerState._healthById = new Map();
 
+  // What each camera's playlist last answered, as the proxy reports it
+  // (Map<id, {ok, fail}>); replaced only when its content changes.
+
+  layerState._streamHealthById = new Map();
+
   layerState._calibrationById = new Map();
 
   layerState._listeners = new Set();

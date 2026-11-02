@@ -3074,6 +3074,9 @@
   "LIVE SLOTS FULL": "实时名额已满",
   "Hover for live video · click to keep it playing": "悬停播放实时视频 · 点击保持播放",
   "Still camera · snapshots only": "静态摄像头 · 仅快照",
+  "LIVE?": "实时?",
+  "STREAM DOWN": "流已中断",
+  "Stream down · snapshots only": "流已中断 · 仅快照",
   "Hover or click a live tile for video": "悬停或点击实时方块以播放视频",
   "{count} live feeds at a time": {
     "other": "同时 {count} 路实时视频"

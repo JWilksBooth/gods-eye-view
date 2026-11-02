@@ -232,3 +232,35 @@ test('an abandoned consumer expires while a renewed consumer keeps the session',
   assert.equal(entry.controller.signal.aborted, false);
   await manager.shutdown();
 });
+
+test('the puller reports every upstream verdict: segments are a success, three failed polls a failure, a stop neither', async () => {
+  const verdicts = [];
+  const onUpstream = (cameraId, ok) => verdicts.push([cameraId, ok]);
+  const good = createHlsPuller({
+    limits: { ...HLS_LIMITS, pollMs: 100000 },
+    fetchImpl: async (url) =>
+      new Response(url.endsWith('.m3u8') ? playlist : 'abc'),
+    onUpstream,
+  });
+  const entry = await good.ensure('up', base);
+  assert.equal(await good.waitReady(entry), true);
+  assert.deepEqual(verdicts, [['up', true]]);
+  await good.shutdown();
+  // A stop mid-fetch is the viewer leaving, not the camera failing.
+  assert.deepEqual(verdicts, [['up', true]]);
+
+  const gone = createHlsPuller({
+    limits: { ...HLS_LIMITS, pollMs: 5 },
+    fetchImpl: async () => new Response('', { status: 404 }),
+    onUpstream,
+  });
+  const dead = await gone.ensure('dead', base);
+  assert.equal(await gone.waitReady(dead), false);
+  assert.equal(dead.stopping, true);
+  assert.deepEqual(verdicts, [
+    ['up', true],
+    ['dead', false],
+  ]);
+  assert.deepEqual(gone.stats(), { sessions: 0, bytes: 0 });
+  await gone.shutdown();
+});

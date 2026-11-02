@@ -4,6 +4,8 @@ import {
   CAMERA_QUICK_PANEL_ID,
   CameraQuickControls,
   QUICK_RERANK_MS,
+  QUICK_STREAM_PROBE_DELAY_MS,
+  QUICK_STREAM_PROBE_MEMORY_MS,
   QUICK_THUMB_IN_FLIGHT_MAX,
   QUICK_THUMB_TICK_MS,
 } from './cameraQuickControls.js';
@@ -52,15 +54,17 @@ function harness({
   catalog = CATALOG,
   collapsed = false,
   center = DOWNTOWN_LA,
+  streamHealth = null,
 } = {}) {
   const document = createFakeDocument();
   const timers = createFakeTimers();
   const root = panelDom(document);
   if (collapsed) root.classList.add('collapsed');
-  const calls = { opened: [], enabled: 0, collapsed: [], wall: [], unsubscribed: 0 };
+  const calls = { opened: [], enabled: 0, collapsed: [], wall: [], probed: [], unsubscribed: 0 };
   let cctvListener = null;
   let settled = null;
   let layerEnabled = enabled;
+  let health = streamHealth;
   const cctv = {
     subscribe(listener) {
       cctvListener = listener;
@@ -70,6 +74,11 @@ function harness({
       };
     },
     getCameraCatalog: () => catalog,
+    getStreamHealth: () => health,
+    probeStreams: async (ids) => {
+      calls.probed.push(ids);
+      return { probed: ids.length, streams: {} };
+    },
     getFrameUrl: (camera, refreshMs) => `/api/cctv/frame/${camera.id}?r=${refreshMs}`,
   };
   const controls = new CameraQuickControls({
@@ -116,6 +125,10 @@ function harness({
     notify: (state) => cctvListener?.(state),
     settle: () => settled?.(),
     search: () => byId('camera-quick-search'),
+    setHealth: (next) => {
+      health = next;
+    },
+    badge: (id) => byId('camera-quick-list').children.find((row) => row.dataset.cameraId === id).children[0].children[1],
   };
 }
 
@@ -126,8 +139,11 @@ test('an expanded panel lists the nearest cameras with name, distance and badge,
   const [live, near] = h.rows();
   assert.equal(live.getAttribute('role'), 'option');
   assert.equal(live.dataset.live, 'true');
-  assert.equal(live.children[0].children[1].textContent, 'LIVE');
+  // Nobody has checked the stream yet: live by the catalog, not proven.
+  assert.equal(live.dataset.stream, 'unknown');
+  assert.equal(live.children[0].children[1].textContent, 'LIVE?');
   assert.equal(near.children[0].children[1].textContent, 'STILL');
+  assert.equal(near.dataset.stream, 'none');
   assert.equal(near.children[1].children[0].textContent, 'I-110 at 6th');
   assert.match(near.children[1].children[1].textContent, /^Los Angeles · \d+ m$/);
   assert.match(live.children[1].children[1].textContent, /km$/);
@@ -272,5 +288,58 @@ test('the active camera is marked on its row as the layer reports it', () => {
   const marks = Object.fromEntries(h.rows().map((row) => [row.dataset.cameraId, row.dataset.active]));
   assert.equal(marks.mid, 'true');
   assert.equal(marks.live, 'false');
+  h.controls.destroy();
+});
+
+test('the LIVE badge means the stream answered: unchecked streams read LIVE?, failed ones STREAM DOWN, and the order follows', () => {
+  const h = harness();
+  assert.equal(h.badge('live').textContent, 'LIVE?');
+  assert.equal(h.badge('near').textContent, 'STILL');
+  const now = h.timers.now();
+  const state = { enabled: true, count: CATALOG.length, activeCameraId: null };
+  h.setHealth(new Map([['live', { ok: now - 5_000, fail: 0 }]]));
+  h.notify(state);
+  assert.equal(h.badge('live').textContent, 'LIVE');
+  assert.equal(h.badge('live').dataset.stream, 'ok');
+  assert.equal(h.rowIds()[0], 'live');
+  h.setHealth(new Map([['live', { ok: now - 5_000, fail: now - 1_000 }]]));
+  h.notify(state);
+  assert.equal(h.badge('live').textContent, 'STREAM DOWN');
+  assert.equal(h.badge('live').dataset.stream, 'down');
+  const row = h.rows().find((node) => node.dataset.cameraId === 'live');
+  assert.equal(row.dataset.live, 'false');
+  assert.equal(row.dataset.stream, 'down');
+  // A down stream is a still for now: it takes its place by distance.
+  assert.deepEqual(h.rowIds(), ['near', 'live', 'mid', 'far', 'vegas']);
+  h.notify(state);
+  assert.deepEqual(h.rowIds(), ['near', 'live', 'mid', 'far', 'vegas']);
+  h.controls.destroy();
+});
+
+test('unchecked streams in the list go to the proxy for one probe, a moment after the list settles', async () => {
+  const h = harness();
+  assert.deepEqual(h.calls.probed, []);
+  h.timers.advance(QUICK_STREAM_PROBE_DELAY_MS - 1);
+  assert.deepEqual(h.calls.probed, []);
+  h.timers.advance(1);
+  assert.deepEqual(h.calls.probed, [['live']]);
+  await new Promise((resolve) => setImmediate(resolve));
+  // Re-listing the same camera asks nothing more.
+  h.search().value = '101';
+  h.search().dispatch('input');
+  h.timers.advance(QUICK_STREAM_PROBE_DELAY_MS);
+  assert.deepEqual(h.calls.probed, [['live']]);
+  // Once the memory lapses and the camera is still unchecked, it is asked about again.
+  h.timers.advance(QUICK_STREAM_PROBE_MEMORY_MS);
+  h.search().value = '';
+  h.search().dispatch('input');
+  h.timers.advance(QUICK_STREAM_PROBE_DELAY_MS);
+  assert.deepEqual(h.calls.probed, [['live'], ['live']]);
+  await new Promise((resolve) => setImmediate(resolve));
+  // A verdict, whichever way, ends the asking.
+  h.setHealth(new Map([['live', { ok: 0, fail: h.timers.now() }]]));
+  h.notify({ enabled: true, count: CATALOG.length, activeCameraId: null });
+  h.timers.advance(QUICK_STREAM_PROBE_MEMORY_MS + QUICK_STREAM_PROBE_DELAY_MS);
+  assert.equal(h.calls.probed.length, 2);
   h.controls.destroy();
 });

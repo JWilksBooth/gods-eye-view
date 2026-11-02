@@ -3220,6 +3220,9 @@
   "LIVE SLOTS FULL": "POSTI LIVE ESAURITI",
   "Hover for live video · click to keep it playing": "Passa sopra per il video live · clicca per tenerlo attivo",
   "Still camera · snapshots only": "Telecamera fissa · solo istantanee",
+  "LIVE?": "LIVE?",
+  "STREAM DOWN": "STREAM INTERROTTO",
+  "Stream down · snapshots only": "Stream interrotto · solo istantanee",
   "Hover or click a live tile for video": "Passa sopra o clicca un riquadro live per il video",
   "{count} live feeds at a time": {
     "one": "{count} feed live alla volta",

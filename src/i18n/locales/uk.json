@@ -3296,6 +3296,9 @@
   "LIVE SLOTS FULL": "ОНЛАЙН-СЛОТИ ЗАЙНЯТІ",
   "Hover for live video · click to keep it playing": "Наведіть для живого відео · клацніть, щоб залишити",
   "Still camera · snapshots only": "Камера без відео · лише знімки",
+  "LIVE?": "ОНЛАЙН?",
+  "STREAM DOWN": "ПОТІК НЕДОСТУПНИЙ",
+  "Stream down · snapshots only": "Потік недоступний · лише знімки",
   "Hover or click a live tile for video": "Наведіть або клацніть живу плитку для відео",
   "{count} live feeds at a time": {
     "one": "{count} жива трансляція одночасно",

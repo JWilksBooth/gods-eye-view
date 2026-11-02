@@ -354,6 +354,18 @@ export function createPresentation({
     return list;
   }
 
+  /**
+   * What each camera's playlist last answered, as the proxy reports it
+   * (`Map<id, {ok, fail}>`, read with src/sources/cctvStreamHealth.js). The
+   * same instance until a health poll or a probe changes its content, so a
+   * surface re-ranks only then.
+   * @returns {Map<string, {ok: number, fail: number}>}
+   */
+
+  function streamHealth() {
+    return layerState._streamHealthById;
+  }
+
   /** Dispatches the current UI state to all registered subscriber callbacks. */
 
   function notifyListeners() {
@@ -384,6 +396,7 @@ export function createPresentation({
     getPublicCameraState,
     uiState,
     cameraCatalog,
+    streamHealth,
     notifyListeners,
     notifyListenersThrottled,
   };
