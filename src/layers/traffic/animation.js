@@ -52,6 +52,9 @@ export function createAnimation({
    */
 
   function spawnDotsForRoad(road, altitude, budgetCount = null) {
+    // Vehicles off: the flow is drawn on the roads (rendering.js), never as
+    // dots. A population pump scheduled before the switch lands here too.
+    if (layerState._vehicles === 'off') return;
     // Live flow styling (`road.flow` only exists in live mode; keyless path is
     // byte-identical): closures spawn nothing, congestion colors/slows dots.
     const flow = layerState._liveMode ? road.flow : null;
@@ -356,6 +359,7 @@ export function createAnimation({
     parts.rendering.removeHeatLines();
     layerState._dots = [];
     layerState._roads = [];
+    layerState._flowMapRoads = null;
     layerState._count = 0;
     layerState._bucketCounts = { free: 0, slow: 0, jam: 0, sim: 0 };
     layerState._closedRoads = 0;

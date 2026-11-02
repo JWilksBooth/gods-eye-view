@@ -228,11 +228,16 @@ export function createFlow({ state: layerState, services, parts, source }) {
     // Once traffic exists, retain it while the concurrently acquired detail
     // snapshot finishes. Repeated coarse/tile previews sample roads that are
     // immediately replaced, delaying the final population after every move.
+    // With vehicles off the drawn flow lines are that population.
+    const draped = layerState._vehicles === 'off';
+    const populated = draped
+      ? layerState._heatLineCount > 0
+      : layerState._dots.length ||
+        (layerState._detailRoadsReady && layerState._motion?.added > 0);
     if (
       altitude <= FAST_FETCH_ALTITUDE &&
       layerState._roadSource !== 'TomTom' &&
-      (layerState._dots.length ||
-        (layerState._detailRoadsReady && layerState._motion?.added > 0)) &&
+      populated &&
       (majorPreview || label === 'Loaded tile' || label === 'Loaded major')
     ) {
       layerState._retainedPreview = true;
@@ -397,37 +402,43 @@ export function createFlow({ state: layerState, services, parts, source }) {
       (altitude <= FAST_FETCH_ALTITUDE &&
         layerState._roadSource !== 'TomTom' &&
         (majorPreview || label.includes('major')));
-    if (preview) admitted.length = Math.min(admitted.length, 32);
-    // Mesh picks are synchronous GPU work. Bound the unique height stations
-    // as well as the dot count: a one-dot long road can otherwise cost dozens
-    // of picks. Nearest roads win, and the fixed coordinate budget gives cold
-    // and warm views the same deterministic coverage.
-    const stations = new Set();
-    const bounded = [];
-    const upper = clamped.coverage
-      ? admitted.filter((r) => r.coverageBand === 1)
-      : [];
-    const lower = clamped.coverage
-      ? admitted.filter((r) => r.coverageBand !== 1)
-      : admitted;
-    const ordered = [];
-    for (let i = 0; i < Math.max(upper.length, lower.length); i++) {
-      if (lower[i]) ordered.push(lower[i]);
-      if (upper[i]) ordered.push(upper[i]);
+    // The preview cap and the station budget bound surface picks, which
+    // draped flow lines never need: with vehicles off every admitted road
+    // paints (FLOW_LINE_CAP bounds the lines instead).
+    if (preview && !draped) admitted.length = Math.min(admitted.length, 32);
+    if (draped) layerState._surfaceBudgetOmitted = 0;
+    else {
+      // Mesh picks are synchronous GPU work. Bound the unique height stations
+      // as well as the dot count: a one-dot long road can otherwise cost dozens
+      // of picks. Nearest roads win, and the fixed coordinate budget gives cold
+      // and warm views the same deterministic coverage.
+      const stations = new Set();
+      const bounded = [];
+      const upper = clamped.coverage
+        ? admitted.filter((r) => r.coverageBand === 1)
+        : [];
+      const lower = clamped.coverage
+        ? admitted.filter((r) => r.coverageBand !== 1)
+        : admitted;
+      const ordered = [];
+      for (let i = 0; i < Math.max(upper.length, lower.length); i++) {
+        if (lower[i]) ordered.push(lower[i]);
+        if (upper[i]) ordered.push(upper[i]);
+      }
+      for (const road of ordered) {
+        const keys = roadHeightStations(road.coords).indices.map(
+          (i) =>
+            `${road.coords[i][0].toFixed(6)},${road.coords[i][1].toFixed(6)}`,
+        );
+        const fresh = [...new Set(keys)].filter((key) => !stations.has(key));
+        if (stations.size + fresh.length > 1000) continue;
+        for (const key of fresh) stations.add(key);
+        bounded.push(road);
+      }
+      layerState._surfaceBudgetOmitted = admitted.length - bounded.length;
+      admitted.length = 0;
+      admitted.push(...bounded);
     }
-    for (const road of ordered) {
-      const keys = roadHeightStations(road.coords).indices.map(
-        (i) =>
-          `${road.coords[i][0].toFixed(6)},${road.coords[i][1].toFixed(6)}`,
-      );
-      const fresh = [...new Set(keys)].filter((key) => !stations.has(key));
-      if (stations.size + fresh.length > 1000) continue;
-      for (const key of fresh) stations.add(key);
-      bounded.push(road);
-    }
-    layerState._surfaceBudgetOmitted = admitted.length - bounded.length;
-    admitted.length = 0;
-    admitted.push(...bounded);
     const ready = [];
     const unresolved = [];
     for (const road of admitted) {
@@ -441,12 +452,16 @@ export function createFlow({ state: layerState, services, parts, source }) {
         road.surfaceReady = true;
         road.surfaceSettled = prepared.surfaceSettled;
         ready.push(road);
-      } else unresolved.push(road);
+      } else if (draped) ready.push(road);
+      else unresolved.push(road);
     }
     let lastPaint = 0;
     let painted = 0;
     const paint = (complete = false) => {
       if (!current() || !ready.length) return;
+      // The flow map paints once per pass: no road waits on its heights, and
+      // a partial batch would only be rebuilt by the completing paint.
+      if (!complete && draped) return;
       if (!complete && painted === ready.length) return;
       parts.rendering.renderRoadsForAltitude(
         complete ? ready : ready.slice(painted),
@@ -514,6 +529,7 @@ export function createFlow({ state: layerState, services, parts, source }) {
     if (
       current() &&
       !preview &&
+      !draped &&
       !label.includes('refined') &&
       scene.postRender &&
       (!trafficSurfaceReady(scene) ||

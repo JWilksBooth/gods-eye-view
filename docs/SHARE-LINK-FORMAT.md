@@ -218,6 +218,15 @@ A followed aircraft, military aircraft or satellite is a thing view in the
 compact form, not a tracking option: the encoder moves it out of the layer
 options, and the converter moves it back for the long form.
 
+Street Traffic's options, as an example of what field 11 and the long
+form's `lo` carry: `r` is the road source (`t` TomTom, `o` OSM, `h` Hybrid;
+absent, the installation's default) and `v` the vehicles switch (`1`
+simulated vehicles animate the flow, `0` the flow is drawn on the roads
+alone; absent, on, so links made before the switch existed keep their
+moving dots). A link with OSM roads and the vehicles off reads
+`lo=t.r.o_t.v.0` in the long form; the compact form writes the same two
+options as field 11 and omits either one at its absent meaning.
+
 ### Panels (field 12)
 
 Each entry is one varint: `panel number × 16 + collapsed × 4 + pinned`, where

@@ -253,7 +253,7 @@ export const SHARE_VIEW_FLAGS = freezeAll([
  * written explicitly.
  */
 export const SHARE_VIEW_LAYER_OPTION_ABSENT = Object.freeze({
-  traffic: Object.freeze({ roadMode: null }),
+  traffic: Object.freeze({ roadMode: null, vehicles: 'on' }),
   'weather-lightning': Object.freeze({ opacity: 'strong' }),
   'weather-radar': Object.freeze({ opacity: 'strong' }),
   'weather-satellite': Object.freeze({

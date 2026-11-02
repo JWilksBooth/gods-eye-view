@@ -6033,6 +6033,24 @@ easier to meet (detection is now on more often), but does not create it.
   sized so a 31-day month stays inside TomTom's 200K/month free allowance),
   decoded client-side for green/amber/red dot color and speed/density scaling
   (`trafficFlowStyle.js`).
+- Vehicles switch (`vehicles` param, `on` by default; option token `v` in the
+  layer state `lo` field, absent meaning on): the `Vehicles` chip after the
+  road-source chips on the Street Traffic row. Off, the layer spawns no dots
+  and draws the flow on the road geometry itself, as draped ground lines in
+  the dots' buckets: green free flow, amber slow, the pulsing red glow of the
+  heat-line batch for jams, dark dashed red for closures, the dots' faint
+  white for roads TomTom has no flow for (hidden under `uncoveredRoads:
+  'hide'`), and keyless every road in that white under the usual
+  `SIMULATED — add TomTom key for live` status. At most 2,400 lines draw,
+  congestion kept first. `getStats().count` and `flowBuckets` then describe
+  the drawn roads, `vehicles` carries the switch, and CCTV detection sees no
+  vehicles. A rebuild (late flow, a completed pass, a style change) keeps the
+  old batches until the new ones have rendered, holding continuous rendering
+  for the hand-over, so the map never blinks. Turning vehicles off re-renders
+  the roads on hand (lines need no measured heights); turning them on reloads
+  the view so the dots get theirs. LIVE OPS region buttons only turn the
+  layer on and leave the stored choice alone; a share link carries the choice
+  like any other layer option.
 - Road source (`src/layers/traffic/roadModes.js`): the Street Traffic row has
   TomTom / OSM / Hybrid chips (`roadMode` param, stored in the existing layer
   state `lo` field, no new share token); `?trafficRoads=tomtom|osm|hybrid`

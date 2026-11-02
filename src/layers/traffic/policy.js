@@ -147,6 +147,45 @@ export const HEAT_JAM_COLOR = Cesium.Color.fromCssColorString('#e05252');
 export const HEAT_SLOW_COLOR =
   Cesium.Color.fromCssColorString('#f0b23e').withAlpha(0.2);
 
+// ─── Flow map (vehicles off) ───────────────────────────────────────────────
+/**
+ * @const {number} Max roads drawn as flow lines per render. Congestion is
+ * kept first (jam, slow, closed), then free flow, then simulated roads,
+ * longest first within each: the cap trims the quiet edge of a dense view,
+ * never its congestion.
+ */
+
+export const FLOW_LINE_CAP = 2400;
+
+/** @const {number} Alpha of free-flow and slow road lines. */
+
+export const FLOW_LINE_ALPHA = 0.8;
+
+/** @const {number} Px added to a jam road's width so queues glow wider than the flow around them. */
+
+export const FLOW_JAM_WIDTH_BOOST = 3;
+
+/** @const {Cesium.Color} Simulated or unmatched roads: the dots' white, faint. */
+
+export const FLOW_SIM_COLOR = Cesium.Color.WHITE.withAlpha(0.4);
+
+/** @const {Cesium.Color} Closed roads: dark red, drawn dashed. */
+
+export const FLOW_CLOSED_COLOR =
+  Cesium.Color.fromCssColorString('#7d2b2b').withAlpha(0.9);
+
+/** @const {number} Px — dash length of a closed road's line. */
+
+export const FLOW_CLOSED_DASH_PX = 12;
+
+/**
+ * @const {number} Frames a replaced flow batch stays on screen waiting for
+ * its replacement's first frame before it is retired regardless (~1.5 s at
+ * 60 fps): the hand-over must never blink, and never leak either.
+ */
+
+export const FLOW_SWAP_FRAME_LIMIT = 90;
+
 /** @const {number} Far-distance scale floor for jam dots (shipped: 0.3). */
 
 export const JAM_DOT_FAR_SCALE = 0.55;

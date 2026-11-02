@@ -91,6 +91,10 @@ test('en: road-source chips keep their English labels and titles', () => {
         'Hybrid',
         'TomTom roads first; OpenStreetMap fills the rest, simulated (needs a TomTom key)',
       ],
+      [
+        'Vehicles',
+        'Simulated vehicles animate the flow; click to draw the flow on the roads alone',
+      ],
     ],
   );
   assert.equal(
@@ -99,9 +103,9 @@ test('en: road-source chips keep their English labels and titles', () => {
   );
 });
 
-for (const [locale, hybrid] of [
-  ['ru', 'Гибрид'],
-  ['es', 'Híbrido'],
+for (const [locale, hybrid, vehicles] of [
+  ['ru', 'Гибрид', 'Автомобили'],
+  ['es', 'Híbrido', 'Vehículos'],
 ]) {
   test(`${locale}: the Hybrid chip and every chip title are translated`, () => {
     setLocale(locale);
@@ -110,12 +114,12 @@ for (const [locale, hybrid] of [
         const chips = roadChips(live);
         assert.deepEqual(
           chips.map((chip) => chip.label),
-          ['TomTom', 'OSM', hybrid],
+          ['TomTom', 'OSM', hybrid, vehicles],
         );
         for (const chip of chips)
           assert.doesNotMatch(
             chip.title,
-            /roads only|roads, with|fills the rest|needs a/,
+            /roads only|roads, with|fills the rest|needs a|simulated vehicles|on the roads/,
             `${locale}: ${chip.title}`,
           );
       }

@@ -13,8 +13,31 @@
  * - `subscribeLayers(listener)`: data-manager change notifications; returns
  *   an unsubscribe function.
  */
-import { LIVE_OPS_REGIONS } from '../data/liveOpsRegions.js';
+import { LIVE_OPS_LAYERS, LIVE_OPS_REGIONS } from '../data/liveOpsRegions.js';
 import { formatRelativeTime, msg, t } from '../i18n/index.js';
+
+/**
+ * Scope Live Incidents to a region and turn the console's layers on. Only
+ * enabled state and the incidents region change: every other layer setting
+ * keeps its stored choice, Street Traffic's road source and vehicles switch
+ * included, so a console click never puts simulated vehicles back on a map
+ * whose owner turned them off.
+ * @param {object} manager - The data manager.
+ * @param {{id: string}} region - A LIVE OPS region.
+ * @returns {Promise<void>} Settles once every layer the manager has is on.
+ */
+export function enableLiveOpsRegionLayers(manager, region) {
+  manager.setLayerParams?.(
+    'incidents',
+    { region: region.id },
+    { origin: 'user' },
+  );
+  return Promise.all(
+    LIVE_OPS_LAYERS.filter((id) => manager.layers?.has(id)).map((id) =>
+      manager.setEnabled(id, true, { origin: 'user' }),
+    ),
+  ).then(() => undefined);
+}
 
 const STATUS_KEYS = Object.freeze({
   idle: msg('Pick a region'),

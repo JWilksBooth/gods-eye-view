@@ -1,7 +1,32 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { LiveOpsControls } from './liveOpsControls.js';
+import {
+  LiveOpsControls,
+  enableLiveOpsRegionLayers,
+} from './liveOpsControls.js';
 import { LIVE_OPS_REGIONS } from '../data/liveOpsRegions.js';
+
+test('a region click scopes incidents and turns the console layers on, and nothing else', async () => {
+  const calls = [];
+  const manager = {
+    layers: new Map([
+      ['cctv', {}],
+      ['traffic', {}],
+    ]),
+    setLayerParams: (id, params, options) =>
+      calls.push(['params', id, params, options.origin]),
+    setEnabled: async (id, enabled, options) =>
+      calls.push(['enabled', id, enabled, options.origin]),
+  };
+  await enableLiveOpsRegionLayers(manager, LIVE_OPS_REGIONS[0]);
+  // Street Traffic keeps its stored road source and vehicles switch: the
+  // console never sends it params, only turns it on.
+  assert.deepEqual(calls, [
+    ['params', 'incidents', { region: 'los-angeles' }, 'user'],
+    ['enabled', 'cctv', true, 'user'],
+    ['enabled', 'traffic', true, 'user'],
+  ]);
+});
 
 /* A small DOM: just what the panel body touches. */
 class FakeNode {

@@ -185,6 +185,38 @@ export function createState({ services }) {
 
   layerState._heatLineCount = 0;
 
+  /**
+   * Vehicles switch: 'on' animates simulated dots along the roads (shipped
+   * behaviour); 'off' spawns no dots and draws the flow on the road geometry
+   * itself, bucketed as the dots are (free, slow, jam, closed; simulated
+   * white without flow), so the layer reads as a congestion map rather than
+   * as cars nobody observed. Persisted and shared like `roadMode`
+   * (`layerState.js`, option `vehicles`).
+   * @type {'on'|'off'}
+   */
+
+  layerState._vehicles = 'on';
+
+  /** @type {Cesium.GroundPolylinePrimitive|null} Flow-map batch: free, slow and simulated roads (vehicles off). */
+
+  layerState._flowLinesPrim = null;
+
+  /** @type {Cesium.GroundPolylinePrimitive|null} Flow-map batch: closed roads, dashed (vehicles off). */
+
+  layerState._flowClosedPrim = null;
+
+  /** @type {Map<string, object>|null} Roads drawn as flow lines, by identity, across one load's paints (vehicles off). */
+
+  layerState._flowMapRoads = null;
+
+  /** @type {string|null} What the flow-map batches were built from, so an unchanged paint skips the rebuild. */
+
+  layerState._flowMapSignature = null;
+
+  /** @type {{finish: Function}|null} Replaced flow batches still on screen until their replacement has rendered. */
+
+  layerState._flowRetiring = null;
+
   /** @type {boolean|null} GroundPolylinePrimitive.isSupported, checked once. */
 
   layerState._heatSupported = null;

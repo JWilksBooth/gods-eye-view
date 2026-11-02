@@ -304,6 +304,10 @@ const OPTION_GROUPS = Object.freeze({
       osm: 'o',
       hybrid: 'h',
     }),
+    // Simulated vehicles animate the flow unless switched off, which draws
+    // the flow on the roads alone. Links made before the switch existed carry
+    // no token and keep their moving dots.
+    enumOption('vehicles', 'v', 'on', ['on', 'off'], { on: '1', off: '0' }),
   ]),
   'weather-lightning': Object.freeze([
     enumOption('opacity', 'o', 'strong', ['light', 'strong'], {

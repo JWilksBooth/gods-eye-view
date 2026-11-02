@@ -17,9 +17,11 @@ import { CockpitCoordinator } from './cockpitCoordinator.js';
 import { ContextControls } from './context.js';
 import { CctvControls } from './cctv.js';
 import { StreetLevelControls } from './streetLevelControls.js';
-import { LiveOpsControls } from './liveOpsControls.js';
+import {
+  LiveOpsControls,
+  enableLiveOpsRegionLayers,
+} from './liveOpsControls.js';
 import { createLiveOpsHeadlineSource } from '../sources/liveOpsHeadlines.js';
-import { LIVE_OPS_LAYERS } from '../data/liveOpsRegions.js';
 import { RadioControls } from './radio.js';
 import { LocalSdrControls } from './localSdrControls.js';
 import { LocationNavigation } from './locationNavigation.js';
@@ -1209,18 +1211,7 @@ export class StyleManager extends ShellFacade {
           if (flown === false) return false;
           const manager = this._dataManager;
           if (!manager) return true;
-          manager.setLayerParams?.(
-            'incidents',
-            { region: region.id },
-            {
-              origin: 'user',
-            },
-          );
-          return Promise.all(
-            LIVE_OPS_LAYERS.filter((id) => manager.layers?.has(id)).map((id) =>
-              manager.setEnabled(id, true, { origin: 'user' }),
-            ),
-          ).then(() => true);
+          return enableLiveOpsRegionLayers(manager, region).then(() => true);
         },
         getHeadlines: (regionId, options) =>
           headlines.getHeadlines(regionId, options),

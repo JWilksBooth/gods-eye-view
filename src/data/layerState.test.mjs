@@ -200,6 +200,38 @@ function encode(state) {
   return params.toString();
 }
 
+test('the Street Traffic vehicles switch travels as t.v and an absent token keeps the vehicles', () => {
+  const off = normalizeLayerState({
+    enabledLayerIds: ['traffic'],
+    options: { traffic: { vehicles: 'off' } },
+  });
+  assert.match(encode(off), /(^|=|_)t\.v\.0(_|&|$)/);
+  assert.deepEqual(
+    decodeLayerStateParams(new URLSearchParams(encode(off))).options.traffic,
+    { roadMode: null, vehicles: 'off' },
+  );
+  const on = createDefaultLayerState();
+  on.enabledLayerIds = ['traffic'];
+  assert.doesNotMatch(encode(on), /t\.v\./);
+  for (const query of ['v=2&l=t', 'v=2&l=t&lo=t.v.1', 'v=2&l=t&lo=t.v.x'])
+    assert.equal(
+      decodeLayerStateParams(new URLSearchParams(query)).options.traffic
+        .vehicles,
+      'on',
+      query,
+    );
+  assert.equal(
+    normalizeLayerState({ options: { traffic: { vehicles: 'maybe' } } })
+      .options.traffic.vehicles,
+    'on',
+  );
+  assert.equal(
+    parseStoredLayerState(serializeStoredLayerState(off)).options.traffic
+      .vehicles,
+    'off',
+  );
+});
+
 test('production registry is exact, canonical, and rejects incomplete contracts', async () => {
   assert.equal(validateLayerStateRegistry(), true);
   assert.equal(REGISTERED_LAYER_IDS.length, 36);
