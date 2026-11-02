@@ -12,8 +12,8 @@
  */
 import { msg, t } from '../i18n/index.js';
 
-// The preset cities (CITY_POIS names, kept in step by placeNames.test.mjs),
-// and Los Angeles, which voice results name for the analyst's region scopes.
+// The preset cities (CITY_POIS names, kept in step by placeNames.test.mjs);
+// Los Angeles also names the analyst's region scopes in voice results.
 const PLACE_NAME_KEYS = new Map(
   [
     msg('Austin'),
@@ -26,6 +26,8 @@ const PLACE_NAME_KEYS = new Map(
     msg('Washington DC'),
     msg('Tallinn'),
     msg('Los Angeles'),
+    msg('Sonoma County'),
+    msg('Las Vegas'),
   ].map((key) => [key, key]),
 );
 
