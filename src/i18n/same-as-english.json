@@ -179,7 +179,9 @@
     "{width} × {height} px · MSAA {samples}×",
     "ΔN",
     "Ⅱ PAUSE",
-    "▲ {frp} MW"
+    "▲ {frp} MW",
+    "{distance} km",
+    "{distance} m"
   ],
   "es": [
     "1090 MHz",
@@ -317,7 +319,9 @@
     "ΔE",
     "ΔN",
     "▲ {frp} MW",
-    "Las Vegas"
+    "Las Vegas",
+    "{distance} km",
+    "{distance} m"
   ],
   "fr": [
     "1090 MHz",
@@ -518,7 +522,10 @@
     "ΔE",
     "ΔN",
     "Ⅱ PAUSE",
-    "▲ {frp} MW"
+    "▲ {frp} MW",
+    "{distance} km",
+    "{distance} m",
+    "GLOBE"
   ],
   "it": [
     "1090 MHz",
@@ -699,7 +706,9 @@
     "{width} × {height} px · MSAA {samples}×",
     "ΔE",
     "ΔN",
-    "▲ {frp} MW"
+    "▲ {frp} MW",
+    "{distance} km",
+    "{distance} m"
   ],
   "ja": [
     "1090 MHz",
@@ -758,7 +767,9 @@
     "{width} × {height} px · MSAA {samples}×",
     "ΔE",
     "ΔN",
-    "▲ {frp} MW"
+    "▲ {frp} MW",
+    "{distance} km",
+    "{distance} m"
   ],
   "pt": [
     "1090 MHz",
@@ -903,7 +914,9 @@
     "{width} × {height} px · FXAA",
     "{width} × {height} px · MSAA {samples}×",
     "ΔN",
-    "▲ {frp} MW"
+    "▲ {frp} MW",
+    "{distance} km",
+    "{distance} m"
   ],
   "ru": [
     "AIS: --",

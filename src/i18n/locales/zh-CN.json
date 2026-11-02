@@ -3042,5 +3042,51 @@
   "Live stream feed rate limited (HTTP 429)": "直播流数据源已限速 (HTTP 429)",
   "Malformed live stream snapshot": "直播流快照格式错误",
   "Discovers geotagged YouTube live streams for the Live Streams layer; keyless, the layer shows its curated cameras": "为直播流图层发现带地理标记的 YouTube 直播；无密钥时，图层显示精选摄像头",
-  "Adds Windy.com webcams to the Live Streams layer, credited \"Webcams provided by windy.com\"": "将 Windy.com 网络摄像头添加到直播流图层，并注明 \"Webcams provided by windy.com\""
+  "Adds Windy.com webcams to the Live Streams layer, credited \"Webcams provided by windy.com\"": "将 Windy.com 网络摄像头添加到直播流图层，并注明 \"Webcams provided by windy.com\"",
+  "Cameras are off": "摄像头已关闭",
+  "Turning cameras on…": "正在开启摄像头…",
+  "Loading cameras…": "正在加载摄像头…",
+  "No cameras near this view yet": "此视图附近暂无摄像头",
+  "No cameras match": "没有匹配的摄像头",
+  "{distance} km": "{distance} 公里",
+  "{distance} m": "{distance} 米",
+  "STILL": "静态",
+  "Open {name} on the globe": "在地球上打开 {name}",
+  "{count} cameras": {
+    "other": "{count} 个摄像头"
+  },
+  "nearest {count} listed": "列出最近的 {count} 个",
+  "Show cameras everywhere": "显示所有地区的摄像头",
+  "Stop limiting cameras to {region}": "不再将摄像头限制在{region}",
+  "Camera wall": "摄像头电视墙",
+  "CAMERA WALL": "摄像头电视墙",
+  "Feeds shown": "显示路数",
+  "{count} feeds": {
+    "other": "{count} 路"
+  },
+  "GLOBE": "地球",
+  "Back to the globe (Esc)": "返回地球 (Esc)",
+  "OPEN ON GLOBE": "在地球上打开",
+  "Activate this camera on the globe and close the wall": "在地球上激活此摄像头并关闭电视墙",
+  "No cameras to show": "没有可显示的摄像头",
+  "LIVE · PINNED": "实时 · 已固定",
+  "LIVE UNAVAILABLE": "实时不可用",
+  "LIVE SLOTS FULL": "实时名额已满",
+  "Hover for live video · click to keep it playing": "悬停播放实时视频 · 点击保持播放",
+  "Still camera · snapshots only": "静态摄像头 · 仅快照",
+  "Hover or click a live tile for video": "悬停或点击实时方块以播放视频",
+  "{count} live feeds at a time": {
+    "other": "同时 {count} 路实时视频"
+  },
+  "CAMERAS": "摄像头",
+  "The cameras nearest the view, a search and the camera wall": "视图附近的摄像头、搜索和摄像头电视墙",
+  "Search cameras: road, place, 101…": "搜索摄像头：道路、地点、101…",
+  "Search cameras": "搜索摄像头",
+  "Order": "排序",
+  "NEWEST": "最新",
+  "Live feeds first, then the freshest frames": "实时视频优先，然后是最新画面",
+  "Closest to the view centre first": "离视图中心最近的优先",
+  "CAMERAS ON": "开启摄像头",
+  "WALL": "电视墙",
+  "Show several live feeds at once": "同时显示多路实时视频"
 }

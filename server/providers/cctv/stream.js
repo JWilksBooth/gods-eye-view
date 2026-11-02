@@ -1,9 +1,14 @@
 /** Bounded, demand-owned HLS sessions. No subprocess, disk cache or idle sweep. */
 import { randomUUID } from 'node:crypto';
+import {
+  CCTV_HLS_LEASES_PER_SESSION,
+  CCTV_HLS_SESSION_LIMIT,
+} from '../../../src/sources/cctvStreamBudget.js';
 
 export const HLS_LIMITS = Object.freeze({
-  sessions: 2,
-  leasesPerSession: 8,
+  // Shared with the browser (the camera wall plans against the same numbers).
+  sessions: CCTV_HLS_SESSION_LIMIT,
+  leasesPerSession: CCTV_HLS_LEASES_PER_SESSION,
   playlistBytes: 256 * 1024,
   segmentBytes: 4 * 1024 * 1024,
   sessionBytes: 24 * 1024 * 1024,

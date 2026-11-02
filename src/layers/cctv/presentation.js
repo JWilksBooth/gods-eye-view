@@ -321,6 +321,39 @@ export function createPresentation({
     return list;
   }
 
+  /**
+   * A light copy of every camera in the catalog: what the CAMERAS quick
+   * panel ranks and searches. Built once per catalog (the same array comes
+   * back until the records change), so a 4,000-camera catalog costs nothing
+   * on the notifications that drive the panel.
+   * @returns {Array<{id: string, name: string, city: string, provider: string,
+   *   credit: string, lat: number, lon: number, headingDeg: number,
+   *   fovDeg: number, pitchDeg: number, feedType: string, isVideo: boolean}>}
+   */
+
+  function cameraCatalog() {
+    const records = layerState._records;
+    const cached = layerState._cameraCatalogCache;
+    if (cached?.records === records && cached.count === records.length)
+      return cached.list;
+    const list = records.map(({ camera }) => ({
+      id: camera.id,
+      name: camera.name,
+      city: camera.city,
+      provider: camera.provider,
+      credit: camera.credit || '',
+      lat: camera.lat,
+      lon: camera.lon,
+      headingDeg: camera.headingDeg,
+      fovDeg: camera.fovDeg,
+      pitchDeg: camera.pitchDeg,
+      feedType: camera.feedType,
+      isVideo: parts.model.isVideoFeedType(camera.feedType),
+    }));
+    layerState._cameraCatalogCache = { records, count: records.length, list };
+    return list;
+  }
+
   /** Dispatches the current UI state to all registered subscriber callbacks. */
 
   function notifyListeners() {
@@ -350,6 +383,7 @@ export function createPresentation({
     buildSummaryText,
     getPublicCameraState,
     uiState,
+    cameraCatalog,
     notifyListeners,
     notifyListenersThrottled,
   };

@@ -34,16 +34,23 @@
   order: 1;
 }
 
-#left-panel-stack > #cctv-panel {
+/* CAMERAS (the quick panel, src/ui/styles/camera-quick.css) sits right under
+   the layer list: it is the fastest route to a camera, and the CCTV panel
+   below it shows the one it opens. */
+#left-panel-stack > #camera-quick-panel {
   order: 2;
 }
 
-#left-panel-stack > #live-ops-panel {
+#left-panel-stack > #cctv-panel {
   order: 3;
 }
 
-#left-panel-stack > #scene-panel {
+#left-panel-stack > #live-ops-panel {
   order: 4;
+}
+
+#left-panel-stack > #scene-panel {
+  order: 5;
 }
 
 /*

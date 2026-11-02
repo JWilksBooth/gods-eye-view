@@ -133,6 +133,11 @@ export function createState({ services }) {
 
   layerState._cameraIndexCache = null;
 
+  // { records, count, list } — the light whole-catalog copy the CAMERAS
+  // quick panel ranks, rebuilt only when the records change.
+
+  layerState._cameraCatalogCache = null;
+
   // Staggered geometry-load queue state (see startGeometryLoadQueue).
 
   layerState._geoQueue = [];

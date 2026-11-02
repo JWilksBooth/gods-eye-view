@@ -7,6 +7,7 @@ import {
   CALTRANS_CCTV_URL,
   DEFAULT_CALTRANS_DISTRICTS,
   DEFAULT_CALTRANS_MAX_SOURCES,
+  CALTRANS_MAX_SOURCES_CEILING,
   CALTRANS_ANCHORS,
   TFL_JAMCAM_URL,
   TFL_IMAGE_ORIGIN,
@@ -418,7 +419,7 @@ export async function loadCaltransSourcesFromOpenData() {
     process.env.CCTV_CALTRANS_MAX_SOURCES || DEFAULT_CALTRANS_MAX_SOURCES,
   );
   const maxCount = Number.isFinite(maxRaw)
-    ? Math.max(8, Math.min(1500, Math.floor(maxRaw)))
+    ? Math.max(8, Math.min(CALTRANS_MAX_SOURCES_CEILING, Math.floor(maxRaw)))
     : DEFAULT_CALTRANS_MAX_SOURCES;
   const prioritized = prioritizeSources(cameras, maxCount, CALTRANS_ANCHORS);
   console.log(
