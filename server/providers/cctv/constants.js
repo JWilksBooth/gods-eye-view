@@ -8,10 +8,12 @@ export const DEFAULT_AUSTIN_MAX_SOURCES = 250;
  * Catalog-wide safety ceiling on served cameras. Each pack already caps
  * itself (nearest-to-anchor first); this bound only matters when the packs
  * together exceed it, and it is then filled round-robin across packs (see
- * cap.js) so no region is silently dropped. The default per-pack caps
- * together can exceed it, so a default install may be thinned evenly here.
+ * cap.js) so no region is silently dropped. The original packs' default
+ * caps (Caltrans at 1,500 for the LIVE OPS regions included) sum to just
+ * under this; the packs added since can exceed it, so an install with every
+ * pack on may be thinned evenly here.
  */
-export const DEFAULT_CCTV_MAX_SOURCES = 4000;
+export const DEFAULT_CCTV_MAX_SOURCES = 5000;
 /** Hard upper bound for CCTV_MAX_SOURCES; also sizes the health map. */
 export const CCTV_MAX_SOURCES_CEILING = 5000;
 /** Reference point for Austin camera prioritization (Congress & 6th). */

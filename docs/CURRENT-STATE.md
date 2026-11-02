@@ -69,8 +69,10 @@ operates in the Las Vegas valley, stills; a Nevada 511 camera on the same
 pole is dropped), ALERTCalifornia (`alertcalifornia`, UC San Diego's fire
 cameras with their live pan, tilt and field of view, CC BY-NC-ND 4.0 with
 credit, nearest the California regions first), and Caltrans districts 12, 8
-and 1 join the defaults with a 1,500-camera default cap. The sources
-verified and left out are listed in DATA_SOURCES.md.
+and 1 join the defaults with a 1,500-camera default cap, and the
+catalog-wide default cap rises to 5,000 (its ceiling) so the original packs
+still load whole. The sources verified and left out are listed in
+DATA_SOURCES.md.
 
 ## LIVE OPS region console — November 1, 2026
 
