@@ -125,6 +125,7 @@ export function createLifecycle({
     layerState._viewPose = null;
     layerState._viewMotionPass = null;
     layerState._healthById = new Map();
+    layerState._streamHealthById = new Map();
     layerState._count = 0;
     layerState._lastUpdate = null;
     layerState._lastHealthSyncAt = 0;

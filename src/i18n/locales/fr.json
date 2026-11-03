@@ -3219,6 +3219,9 @@
   "LIVE SLOTS FULL": "PLACES DIRECT ÉPUISÉES",
   "Hover for live video · click to keep it playing": "Survolez pour la vidéo en direct · cliquez pour la garder",
   "Still camera · snapshots only": "Caméra fixe · instantanés seulement",
+  "LIVE?": "DIRECT ?",
+  "STREAM DOWN": "FLUX COUPÉ",
+  "Stream down · snapshots only": "Flux coupé · instantanés seulement",
   "Hover or click a live tile for video": "Survolez ou cliquez une tuile en direct pour la vidéo",
   "{count} live feeds at a time": {
     "one": "{count} flux en direct à la fois",

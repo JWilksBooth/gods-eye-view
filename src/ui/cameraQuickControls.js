@@ -10,7 +10,10 @@
  * timers, and releases them in destroy(). Thumbnails are paced: at most two
  * frame requests in flight, each row refreshed on its provider's cadence,
  * nothing per frame, and nothing while the panel is collapsed or the page is
- * hidden.
+ * hidden. The LIVE badge means the proxy saw the stream answer
+ * (`cctv.getStreamHealth()`, refreshed by the layer's health poll); streams
+ * nobody has checked read LIVE? and are sent to the proxy for one bounded
+ * probe (`cctv.probeStreams(ids)`) a moment after they are listed.
  *
  * Actions, supplied by the shell:
  * - `isEnabled()`: whether the CCTV layer is on.
@@ -48,6 +51,18 @@ export const QUICK_THUMB_TICK_MS = 2_000;
 export const QUICK_THUMB_IN_FLIGHT_MAX = 2;
 /** How often the newest-first order may re-sort after thumbnails land. */
 export const QUICK_RERANK_MS = 10_000;
+/** Unchecked streams in the list go to the proxy for a probe after this long. */
+export const QUICK_STREAM_PROBE_DELAY_MS = 1_500;
+/** A camera this panel asked the proxy about is not asked about again for this long. */
+export const QUICK_STREAM_PROBE_MEMORY_MS = 10 * 60_000;
+
+/** The badge per stream state (cameraQuickModel.cameraStreamState). */
+const BADGES = Object.freeze({
+  ok: msg('LIVE'),
+  unknown: msg('LIVE?'),
+  down: msg('STREAM DOWN'),
+  none: msg('STILL'),
+});
 
 const STATUS = Object.freeze({
   off: msg('Cameras are off'),
@@ -101,6 +116,10 @@ export class CameraQuickControls {
     this._unsubscribeView = null;
     this._thumbTimer = null;
     this._rerankTimer = null;
+    this._streamHealth = null;
+    this._probeTimer = null;
+    this._probing = false;
+    this._probed = new Map();
     const byId = (id) => root?.querySelector(`#${id}`) || null;
     this._elements = {
       search: byId('camera-quick-search'),
@@ -285,6 +304,12 @@ export class CameraQuickControls {
       this._catalog = catalog;
       this._needsRefresh = true;
     }
+    // The layer replaces the map only when a verdict changed.
+    const streamHealth = this.cctv?.getStreamHealth?.() || null;
+    if (streamHealth !== this._streamHealth) {
+      this._streamHealth = streamHealth;
+      this._needsRefresh = true;
+    }
     if (
       this._needsRefresh ||
       previous?.enabled !== enabled ||
@@ -332,10 +357,13 @@ export class CameraQuickControls {
       region: this._region,
       order: this._order,
       frames: this._slots,
+      streamHealth: this._streamHealth,
+      now: this.now(),
     });
     this._stampsDirty = false;
     this._render();
     this._thumbTick();
+    this._scheduleStreamProbe();
   }
 
   _render() {
@@ -417,10 +445,12 @@ export class CameraQuickControls {
         ? t('{distance} km', { distance: distance.value })
         : t('{distance} m', { distance: distance.value });
     setText(row.meta, [camera.city, distanceText].filter(Boolean).join(' · '));
-    setText(row.badge, entry.live ? t('LIVE') : t('STILL'));
+    setText(row.badge, t(BADGES[entry.stream] || BADGES.none));
     row.badge.dataset.live = entry.live ? 'true' : 'false';
+    row.badge.dataset.stream = entry.stream;
     row.li.dataset.index = String(index);
     row.li.dataset.live = entry.live ? 'true' : 'false';
+    row.li.dataset.stream = entry.stream;
     row.li.dataset.active =
       camera.id === this._state?.activeCameraId ? 'true' : 'false';
     const title = t('Open {name} on the globe', { name: camera.name });
@@ -571,6 +601,58 @@ export class CameraQuickControls {
     this._thumbTick();
   }
 
+  /**
+   * Streams in the list nobody has checked go to the proxy for a probe a
+   * moment after the list settles (typing re-lists on every key), one
+   * request at a time; a camera once asked about is left alone for a while
+   * whatever the proxy answered. Nothing while collapsed or hidden.
+   */
+  _scheduleStreamProbe() {
+    if (
+      this.destroyed ||
+      this._probeTimer ||
+      typeof this.cctv?.probeStreams !== 'function'
+    )
+      return;
+    if (!this._entries.some((entry) => entry.stream === 'unknown')) return;
+    this._probeTimer = this.timers.setTimeout(() => {
+      this._probeTimer = null;
+      this._probeStreams();
+    }, QUICK_STREAM_PROBE_DELAY_MS);
+    this._probeTimer?.unref?.();
+  }
+
+  _probeStreams() {
+    if (this.destroyed || !this.isExpanded() || this.document?.hidden) return;
+    if (this._probing) {
+      this._scheduleStreamProbe();
+      return;
+    }
+    const now = this.now();
+    for (const [id, at] of this._probed)
+      if (now - at > QUICK_STREAM_PROBE_MEMORY_MS) this._probed.delete(id);
+    const ids = [];
+    for (const entry of this._entries) {
+      const id = entry.camera.id;
+      if (entry.stream !== 'unknown' || this._probed.has(id)) continue;
+      this._probed.set(id, now);
+      ids.push(id);
+    }
+    if (!ids.length) return;
+    this._probing = true;
+    let result;
+    try {
+      result = this.cctv.probeStreams(ids);
+    } catch {
+      result = null;
+    }
+    Promise.resolve(result)
+      .catch(() => {})
+      .finally(() => {
+        this._probing = false;
+      });
+  }
+
   _startTimers() {
     if (this._thumbTimer || this.destroyed) return;
     this._thumbTimer = this.timers.setInterval(
@@ -588,8 +670,10 @@ export class CameraQuickControls {
   _stopTimers() {
     if (this._thumbTimer) this.timers.clearInterval(this._thumbTimer);
     if (this._rerankTimer) this.timers.clearInterval(this._rerankTimer);
+    if (this._probeTimer) this.timers.clearTimeout(this._probeTimer);
     this._thumbTimer = null;
     this._rerankTimer = null;
+    this._probeTimer = null;
   }
 
   _renderStatus() {
@@ -661,6 +745,7 @@ export class CameraQuickControls {
     for (const [id, row] of this._rows) this._releaseRow(id, row);
     this._rows.clear();
     this._slots.clear();
+    this._probed.clear();
     this._entries = [];
   }
 }

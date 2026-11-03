@@ -9,7 +9,7 @@ import {
 } from './cameraWall.js';
 import { createFakeDocument, createFakeTimers } from '../testSupport/panelDom.mjs';
 
-const entry = (id, live, km = 1) => ({
+const entry = (id, live, km = 1, stream = live ? 'ok' : 'none') => ({
   camera: {
     id,
     name: `Camera ${id}`,
@@ -22,6 +22,7 @@ const entry = (id, live, km = 1) => ({
   },
   distanceKm: km,
   live,
+  stream,
   frameStamp: 0,
 });
 
@@ -33,13 +34,18 @@ const ENTRIES = [
   entry('e', true, 3),
 ];
 
-function harness({ layerState = { enabled: true, activeCamera: null, activeCameraId: null }, limit = 2 } = {}) {
+function harness({
+  layerState = { enabled: true, activeCamera: null, activeCameraId: null },
+  limit = 2,
+  streamHealth = null,
+} = {}) {
   const document = createFakeDocument();
   const timers = createFakeTimers();
   const players = [];
   let cctvListener = null;
   const cctv = {
     getUIState: () => layerState,
+    ...(streamHealth ? { getStreamHealth: () => streamHealth } : {}),
     subscribe(listener) {
       cctvListener = listener;
       return () => {
@@ -204,5 +210,51 @@ test('changing the size re-renders the tiles and drops players for tiles that le
   assert.equal(h.tiles().length, 4);
   assert.equal(h.wall.size, 4);
   assert.deepEqual(h.playing(), []);
+  h.wall.close();
+});
+
+test('a camera whose stream the proxy knows to be down is a still on the wall until a later verdict says it answers', () => {
+  const health = new Map();
+  const h = harness({ streamHealth: health });
+  const state = { enabled: true, activeCamera: null, activeCameraId: null };
+  h.wall.open({ entries: ENTRIES, size: 4 });
+  const badge = (id) => h.tile(id).querySelector('.camera-wall-badge').textContent;
+  // No verdict yet: live by the catalog, unproven.
+  assert.equal(badge('a'), 'LIVE?');
+  assert.equal(h.tile('a').dataset.state, 'unverified');
+  health.set('a', { ok: h.timers.now() - 1_000, fail: 0 });
+  health.set('b', { ok: 0, fail: h.timers.now() - 1_000 });
+  h.notify(state);
+  assert.equal(badge('a'), 'LIVE');
+  assert.equal(badge('b'), 'STREAM DOWN');
+  assert.equal(h.tile('b').dataset.state, 'down');
+  assert.equal(h.tile('b').title, 'Stream down · snapshots only');
+  // Neither a hover nor a click spends a session on it.
+  h.tile('b').dispatch('pointerenter', { pointerType: 'mouse' });
+  h.timers.advance(WALL_HOVER_DELAY_MS * 2);
+  h.tile('b').click();
+  assert.deepEqual(h.playing(), []);
+  assert.equal(h.players.length, 0);
+  assert.deepEqual(h.wall.readState().plan.video, []);
+  // A pinned camera that goes down is evicted and its decoder released.
+  h.tile('a').click();
+  assert.deepEqual(h.playing(), ['a']);
+  h.timers.advance(10);
+  health.set('a', { ok: h.timers.now() - 1_010, fail: h.timers.now() });
+  h.notify(state);
+  assert.deepEqual(h.playing(), []);
+  assert.equal(badge('a'), 'STREAM DOWN');
+  assert.deepEqual(h.wall.readState().pinned, []);
+  assert.equal(h.players[0].disposed, 1);
+  // A success since clears it: the tile plays again.
+  h.timers.advance(10);
+  health.set('a', { ok: h.timers.now(), fail: h.timers.now() - 10 });
+  h.notify(state);
+  assert.equal(badge('a'), 'LIVE');
+  h.tile('a').click();
+  assert.deepEqual(h.playing(), ['a']);
+  // The same verdicts again change nothing.
+  h.notify(state);
+  assert.deepEqual(h.playing(), ['a']);
   h.wall.close();
 });

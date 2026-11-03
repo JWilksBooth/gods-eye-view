@@ -156,11 +156,18 @@
   bottom: 3px;
 }
 
-.camera-quick-badge[data-live='true'],
+/* LIVE: the proxy saw the stream answer. */
+.camera-quick-badge[data-stream='ok'],
 .camera-wall-badge[data-state='playing'],
 .camera-wall-badge[data-state='pinned'] {
   color: #ff7a7a;
   background: rgba(70, 0, 0, 0.72);
+}
+
+/* LIVE?: a stream by the catalog that nobody has checked yet. */
+.camera-quick-badge[data-stream='unknown'] {
+  color: #e39a9a;
+  background: rgba(70, 0, 0, 0.5);
 }
 
 .camera-quick-text {
@@ -286,7 +293,8 @@ body.mobile-shell[data-mobile-sheet='layers']
   box-shadow: 0 0 0 1px var(--accent) inset;
 }
 
-.camera-wall-tile[data-state='still'] {
+.camera-wall-tile[data-state='still'],
+.camera-wall-tile[data-state='down'] {
   cursor: default;
 }
 
@@ -350,6 +358,9 @@ body.mobile-shell[data-mobile-sheet='layers']
   white-space: nowrap;
 }
 
+/* STREAM DOWN: the stream failed recently and has not answered since. */
+.camera-quick-badge[data-stream='down'],
+.camera-wall-badge[data-state='down'],
 .camera-wall-badge[data-state='refused'],
 .camera-wall-badge[data-state='full'] {
   color: #ffb347;

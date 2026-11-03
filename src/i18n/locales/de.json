@@ -3146,6 +3146,9 @@
   "LIVE SLOTS FULL": "LIVE-PLÄTZE BELEGT",
   "Hover for live video · click to keep it playing": "Für Livevideo darüberfahren · klicken, damit es weiterläuft",
   "Still camera · snapshots only": "Standbildkamera · nur Schnappschüsse",
+  "LIVE?": "LIVE?",
+  "STREAM DOWN": "STREAM AUSGEFALLEN",
+  "Stream down · snapshots only": "Stream ausgefallen · nur Schnappschüsse",
   "Hover or click a live tile for video": "Für Video über eine Live-Kachel fahren oder sie anklicken",
   "{count} live feeds at a time": {
     "one": "{count} Livefeed gleichzeitig",

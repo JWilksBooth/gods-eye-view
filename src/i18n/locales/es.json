@@ -3220,6 +3220,9 @@
   "LIVE SLOTS FULL": "SIN HUECOS EN VIVO",
   "Hover for live video · click to keep it playing": "Pasa el cursor para ver el vídeo en vivo · haz clic para mantenerlo",
   "Still camera · snapshots only": "Cámara fija · solo instantáneas",
+  "LIVE?": "¿EN VIVO?",
+  "STREAM DOWN": "SEÑAL CAÍDA",
+  "Stream down · snapshots only": "Señal caída · solo instantáneas",
   "Hover or click a live tile for video": "Pasa el cursor o haz clic en un mosaico en vivo para ver vídeo",
   "{count} live feeds at a time": {
     "one": "{count} señal en vivo a la vez",

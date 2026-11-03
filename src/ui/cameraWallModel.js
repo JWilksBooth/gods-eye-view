@@ -31,7 +31,9 @@ export function wallColumns(size) {
  * and one slot otherwise. Pinned tiles (clicked) come first, newest pin
  * first, so a new pin evicts the oldest when the budget is full; the hovered
  * tile takes a free slot and never evicts a pin. A camera the proxy refused
- * recently is skipped.
+ * recently is skipped, and so is a camera whose stream the proxy knows to
+ * be down (`dead`): neither a hover nor a pin spends a session on it, and a
+ * pinned camera that goes down is evicted.
  *
  * @param {object} options
  * @param {number} [options.limit] Distinct cameras the proxy pulls at once.
@@ -39,6 +41,7 @@ export function wallColumns(size) {
  * @param {string|null} [options.hover] The hovered camera id.
  * @param {string[]} [options.external] Cameras streamed outside the wall.
  * @param {string[]} [options.refused] Cameras the proxy refused recently.
+ * @param {string[]} [options.dead] Cameras whose stream is known to be down.
  * @returns {{video: string[], evicted: string[], hoverRefused: boolean}}
  */
 export function planWallVideo({
@@ -47,10 +50,13 @@ export function planWallVideo({
   hover = null,
   external = [],
   refused = [],
+  dead = [],
 } = {}) {
   const budget = Math.max(0, Math.floor(Number(limit)) || 0);
   const outside = new Set((external || []).filter(Boolean));
-  const blocked = new Set((refused || []).filter(Boolean));
+  const blocked = new Set(
+    [...(refused || []), ...(dead || [])].filter(Boolean),
+  );
   const video = [];
   const used = () =>
     video.length + [...outside].filter((id) => !video.includes(id)).length;

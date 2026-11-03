@@ -222,7 +222,9 @@
       "src/sources/cctvTypes.js",
       "src/sources/cctvStreamBudget.js",
       "src/sources/httpBody.js",
-      "src/i18n/marker.js"
+      "src/i18n/marker.js",
+      "server/providers/cctv/streamHealth.js",
+      "src/sources/cctvStreamHealth.js"
     ],
     "external": []
   },
@@ -923,7 +925,8 @@
       "src/layers/streetLevel/view.js",
       "src/layers/streetLevel/tileMath.js",
       "src/sources/cctvTypes.js",
-      "src/sources/cctvStreamBudget.js"
+      "src/sources/cctvStreamBudget.js",
+      "src/sources/cctvStreamHealth.js"
     ],
     "external": ["cesium", "mgrs", "hls.js"]
   },
@@ -1641,7 +1644,8 @@
       "src/i18n/locales/uk.json",
       "src/i18n/locales/zh-CN.json",
       "src/i18n/locales/zh-Hant.json",
-      "src/performancePreset.js"
+      "src/performancePreset.js",
+      "src/sources/cctvStreamHealth.js"
     ],
     "external": ["hls.js", "cesium"]
   },
@@ -2923,7 +2927,8 @@
       "src/ui/cameraWall.js",
       "src/ui/cameraWallModel.js",
       "src/sources/cctvTypes.js",
-      "src/sources/cctvStreamBudget.js"
+      "src/sources/cctvStreamBudget.js",
+      "src/sources/cctvStreamHealth.js"
     ],
     "external": [
       "hls.js",
@@ -3555,7 +3560,8 @@
       "src/layers/streams/eventAdapter.js",
       "src/layers/events/adapters.js",
       "src/layers/events/model.js",
-      "src/layers/events/policy.js"
+      "src/layers/events/policy.js",
+      "src/sources/cctvStreamHealth.js"
     ],
     "external": [
       "hls.js",

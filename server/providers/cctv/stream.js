@@ -124,12 +124,30 @@ export function parseHlsMedia(text, base, limit = HLS_LIMITS.segments) {
   return segments.slice(-limit);
 }
 
+/**
+ * @param {object} [options]
+ * @param {typeof fetch} [options.fetchImpl]
+ * @param {typeof HLS_LIMITS} [options.limits]
+ * @param {(cameraId: string, ok: boolean) => void} [options.onUpstream]
+ *   Every verdict on a camera's upstream: true when a poll brought segments,
+ *   false when three polls in a row failed and the session stopped. A stop
+ *   or shutdown mid-fetch is nobody's verdict and is not reported.
+ */
 export function createHlsPuller({
   fetchImpl = fetch,
   limits = HLS_LIMITS,
+  onUpstream = null,
 } = {}) {
   const active = new Map();
   let closed = false;
+  const report = (entry, ok) => {
+    if (typeof onUpstream !== 'function') return;
+    try {
+      onUpstream(entry.cameraId, ok);
+    } catch {
+      /* a listener's fault stays its own */
+    }
+  };
   const stop = (cameraId, token) => {
     const entry = active.get(cameraId);
     if (!entry || (token && token !== entry.token)) return;
@@ -237,10 +255,15 @@ export function createHlsPuller({
         entry.bytes += body.length;
       }
       entry.failures = 0;
+      if (entry.segments.size) report(entry, true);
     } catch {
+      // A fetch cut short by stop() or shutdown() lands here too; the viewer
+      // left, the camera did not fail.
+      if (entry.stopping) return;
       entry.chunklistUrl = null;
       entry.failures++;
       if (entry.failures >= 3) {
+        report(entry, false);
         stop(entry.cameraId, entry.token);
         return;
       }

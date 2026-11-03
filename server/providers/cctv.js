@@ -18,6 +18,11 @@ import { sanitizeCctvRangeHeader } from './cctv/range.js';
 import { admitSameSiteKeyless } from './common/same-site.js';
 import { PROXY_SIGNALS } from '../../src/localRequestGate.mjs';
 import { createHlsPuller } from './cctv/stream.js';
+import {
+  STREAM_PROBE_LIMITS,
+  createStreamHealth,
+  createStreamProbe,
+} from './cctv/streamHealth.js';
 import { googleServerApiKey } from './places/google-key.js';
 export { CCTV_FRAME_FETCH_TIMEOUT_MS, fetchCctvImageFromUpstream };
 /**
@@ -26,7 +31,9 @@ export { CCTV_FRAME_FETCH_TIMEOUT_MS, fetchCctvImageFromUpstream };
  *
  * Endpoints:
  *   GET /api/cctv/sources        — list all registered camera sources
- *   GET /api/cctv/health         — per-camera health/status report
+ *   GET /api/cctv/health         — per-camera health/status report, plus what
+ *                                  each camera's playlist last answered
+ *   GET /api/cctv/stream-probe   — probe the named cameras' playlists (bounded)
  *   GET /api/cctv/stream/:id     — stream info (feedType, URLs) for a camera
  *   GET /api/cctv/media/:id      — proxy live video media from upstream
  *   GET /api/cctv/frame/:id      — single frame with fallback chain
@@ -41,8 +48,34 @@ export function cctvProxy({ sourceRoot = process.cwd() } = {}) {
    * CCTV_MAX_SOURCES ceiling so health/status observability is never evicted
    * for any catalog the proxy can actually serve. */
   const HEALTH_MAX_ENTRIES = CCTV_MAX_SOURCES_CEILING;
+  /** What each camera's playlist last answered (see ./cctv/streamHealth.js). */
+  const streamHealth = createStreamHealth();
   /** Live HLS strategies (see ./cctv/stream.js). Shared across dev and preview. */
-  const puller = createHlsPuller();
+  const puller = createHlsPuller({
+    onUpstream: (cameraId, ok) =>
+      ok
+        ? streamHealth.recordSuccess(cameraId)
+        : streamHealth.recordFailure(cameraId),
+  });
+  const streamProbe = createStreamProbe({ health: streamHealth });
+  /** CCTV_STREAM_PROBE=0 leaves every playlist alone: leases alone teach the record. */
+  const streamProbeEnabled = () =>
+    String(process.env.CCTV_STREAM_PROBE || '1').trim() !== '0';
+  let streamSeeded = false;
+  /** The one probe pass, in the background, when the catalog first loads. */
+  const seedStreamHealth = (sources) => {
+    if (streamSeeded || !sources.length || !streamProbeEnabled()) return;
+    streamSeeded = true;
+    streamProbe
+      .seed(sources)
+      .then((report) => {
+        if (!report.probed) return;
+        console.log(
+          `[CCTV] stream probe: ${report.probed} playlists, ${report.ok} answered, ${report.failed} failed, ${(report.ms / 1000).toFixed(1)} s`,
+        );
+      })
+      .catch(() => {});
+  };
 
   /** Update the health entry for a camera, evicting the oldest entry if at capacity. */
   const setHealth = (cameraId, patch) => {
@@ -148,6 +181,7 @@ export function cctvProxy({ sourceRoot = process.cwd() } = {}) {
         // key-bearing Street View fallback below has its own check.
         if (admitSameSiteKeyless(req, res)) return;
         const sources = await getCctvSources();
+        seedStreamHealth(sources);
         const sourceById = new Map(
           sources.map((source) => [source.id, source]),
         );
@@ -196,7 +230,36 @@ export function cctvProxy({ sourceRoot = process.cwd() } = {}) {
             'Content-Type': 'application/json',
             'Cache-Control': 'no-store',
           });
-          res.end(JSON.stringify({ cameras: listHealth() }));
+          res.end(
+            JSON.stringify({
+              cameras: listHealth(),
+              streams: streamHealth.snapshot(),
+            }),
+          );
+          return;
+        }
+
+        if (url.pathname === '/stream-probe') {
+          // The cameras a surface lists (the CAMERAS panel's rows): probe
+          // the live ones whose verdict is unknown, bounded, and answer with
+          // their records. A camera with a fresh verdict costs nothing.
+          const ids = url.searchParams
+            .getAll('id')
+            .slice(0, STREAM_PROBE_LIMITS.batch);
+          const wanted = ids.map((id) => sourceById.get(id)).filter(Boolean);
+          const report = streamProbeEnabled()
+            ? await streamProbe.probe(wanted)
+            : null;
+          res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store',
+          });
+          res.end(
+            JSON.stringify({
+              probed: report?.probed ?? 0,
+              streams: streamHealth.snapshot(ids),
+            }),
+          );
           return;
         }
 
@@ -405,6 +468,7 @@ export function cctvProxy({ sourceRoot = process.cwd() } = {}) {
                 label: source?.provider || 'Configured source',
                 message: `Upstream HTTP ${upstream.status}`,
               });
+              streamHealth.recordFailure(cameraId);
               res.writeHead(upstream.status, {
                 'Content-Type': 'application/json',
                 'Cache-Control': 'no-store',
@@ -435,6 +499,7 @@ export function cctvProxy({ sourceRoot = process.cwd() } = {}) {
                 label: source?.provider || 'Configured source',
                 message: 'Unexpected media type',
               });
+              streamHealth.recordFailure(cameraId);
               res.writeHead(502, {
                 'Content-Type': 'application/json',
                 'Cache-Control': 'no-store',
@@ -450,6 +515,7 @@ export function cctvProxy({ sourceRoot = process.cwd() } = {}) {
                 ? 'Live stream connected'
                 : 'Snapshot feed connected',
             });
+            streamHealth.recordSuccess(cameraId);
 
             await proxyMediaResponse(res, upstream, {
               contentType,
@@ -482,6 +548,7 @@ export function cctvProxy({ sourceRoot = process.cwd() } = {}) {
               label: source?.provider || 'Configured source',
               message: 'Media fetch failed',
             });
+            streamHealth.recordFailure(cameraId);
             res.writeHead(timedOut ? 504 : 502, {
               'Content-Type': 'application/json',
               'Cache-Control': 'no-store',

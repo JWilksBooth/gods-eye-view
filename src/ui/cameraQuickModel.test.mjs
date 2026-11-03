@@ -5,11 +5,13 @@ import {
   cameraDistanceParts,
   cameraIsLive,
   cameraMatchesQuery,
+  cameraStreamState,
   normalizeCameraQuery,
   quickListKeyAction,
   rankQuickCameras,
 } from './cameraQuickModel.js';
 import { liveOpsRegion } from '../data/liveOpsRegions.js';
+import { CCTV_STREAM_FAILURE_WINDOW_MS } from '../sources/cctvStreamHealth.js';
 
 const DOWNTOWN_LA = { lat: 34.0537, lon: -118.2428 };
 
@@ -110,6 +112,75 @@ test('newest order lists live feeds first, then the freshest stills, within the 
     rows.map((row) => row.frameStamp),
     [0, 5_000, 1_000, 0],
   );
+  // Nobody has checked the live camera's stream: live by the catalog alone.
+  assert.deepEqual(
+    rows.map((row) => row.stream),
+    ['unknown', 'none', 'none', 'none'],
+  );
+});
+
+test('a stream state is what the proxy saw: answering, unchecked, down, or none for a still', () => {
+  const now = 1_700_000_000_000;
+  const health = new Map([
+    ['near-live', { ok: now - 1_000, fail: 0 }],
+    ['bay-bridge', { ok: 0, fail: now - 1_000 }],
+    ['near-still', { ok: now, fail: 0 }],
+  ]);
+  assert.equal(cameraStreamState(CATALOG[1], health, now), 'ok');
+  assert.equal(cameraStreamState(CATALOG[5], health, now), 'down');
+  assert.equal(cameraStreamState(CATALOG[2], health, now), 'none');
+  assert.equal(cameraStreamState(CATALOG[1], null, now), 'unknown');
+  assert.equal(cameraStreamState(CATALOG[1], new Map(), now), 'unknown');
+  assert.equal(
+    cameraStreamState(CATALOG[5], health, now + CCTV_STREAM_FAILURE_WINDOW_MS),
+    'unknown',
+  );
+});
+
+test('newest order puts answering streams first, unchecked streams next, and a down stream among the stills', () => {
+  const now = 1_700_000_000_000;
+  const cameras = [
+    camera('still-fresh', 34.055, -118.245),
+    camera('live-ok', 34.07, -118.26, { feedType: 'hls' }),
+    camera('live-unknown', 34.08, -118.27, { feedType: 'hls' }),
+    camera('live-down', 34.052, -118.242, { feedType: 'hls' }),
+    camera('still-old', 34.09, -118.28),
+  ];
+  const health = new Map([
+    ['live-ok', { ok: now - 60_000, fail: 0 }],
+    ['live-down', { ok: 0, fail: now - 60_000 }],
+  ]);
+  const frames = new Map([
+    ['still-fresh', { stamp: now - 1_000 }],
+    ['still-old', { stamp: now - 500_000 }],
+    ['live-down', { stamp: now - 2_000 }],
+  ]);
+  const options = { cameras, center: DOWNTOWN_LA, frames, streamHealth: health, now };
+  const rows = rankQuickCameras({ ...options, order: 'newest' });
+  assert.deepEqual(
+    rows.map((row) => row.camera.id),
+    ['live-ok', 'live-unknown', 'still-fresh', 'live-down', 'still-old'],
+  );
+  assert.deepEqual(
+    rows.map((row) => row.stream),
+    ['ok', 'unknown', 'none', 'down', 'none'],
+  );
+  assert.deepEqual(
+    rows.map((row) => row.live),
+    [true, true, false, false, false],
+  );
+  // A success after the failure clears it: the camera is live again and,
+  // with the fresher thumbnail, first.
+  health.set('live-down', { ok: now - 30_000, fail: now - 60_000 });
+  const again = rankQuickCameras({ ...options, order: 'newest' });
+  assert.deepEqual(
+    again.map((row) => row.camera.id).slice(0, 2),
+    ['live-down', 'live-ok'],
+  );
+  // Nearest order ignores the stream but still reports it.
+  const nearest = rankQuickCameras({ ...options, order: 'nearest' });
+  assert.equal(nearest[0].camera.id, 'live-down');
+  assert.equal(nearest[0].stream, 'ok');
 });
 
 test('a region box and a query both narrow the candidates; total counts the candidates', () => {

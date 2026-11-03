@@ -3220,6 +3220,9 @@
   "LIVE SLOTS FULL": "VAGAS AO VIVO ESGOTADAS",
   "Hover for live video · click to keep it playing": "Passe o mouse para o vídeo ao vivo · clique para manter",
   "Still camera · snapshots only": "Câmera fixa · apenas instantâneos",
+  "LIVE?": "AO VIVO?",
+  "STREAM DOWN": "STREAM FORA DO AR",
+  "Stream down · snapshots only": "Stream fora do ar · apenas instantâneos",
   "Hover or click a live tile for video": "Passe o mouse ou clique em um bloco ao vivo para ver vídeo",
   "{count} live feeds at a time": {
     "one": "{count} transmissão ao vivo por vez",

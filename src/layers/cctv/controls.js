@@ -284,6 +284,42 @@ export function createControls({ state: layerState, services, parts, source }) {
     },
 
     /**
+     * What each camera's playlist last answered, as the proxy reports it
+     * (`Map<id, {ok, fail}>`; src/sources/cctvStreamHealth.js reads it).
+     * The same instance until a health poll or a probe changes its content,
+     * so a surface re-ranks only then.
+     * @returns {Map<string, {ok: number, fail: number}>}
+     */
+    getStreamHealth() {
+      return parts.presentation.streamHealth();
+    },
+
+    /**
+     * Ask the proxy to probe these cameras' playlists (bounded; a camera
+     * with a fresh verdict is not fetched) and fold the answer into the
+     * stream health, notifying listeners when it changed. Resolves null when
+     * the source cannot probe.
+     * @param {string[]} cameraIds
+     * @returns {Promise<object|null>}
+     */
+    async probeStreams(cameraIds) {
+      if (typeof source.probeStreams !== 'function') return null;
+      const ids = [
+        ...new Set(
+          (Array.isArray(cameraIds) ? cameraIds : [])
+            .map((id) => String(id ?? '').trim())
+            .filter(Boolean),
+        ),
+      ];
+      if (!ids.length) return null;
+      const signal = layerState._sourceAbort?.signal;
+      const payload = await source.probeStreams(ids, { signal });
+      signal?.throwIfAborted();
+      parts.health.mergeStreamHealth(payload?.streams);
+      return payload;
+    },
+
+    /**
      * The registered frame URL for a catalog entry, bucketed to `refreshMs`
      * so a surface that re-reads it on that cadence sees a new frame only
      * when the bucket turns over.
