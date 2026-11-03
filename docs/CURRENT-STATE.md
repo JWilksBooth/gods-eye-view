@@ -1487,7 +1487,7 @@ from the payload. There is no heading in the feed, so gizmos use the shared
 id-hash fallback at low confidence.
 
 Once enabled, the 250 cameras nearest the five borough cores load.
-`CCTV_NYC_MAX_SOURCES` sets the pack cap (8–400). The catalog-wide ceiling stays at 4,000 and is shared
+`CCTV_NYC_MAX_SOURCES` sets the pack cap (8–400). The catalog-wide ceiling (4,000 then, 5,000 since #16) is shared
 round-robin: no region is dropped outright, but when the packs together exceed
 the ceiling, adding a pack trims cameras from the largest packs.
 
@@ -1505,8 +1505,8 @@ cameras return a 200 "Image Unavailable" placeholder frame instead of an error.
 
 By default all ~336 cameras load, nearest downtown first.
 `CCTV_TORONTO_MAX_SOURCES` sets the pack cap (8–500) and
-`CCTV_TORONTO_ENABLED=0` turns the pack off. The pack shares the 4,000
-catalog-wide ceiling round-robin with the other packs.
+`CCTV_TORONTO_ENABLED=0` turns the pack off. The pack shares the 5,000
+catalog-wide ceiling (4,000 before #16) round-robin with the other packs.
 
 ## Lithuania CCTV source pack
 
@@ -5141,7 +5141,7 @@ silently demoting every later lookup for the session.
   kill switch `CCTV_FINTRAFFIC_ENABLED=0`) are the fourth pack: one keyless GeoJSON station list
   covering the whole country, where one _preset_ (a station's fixed view) is one camera — 806
   GATHERING stations carry 2,256 in-collection presets, prioritized to 300 against seven anchors
-  on the main road spine. `CCTV_MAX_SOURCES` is a 4,000 catalog-wide ceiling shared round-robin
+  on the main road spine. `CCTV_MAX_SOURCES` is a 5,000 catalog-wide ceiling (4,000 before #16) shared round-robin
   across packs, so a lower global cap thins every region instead of starving the last pack.
   ~1,100 cameras total, all RAW PRIOR poses, stills-first. The catalog lives for 15 minutes; once
   it expires, `/api/cctv` keeps answering from it while one background refresh reloads every
