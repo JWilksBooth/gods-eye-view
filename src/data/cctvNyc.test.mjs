@@ -376,7 +376,8 @@ for (const [label, flag] of [
 }
 
 test('the shipped catalog ceiling is not raised to make room for this pack', () => {
-  assert.equal(DEFAULT_CCTV_MAX_SOURCES, 4000);
+  // 5,000 since #16 raised the ceiling for the wider Caltrans defaults, not for this pack.
+  assert.equal(DEFAULT_CCTV_MAX_SOURCES, 5000);
   assert.equal(DEFAULT_NYC_MAX_SOURCES, 250);
 });
 
