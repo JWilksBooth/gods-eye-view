@@ -143,8 +143,8 @@ test('root config retains existing named exports and standalone provider order',
 });
 
 test('directories the server writes while it runs are kept out of the dev watcher', () => {
-  // Providers write cache files and logs here while the app runs; none of it is
-  // source, so the dev watcher has no reason to stat it.
+  // Providers write cache files and logs here while the app runs, and Claude Code
+  // keeps whole session worktrees under .claude; none of it is source.
   const config = standaloneConfig({ mode: 'test' });
   const plugin = config.plugins.find(
     ({ name }) => name === 'gev-unwatched-runtime-dirs',
@@ -154,6 +154,7 @@ test('directories the server writes while it runs are kept out of the dev watche
   assert.deepEqual(plugin.config().server.watch.ignored, [
     '**/.gev-cache/**',
     '**/.gev-logs/**',
+    '**/.claude/**',
   ]);
 });
 
